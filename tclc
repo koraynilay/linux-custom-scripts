@@ -1,0 +1,31 @@
+#!/bin/sh
+
+theme=$1
+save_name=$2
+config="/root/.config/termite/config"
+config_nocolor="/root/.config/termite/configs/config1"
+themes_dir="/root/.config/termite/configs/themes"
+
+if [ -z "$theme" ]; then
+	printf "Please select a theme. Use 'list' option to list the themes\n"
+elif [ "$theme" = "list" ]; then
+	cd "$themes_dir" && ls
+elif [ "$theme" = "edit" ]; then
+	vim "$themes_dir/$2"
+elif [ "$theme" = "reload" ]; then
+	killall -USR1 termite
+elif [ "$theme" = "save" ]; then
+	if cat $themes_dir/$save_name>/dev/null ;then
+		printf "Theme already exists\n"
+		exit 4
+	fi
+	awk '{if($0 ~ /options|hints/)exit;else print $0}' $config>"$themes_dir/$save_name"
+	printf "Saved current theme as: $save_name\n"
+else
+	cat "$themes_dir/$theme" > $config
+	printf "\n" >> $config
+	cat $config_nocolor >> $config
+
+	killall -USR1 termite
+	printf "Selected theme: $theme\n"
+fi

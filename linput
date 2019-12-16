@@ -1,0 +1,19 @@
+mode="$1"
+
+if [ "$mode" = "on" ]; then
+	pactl load-module module-loopback latency_msec=1>/dev/null
+	printf "loaded"
+elif [ "$mode" = "off" ]; then
+	pactl unload-module module-loopback>/dev/null
+	printf "unloaded"
+elif [ "$mode" = "--help" ] || [ "$mode" = "help" ]; then
+	printf "on\tactivate mic loopback\noff\tdeactivate mic loopback"
+elif [ -z "$mode" ]; then
+	printf "on\tactivate mic loopback\noff\tdeactivate mic loopback"
+else
+	printf "'$mode' not recognized, please specify 'on' or 'off'"
+fi
+# #load
+# pactl load-module module-loopback latency_msec=1
+# #unload
+# pactl unload-module module-loopback
