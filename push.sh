@@ -5,3 +5,4 @@ sleep 1
 git commit -m configs
 sleep 1
 git push
+notify-send "changes in $PWD pushed"
