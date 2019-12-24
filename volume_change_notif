@@ -1,0 +1,1 @@
+dunstify -u LOW -r 1 -p -a volume $(amixer scontents | awk '$2 ~ /Left/ && $5 ~ /[0-9]%/ && $6 ~ /on/ {split($5, str, "["); split(str[2], str2, "]"); print str2[1]}')
