@@ -1,0 +1,4 @@
+#!/bin/sh
+#mpc | cat -n | awk '$1 == 2 {print $2}' | sed -e 's/\[//g' -e 's/\]//g'
+#mpc | cat -n | awk '$1 == 1 {for(i=2;i<=NF;i++){print $i}}' | tr '\n' ' '
+dunstify -t 3000 -u LOW -r 2 -p -a "$(mpc | cat -n | awk '$1 == 2 {print $2,"-",$4}' | sed -e 's/\[//g' -e 's/\]//g')" "$(mpc | cat -n | awk '$1 == 1 {for(i=2;i<=NF;i++){print $i}}' | tr '\n' ' ')"

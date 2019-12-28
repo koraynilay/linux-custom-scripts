@@ -1,0 +1,4 @@
+#!/bin/sh
+sudo ip link set dev enp3s0 down
+sudo ip link set dev enp3s0 address b2:6e:bf:33:eb:1c
+sudo ip link set dev enp3s0 up
