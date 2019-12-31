@@ -1,27 +1,3 @@
 #!/bin/sh
-i3lock -m -n -i "/root/Pictures/wallpapers/1303263-widescreen-beretta-wallpaper-1920x1080.jpg"  -k --timecolor=ffffffff --datecolor=ffffffff --insidevercolor=00000000 --insidewrongcolor=ff000000 --insidecolor=00000000 --ringcolor=ff000000 --linecolor=ff000050 --keyhlcolor=000000ff --bshlcolor=ff0000ff --separatorcolor=00000000 --keylayout 0 --radius=120 --ringvercolor=00000050 --ringwrongcolor=ff000050 --verifcolor=ffffffff --wrongcolor=ff0000ff --layoutcolor=aaaaaaff --veriftext="Breaking in..." --wrongtext="Couldn't brake in" --noinputtext="Nothing to break with" --locktext="Locking..." --lockfailedtext="Couldn't lock" --time-font="Tw Cen MT" --date-font="Tw Cen MT" --layout-font="Tw Cen MT" --verif-font="Tw Cen MT" --wrong-font="Tw Cen MT" &
+i3lock -m -n -i "/root/Pictures/wallpapers/1303263-widescreen-beretta-wallpaper-1920x1080.jpg"  -k --timecolor=ffffffff --datecolor=ffffffff --insidevercolor=00000000 --insidewrongcolor=ff000000 --insidecolor=00000000 --ringcolor=ff000000 --linecolor=ff000050 --keyhlcolor=000000ff --bshlcolor=ff0000ff --separatorcolor=00000000 --keylayout 0 --radius=120 --ringvercolor=00000050 --ringwrongcolor=ff000050 --verifcolor=ffffffff --wrongcolor=ff0000ff --layoutcolor=aaaaaaff --veriftext="Breaking in..." --wrongtext="Couldn't brake in" --noinputtext="Nothing to break with" --locktext="Locking..." --lockfailedtext="Couldn't lock" --time-font="Tw Cen MT" --date-font="Tw Cen MT" --layout-font="Tw Cen MT" --verif-font="Tw Cen MT" --wrong-font="Tw Cen MT"
 # --bar-base-width=0 --bar-width=5 #--bar-indicator --bar-color=ff000000 --bar-orientation=vertical --bar-direction=0
-
-
-#sleep 40
-#if ! pgrep -u $UID i3lock >/dev/null;then
-#	killall lock.sh
-#else
-#	xset dpms force off
-#fi
-
-
-while true;do
-	sleep 0.5
-	if ! pgrep -u $UID i3lock >/dev/null;then
-		killall lock.sh
-	else
-		sleep 40
-		if ! pgrep -u $UID i3lock >/dev/null;then
-			killall lock.sh
-		else
-			xset dpms force off
-		fi
-#		xset dpms force off
-	fi
-done
