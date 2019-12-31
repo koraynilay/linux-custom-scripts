@@ -1,0 +1,1 @@
+pacman -Qi | gawk '/^Name/ { x =  }; /^Installed Size/ { sub(/Installed Size  *:/, ); print x: /usr/bin/zsh }' | sort -k2,3nr | less

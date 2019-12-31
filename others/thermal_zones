@@ -1,0 +1,1 @@
+for i in /sys/class/thermal/thermal_zone*; do echo "$i: $(<$i/type)"; done

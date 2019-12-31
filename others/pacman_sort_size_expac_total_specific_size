@@ -1,0 +1,1 @@
+expac "%m %n" -l'\n' -Q -H M $(pacman -Qq) | sed s/MiB//g | sort -n | awk '$1 <= 1.00 {res=res+$1} END {print res,"MiB"}'

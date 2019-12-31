@@ -1,0 +1,1 @@
+find / -path /disks -prune -o -name *warfork* -print

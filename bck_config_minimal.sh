@@ -12,7 +12,7 @@ copy2(){
 }
 
 copy_zsh(){
-	mkdir $dest2/omz
+	mkdir -p $dest2/omz
 	printf "copying \"$conf2/custom\" to $dest2/omz/custom\n"
 	cp -r "$conf2/custom/themes" "$dest2/omz/custom"
 	cp -r "$conf2/custom/example.zsh" "$dest2/omz/custom"

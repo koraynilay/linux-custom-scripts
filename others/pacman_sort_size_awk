@@ -1,0 +1,1 @@
+pacman -Qi | awk 'BEGIN{sort=sort -k2 -n} /Name/ {name=} /Size/ {size=/1024;print size,Mb,:name|sort}'
