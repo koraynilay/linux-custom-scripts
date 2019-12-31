@@ -7,7 +7,9 @@ config_nocolor="/root/.config/termite/configs/config1"
 themes_dir="/root/.config/termite/configs/themes"
 
 if [ -z "$theme" ]; then
-	printf "Please select a theme. Use 'list' option to list the themes\n"
+	printf "Usage: tclc [theme name]\n\nhelp\t\tshow this\nlist\t\tshow all themes\nedit [theme]\tedit theme\nreload\t\treload current config (= Ctrl+Shift+r)\nsave [theme]\tsave current theme with 'name'\n"
+elif [ "$theme" = "help" ]; then
+	printf "Usage: tclc [theme name]\n\nhelp\t\tshow this\nlist\t\tshow all themes\nedit [theme]\tedit theme\nreload\t\treload current config (= Ctrl+Shift+r)\nsave [theme]\tsave current theme with 'name'\n"
 elif [ "$theme" = "list" ]; then
 	cd "$themes_dir" && ls
 elif [ "$theme" = "edit" ]; then

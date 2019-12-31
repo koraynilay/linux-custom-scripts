@@ -1,0 +1,2 @@
+#!/bin/sh
+feh --no-fehbg --bg-fill '/root/Pictures/wallpapers/timw/wallpaper_timw_red.png' 

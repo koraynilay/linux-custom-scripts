@@ -12,8 +12,10 @@ copy2(){
 }
 
 copy_zsh(){
+	mkdir $dest2/omz
 	printf "copying \"$conf2/custom\" to $dest2/omz/custom\n"
-	cp -r "$conf2/custom" "$dest2/omz/custom"
+	cp -r "$conf2/custom/themes" "$dest2/omz/custom"
+	cp -r "$conf2/custom/example.zsh" "$dest2/omz/custom"
 }
 
 for conf in /root/.config/*;do
@@ -35,17 +37,20 @@ for conf in /root/.config/*;do
 		/root/.config/vlc) copy;;
 		/root/.config/SpeedCrunch) copy;;
 		/root/.config/systemd) copy;;
+		/root/.config/gtk-3.0/settings.ini) copy;;
 		*) continue;;
 	esac
 done
 for conf2 in /root/.*;do
 	case $conf2 in
-		/root/.fonts) copy2;;
 		/root/.mpd) copy2;;
 		/root/.ncmpcpp) copy2;;
 		/root/.oh-my-zsh) copy_zsh;;
-		/root/.xinitrc) copy2;;
 		/root/.zshrc) copy2;;
+		/root/.xinitrc) copy2;;
+		/root/.gtkrc-2.0) copy2;;
+		/root/.vimrc) copy2;;
+		/root/.vim) copy2;;
 		*) continue;;
 	esac
 done
