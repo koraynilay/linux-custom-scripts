@@ -1,0 +1,5 @@
+if wmctrl -l | grep -i "youtube\|vimeo\|etc" && grep RUNNING /proc/asound/card*/pcm*/sub*/status ; then
+	echo "some media-site is possibly playing som"'
+else
+	echo "there may well be some HTML video going on"
+fi
