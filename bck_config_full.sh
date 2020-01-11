@@ -45,6 +45,7 @@ for conf2 in /root/.*;do
 		/root/.*.pre-oh-my-zsh*) continue;;
 		/root/.steam*) continue;;
 		/root/.wine) continue;;
+		/root/.ssh) continue;;
 		/root/.zcompdump-*-*) continue;;
 		/root/.) continue;;
 		/root/..) continue;;
@@ -53,7 +54,7 @@ for conf2 in /root/.*;do
 	copy2
 done
 
-
+rm -r $dest2/.oh-my-zsh
 
 
 

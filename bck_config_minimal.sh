@@ -43,7 +43,6 @@ for conf in /root/.config/*;do
 done
 for conf2 in /root/.*;do
 	case $conf2 in
-		/root/.mpd) copy2;;
 		/root/.ncmpcpp) copy2;;
 		/root/.oh-my-zsh) copy_zsh;;
 		/root/.zshrc) copy2;;
