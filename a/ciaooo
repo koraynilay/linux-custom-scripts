@@ -1,0 +1,9 @@
+#!/bin/sh
+for a in $(awk '//{print $NF}' abcdhjk | sed 's/>//g' | sed -e 's/<\/[a-z]*//g');do
+	if [ $(echo $a | wc -m) -ge 6 ];then
+		hex=$a
+	else
+		num="color$a"
+	fi
+	printf "$num = $hex\n"
+done
