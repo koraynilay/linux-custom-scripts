@@ -1,0 +1,8 @@
+#!/bin/sh
+str=$1
+strlen=$(echo $str | wc -m)
+if [ -z "$str" ];then
+	printf "Usage: bruxor [string]\n"
+	exit 1
+fi
+echo $str | xortool -b -l $strlen
