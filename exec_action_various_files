@@ -1,0 +1,12 @@
+#!/bin/sh
+for a in $(ls | grep file | sed 's/ /*/g'); do
+	cd "$a"
+#	git init
+#	git add .
+#	git commit -m first
+#	git push -u origin master
+#	cp ~/linux-custom-scripts/push.sh .
+	./push.sh
+	echo $a
+	cd /Raccolte/various_files
+done
