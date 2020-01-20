@@ -50,26 +50,30 @@ int main(int argc, char *argv[])
 			}
 		}
 		else if(info->idle < timeout){
-			if(info->idle >= timeout-5000){
-				if(info->idle >= timeout-4000){
-					if(info->idle >= timeout-3000){
-						if(info->idle >= timeout-2000){
-							if(info->idle >= timeout-1000){
-								system("dunstify -r 3 -u CRITICAL -t 600 -a scrnsvr \"Locking in ~1 sec\"");
+			sys=system(pgrep_lock)/256;
+			printf("sys = %d\n",sys);
+			if(sys == 1){
+				if(info->idle >= timeout-5000){
+					if(info->idle >= timeout-4000){
+						if(info->idle >= timeout-3000){
+							if(info->idle >= timeout-2000){
+								if(info->idle >= timeout-1000){
+									system("dunstify -r 3 -u CRITICAL -t 600 -a scrnsvr \"Locking in ~1 sec\"");
+								}else{
+									system("dunstify -r 3 -u CRITICAL -t 600 -a scrnsvr \"Locking in ~2 sec\"");
+								}
 							}else{
-								system("dunstify -r 3 -u CRITICAL -t 600 -a scrnsvr \"Locking in ~2 sec\"");
+								system("dunstify -r 3 -u CRITICAL -t 600 -a scrnsvr \"Locking in ~3 sec\"");
 							}
 						}else{
-							system("dunstify -r 3 -u CRITICAL -t 600 -a scrnsvr \"Locking in ~3 sec\"");
+							system("dunstify -r 3 -u NORMAL -t 600 -a scrnsvr \"Locking in ~4 sec\"");
 						}
 					}else{
-						system("dunstify -r 3 -u NORMAL -t 600 -a scrnsvr \"Locking in ~4 sec\"");
+						system("dunstify -r 3 -u NORMAL -t 600 -a scrnsvr \"Locking in ~5 sec\"");
 					}
-				}else{
-					system("dunstify -r 3 -u NORMAL -t 600 -a scrnsvr \"Locking in ~5 sec\"");
 				}
+				system(kill_sleep);
 			}
-			system(kill_sleep);
 		}
 		printf("%lu\n", (*info).idle);
 		XCloseDisplay(my_display);

@@ -1,4 +1,5 @@
 #!/bin/sh
+git config --global credentials.helper store
 for a in $(ls | grep file | sed 's/ /*/g'); do
 	cd "$a"
 #	git init
@@ -10,3 +11,4 @@ for a in $(ls | grep file | sed 's/ /*/g'); do
 	echo $a
 	cd /Raccolte/various_files
 done
+rm ~/.git-credentials

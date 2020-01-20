@@ -10,6 +10,12 @@ copy2(){
 	printf "copying \"$conf2\" to $dest2\n"
 	cp -r "$conf2" "$dest2"
 }
+copy_files(){
+	printf "copying \"$conf\" to $dest\n"
+	confdir=$(echo $conf | awk '/root\/.config/ {split($0,a,"/");print a[4]}')
+	mkdir -p $dest/$confdir
+	cp -r "$conf" "$dest/$confdir"
+}
 
 copy_zsh(){
 	mkdir -p $dest2/omz
@@ -38,6 +44,16 @@ for conf in /root/.config/*;do
 		/root/.config/SpeedCrunch) copy;;
 		/root/.config/systemd) copy;;
 		/root/.config/gtk-3.0/settings.ini) copy;;
+		/root/.config/gzdoom/gzdoom.ini) copy;;
+		/root/.config/gzdoom/saves) copy;;
+		*) continue;;
+	esac
+done
+for conf in /root/.config/*/*;do
+	case $conf in
+		/root/.config/gtk-3.0/settings.ini) copy_files;;
+		/root/.config/gzdoom/gzdoom.ini) copy_files;;
+		/root/.config/gzdoom/saves) copy_files;;
 		*) continue;;
 	esac
 done
