@@ -1,0 +1,12 @@
+#!/bin/sh
+case $1 in
+	g|go|start)\
+	systemctl start nxserver.service;
+	nxserver --start;
+	nxserver --upnpstatus;;
+	s|stop)
+	nxserver --stop;
+	systemctl stop nxserver.service;
+	nxserver --upnpstatus;;
+	*)printf "start\tstart the server\nstop\tstop the server\n";;
+esac
