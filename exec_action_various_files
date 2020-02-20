@@ -1,5 +1,5 @@
 #!/bin/sh
-git config --global credentials.helper store
+git config --global credentials.helper 'cache --timeout=240'
 for a in $(ls | grep file | sed 's/ /*/g'); do
 	cd "$a"
 #	git init
@@ -11,4 +11,3 @@ for a in $(ls | grep file | sed 's/ /*/g'); do
 	echo $a
 	cd /Raccolte/various_files
 done
-rm ~/.git-credentials

@@ -1,0 +1,12 @@
+#!/bin/sh
+tsleep=$1
+[[ -z $1 ]] && printf "Usage: shatimer [countdown] [alarm repeats (optional)]\n" && exit 1
+if [ -z $2 ];then
+	reap=15
+else
+	reap=$2
+fi
+sleep $tsleep
+for reee in {0..$reap};do
+	mpv /root/shalarm/data/ring.wav
+done

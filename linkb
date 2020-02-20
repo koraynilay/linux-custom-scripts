@@ -1,0 +1,4 @@
+#!/bin/sh
+program=$1
+[[ -z $program ]] && printf "Usage: linkb [program to link]\n" && exit 1
+ln -s /root/linux-custom-scripts/$program /bin/$program

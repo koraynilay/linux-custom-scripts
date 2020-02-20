@@ -1,3 +1,4 @@
+#!/bin/sh
 mode="$1"
 
 if [ "$mode" = "on" ]; then

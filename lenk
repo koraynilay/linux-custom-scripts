@@ -1,0 +1,5 @@
+#!/bin/sh
+src=$1
+dest=$2
+[[ -z $src ]] && printf "Usage: linkb [src to link] [destination folder]\n" && exit 1
+ln -s `pwd`/$src $dest
