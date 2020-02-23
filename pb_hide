@@ -1,0 +1,18 @@
+#!/bin/sh
+if cat /tmp/polybar_hidden>/dev/null;then
+	#go up
+	rm /tmp/polybar_hidden
+	for i in {0..22};do
+		sleep 0.000000001
+		xdo move -y `echo 1080-3-$i | bc` -a polybar-bottom_DVI-D-0
+		xdo move -y `echo 1080-3-$i | bc` -a Polybar\ tray\ window
+	done
+else
+	#go down
+	touch /tmp/polybar_hidden
+	for i in {0..22};do
+		sleep 0.000000001
+		xdo move -y `echo 1080-25+$i | bc` -a polybar-bottom_DVI-D-0
+		xdo move -y `echo 1080-25+$i | bc` -a Polybar\ tray\ window
+	done
+fi
