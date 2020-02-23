@@ -1,4 +1,5 @@
 #!/bin/sh
+win_id=`xdotool search --class Polybar`
 if cat /tmp/polybar_hidden>/dev/null;then
 	#go up
 	rm /tmp/polybar_hidden
@@ -12,6 +13,7 @@ else
 	touch /tmp/polybar_hidden
 	for i in {0..22};do
 		sleep 0.000000001
+#		xdotool windowmove $win_id `xwininfo -id $win_id | awk '/Absolute upper-left/ {print $4;exit}'` `echo 1080-20 | bc`
 		xdo move -y `echo 1080-25+$i | bc` -a polybar-bottom_DVI-D-0
 		xdo move -y `echo 1080-25+$i | bc` -a Polybar\ tray\ window
 	done
