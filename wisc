@@ -2,5 +2,5 @@
 case $1 in
 	c|connect)systemctl start windscribe;windscribe connect;;
 	d|disconnect|dc)windscribe disconnect;systemctl stop windscribe;;
-	*)exit 1;;
+	*)printf "wisc [option]\n\nOption:\n\tc,connect\tstart the daemon and connect\n\td,disconnect\tstop the daemon and disconnect\n"; exit 1;;
 esac

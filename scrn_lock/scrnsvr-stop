@@ -1,1 +1,1 @@
-killall -SIGSTOP scrnsvr; dunstify -r 4 -a scrnsvr 'scrnsvr stopped'
+killall -SIGSTOP scrnsvr; dunstify -r 4 -t 1500 -a scrnsvr 'scrnsvr stopped'

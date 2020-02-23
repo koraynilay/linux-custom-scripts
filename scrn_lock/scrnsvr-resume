@@ -1,1 +1,1 @@
-killall -SIGCONT scrnsvr; dunstify -r 4 -a scrnsvr 'scrnsvr resumed'
+killall -SIGCONT scrnsvr; dunstify -r 4 -t 1500 -a scrnsvr 'scrnsvr resumed'

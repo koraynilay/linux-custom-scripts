@@ -1,0 +1,12 @@
+#!/bin/bash
+
+flags_file=~/.config/google-chrome/configs/chrome-flags.conf
+
+# Allow users to override command-line options
+if [[ -f $flags_file ]]; then
+   CHROME_USER_FLAGS="$(cat $flags_file)"
+fi
+
+# Launch
+echo $CHROME_USER_FLAGS
+exec /opt/google/chrome/google-chrome $CHROME_USER_FLAGS "$@" 
