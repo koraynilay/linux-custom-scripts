@@ -4,18 +4,25 @@ win_id_tray=`xdotool search --class Polybar | tr '\n' ' ' | awk '// {print $2}'`
 if cat /tmp/polybar_hidden>/dev/null;then
 	#go up
 	rm /tmp/polybar_hidden
+	xdotool windowmap $win_id
+	xdotool windowmap $win_id_tray
 	for i in {0..24};do
-		sleep 0.000000001
-		xdo move -y `echo 1080-3-$i | bc` -a polybar-bottom_DVI-D-0
-		xdo move -y `echo 1080-3-$i | bc` -a Polybar\ tray\ window
+	#	sleep 0.000000001
+		xdotool windowmove $win_id `xwininfo -id $win_id | awk '/Absolute upper-left/ {print $4;exit}'` `echo 1080-1-$i | bc`
+		xdotool windowmove $win_id_tray `xwininfo -id $win_id_tray | awk '/Absolute upper-left/ {print $4;exit}'` `echo 1080-3-$i | bc`
+#		xdo move -y `echo 1080-3-$i | bc` -a polybar-bottom_DVI-D-0
+#		xdo move -y `echo 1080-3-$i | bc` -a Polybar\ tray\ window
 	done
 else
 	#go down
 	touch /tmp/polybar_hidden
 	for i in {0..24};do
-		sleep 0.000000001
-#		xdotool windowmove $win_id `xwininfo -id $win_id | awk '/Absolute upper-left/ {print $4;exit}'` `echo 1080-20 | bc`
-		xdo move -y `echo 1080-25+$i | bc` -a polybar-bottom_DVI-D-0
-		xdo move -y `echo 1080-25+$i | bc` -a Polybar\ tray\ window
+	#	sleep 0.000000001
+		xdotool windowmove $win_id `xwininfo -id $win_id | awk '/Absolute upper-left/ {print $4;exit}'` `echo 1080-25+$i | bc`
+		xdotool windowmove $win_id_tray `xwininfo -id $win_id_tray | awk '/Absolute upper-left/ {print $4;exit}'` `echo 1080-25+$i | bc`
+#		xdo move -y `echo 1080-25+$i | bc` -a polybar-bottom_DVI-D-0
+#		xdo move -y `echo 1080-25+$i | bc` -a Polybar\ tray\ window
 	done
+	xdotool windowunmap $win_id
+	xdotool windowunmap $win_id_tray
 fi
