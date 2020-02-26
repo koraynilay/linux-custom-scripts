@@ -33,6 +33,7 @@ done
 for conf2 in /root/.*;do
 	case $conf2 in
 		/root/.atom) continue;;
+		/root/.flashTool) continue;;
 		/root/.cache) continue;;
 		/root/.config) continue;;
 		/root/.local) continue;;
