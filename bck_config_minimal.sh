@@ -42,7 +42,7 @@ for conf in /root/.config/*;do
 		/root/.config/ranger) copy;;
 		/root/.config/vlc) copy;;
 		/root/.config/SpeedCrunch) copy;;
-		/root/.config/systemd) copy;;
+#		/root/.config/systemd) copy;;
 		/root/.config/gtk-3.0/settings.ini) copy;;
 		/root/.config/gzdoom/gzdoom.ini) copy;;
 		/root/.config/gzdoom/saves) copy;;

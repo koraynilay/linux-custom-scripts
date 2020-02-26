@@ -1,0 +1,2 @@
+#!/bin/sh
+/opt/ferdi/ferdi --no-sandbox

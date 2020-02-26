@@ -1,0 +1,15 @@
+#!/bin/sh
+answ(){
+	printf "Update?: "
+	read ans
+	ans="${ans//$'\n'/ }"
+	if [[ "$ans" == "y" || $ans == "yes" ]];then
+		sudo pacman -Syu
+	else
+		answ
+	fi
+}
+printf "Updates available:\n\n"
+checkupdates
+printf "\n"
+answ

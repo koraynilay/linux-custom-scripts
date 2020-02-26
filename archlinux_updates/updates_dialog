@@ -1,0 +1,2 @@
+#!/bin/sh
+termite --hold -t "archlinux_updates_script" -e updates_dialog_text
