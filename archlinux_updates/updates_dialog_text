@@ -20,7 +20,9 @@ main(){
 	fi
 	answ
 }
+trap main USR1
 while true;do
 	main
-	sleep 3600
+	sleep 3600 &
+	wait $!
 done
