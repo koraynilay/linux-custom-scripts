@@ -5,11 +5,22 @@ answ(){
 	ans="${ans//$'\n'/ }"
 	if [[ "$ans" == "y" || $ans == "yes" ]];then
 		sudo pacman -Syu
+		main
 	else
-		answ
+		main
 	fi
 }
-printf "Updates available:\n\n"
-checkupdates
-printf "\n"
-answ
+main(){
+	clear
+	printf "Updates available:\n\n"
+	checkupdates
+	exit_code=$?
+	if [ $exit_code -eq 2 ];then
+		return 0
+	fi
+	answ
+}
+while true;do
+	main
+	sleep 3600
+done

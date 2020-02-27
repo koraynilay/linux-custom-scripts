@@ -44,6 +44,8 @@ for conf in /root/.config/*;do
 		/root/.config/kdeconnect) copy;;
 #		/root/.config/systemd) copy;;
 		/root/.config/ferdi-themes) copy;;
+		/root/.config/herbstluftwm) copy;;
+		/root/.config/leafpad) copy;;
 		*) continue;;
 	esac
 done
@@ -52,6 +54,7 @@ for conf in /root/.config/*/*;do
 		/root/.config/gtk-3.0/settings.ini) copy_files;;
 		/root/.config/gzdoom/gzdoom.ini) copy_files;;
 		/root/.config/gzdoom/saves) copy_files;;
+		/root/.config/google-chrome/configs) copy_files;;
 		*) continue;;
 	esac
 done

@@ -1,2 +1,6 @@
 #!/bin/sh
-termite --hold -t "archlinux_updates_script" -e updates_dialog_text
+dialog_id=`xdotool search --name "^archlinux_updates_script$"`
+xdotool windowkill $dialog_id
+termite -t "archlinux_updates_script" -e updates_dialog_text 2>/dev/null
+mapunmap_updates.sh
+exit 0

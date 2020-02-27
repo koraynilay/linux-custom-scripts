@@ -1,0 +1,14 @@
+#!/bin/sh
+sleep 3
+xdotool key 0x005b
+xdotool key q
+xdotool key u
+xdotool key a
+xdotool key d
+xdotool key c
+xdotool key o
+xdotool key r
+xdotool key e
+xdotool key 0x0abb
+xdotool key 0x005d
+xdotool key Return
