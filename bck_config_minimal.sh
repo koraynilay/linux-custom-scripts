@@ -40,12 +40,10 @@ for conf in /root/.config/*;do
 		/root/.config/mpd) copy;;
 		/root/.config/rofi) copy;;
 		/root/.config/ranger) copy;;
-		/root/.config/vlc) copy;;
 		/root/.config/SpeedCrunch) copy;;
+		/root/.config/kdeconnect) copy;;
 #		/root/.config/systemd) copy;;
-		/root/.config/gtk-3.0/settings.ini) copy;;
-		/root/.config/gzdoom/gzdoom.ini) copy;;
-		/root/.config/gzdoom/saves) copy;;
+		/root/.config/ferdi-themes) copy;;
 		*) continue;;
 	esac
 done
