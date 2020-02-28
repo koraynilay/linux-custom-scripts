@@ -1,10 +1,10 @@
 #!/bin/sh
 while true;do
-	ups=`checkupdates`
+	checkupdates
 	exit_code=$?
 	if [ $exit_code -ne 2 ];then
 		act=`dunstify -a Updates -A "update,up" "Updates are available"`
-		! [[ -z $act ]] && updates_dialog
+		! [[ -z $act ]] && mapunmap_updates.sh
 	else
 		echo no_updates
 	fi

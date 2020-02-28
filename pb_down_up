@@ -10,6 +10,6 @@ if cat /tmp/polybar_hidden>/dev/null;then
 else
 	#go down
 	touch /tmp/polybar_hidden
-	xdo move -y `echo 1080-2 | bc` -a polybar-bottom_DVI-D-0
-	xdo move -y `echo 1080-2 | bc` -a Polybar\ tray\ window
+	xdo move -y `echo 1080-3 | bc` -a polybar-bottom_DVI-D-0
+	xdo move -y `echo 1080-3 | bc` -a Polybar\ tray\ window
 fi

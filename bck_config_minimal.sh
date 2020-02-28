@@ -46,6 +46,10 @@ for conf in /root/.config/*;do
 		/root/.config/ferdi-themes) copy;;
 		/root/.config/herbstluftwm) copy;;
 		/root/.config/leafpad) copy;;
+		/root/.config/peaclock) copy;;
+		/root/.config/shalarm) copy;;
+		/root/.config/user-dirs.dirs) copy;;
+		/root/.config/user-dirs.locale) copy;;
 		*) continue;;
 	esac
 done
@@ -55,18 +59,31 @@ for conf in /root/.config/*/*;do
 		/root/.config/gzdoom/gzdoom.ini) copy_files;;
 		/root/.config/gzdoom/saves) copy_files;;
 		/root/.config/google-chrome/configs) copy_files;;
+		/root/.config/viewnior/viewnior.conf) copy;;
 		*) continue;;
 	esac
 done
 for conf2 in /root/.*;do
 	case $conf2 in
-		/root/.ncmpcpp) copy2;;
-		/root/.oh-my-zsh) copy_zsh;;
 		/root/.zshrc) copy2;;
+		/root/.zsh_history) copy2;;
+		/root/.oh-my-zsh) copy_zsh;;
+#
+		/root/.ashrc) copy2;;
+		/root/.bash_history) copy2;;
+#
+		/root/.ncmpcpp) copy2;;
+		/root/.ideskrc) copy2;;
+		/root/.idesktop) copy2;;
 		/root/.xinitrc) copy2;;
 		/root/.gtkrc-2.0) copy2;;
 		/root/.vimrc) copy2;;
 		/root/.vim) copy2;;
+		/root/.kde4) copy2;;
+		/root/.lesshst) copy2;;
+		/root/.node_repl_history) copy2;;
+		/root/.assaultcube) copy2;;
+		/root/.fehbg) copy2;;
 		*) continue;;
 	esac
 done

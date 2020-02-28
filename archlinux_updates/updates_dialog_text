@@ -4,7 +4,7 @@ answ(){
 	read ans
 	ans="${ans//$'\n'/ }"
 	if [[ "$ans" == "y" || $ans == "yes" ]];then
-		sudo pacman -Syu
+		sudo pacman -Syu --noconfirm
 		main
 	else
 		main
@@ -23,6 +23,6 @@ main(){
 trap main USR1
 while true;do
 	main
-	sleep 3600 &
+	sleep 600 &
 	wait $!
 done
