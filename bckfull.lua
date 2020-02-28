@@ -12,7 +12,7 @@ if not os.execute("ls "..destination.." >/dev/null 2>&1") then
 	end
 end
 print("copying "..home_folder.." to "..destination);
-os.execute("cd "..home_folder.."; cp -rf `ls -a "..home_folder.." | grep -v '"..dest_basename.."' | awk '/.../'` "..destination);
+os.execute("cd \""..home_folder.."\"; cp -rf $(ls -a \""..home_folder.."\" | grep -v '"..dest_basename.."' | awk '/.../') \""..destination"\"");
 os.execute("rm -rf "..destination.."/.cache");
 os.execute("rm -rf "..destination.."/.mozilla");
 os.execute("rm -rf "..destination.."/.config/google-chrome");
@@ -24,3 +24,11 @@ os.execute("rm -rf "..destination.."/.config/Ferdi");
 os.execute("rm -rf "..destination.."/.local/share/Steam");
 os.execute("rm -rf "..destination.."/.local/share/Trash");
 os.execute("rm -rf "..destination.."/dotfiles-minimal");
+os.execute("cd \""..destination.."\";
+	   for file in $(find . -name \".git\");do
+	   	echo $file;
+		if [ \"$file\" = "./.git" ];then
+			break;
+		fi;
+		rm -rf $file;
+	   done")
