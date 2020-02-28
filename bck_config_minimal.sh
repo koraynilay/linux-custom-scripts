@@ -6,17 +6,22 @@ copy(){
 	printf "copying \"$conf\" to $dest\n"
 	cp -r "$conf" "$dest"
 }
-copy2(){
-	printf "copying \"$conf2\" to $dest2\n"
-	cp -r "$conf2" "$dest2"
-}
 copy_files(){
 	printf "copying \"$conf\" to $dest\n"
 	confdir=$(echo $conf | awk '/root\/.config/ {split($0,a,"/");print a[4]}')
 	mkdir -p $dest/$confdir
 	cp -r "$conf" "$dest/$confdir"
 }
-
+copy2(){
+	printf "copying \"$conf2\" to $dest2\n"
+	cp -r "$conf2" "$dest2"
+}
+copy_files2(){
+	printf "copying \"$conf2\" to $dest2\n"
+	confdir2=$(echo $conf2 | awk '/root/ {split($0,a,"/");print a[4]}')
+	mkdir -p $dest/$confdir2
+	cp -r "$conf2" "$dest/$confdir2"
+}
 copy_zsh(){
 	mkdir -p $dest2/omz
 	printf "copying \"$conf2/custom\" to $dest2/omz/custom\n"
@@ -84,6 +89,12 @@ for conf2 in /root/.*;do
 		/root/.node_repl_history) copy2;;
 		/root/.assaultcube) copy2;;
 		/root/.fehbg) copy2;;
+		*) continue;;
+	esac
+done
+for conf2 in /root/.*/*;do
+	case $conf2 in
+		/root/.mpd/playlists) copy_files2;;
 		*) continue;;
 	esac
 done
