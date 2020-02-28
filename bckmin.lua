@@ -81,8 +81,8 @@ for number,folder in pairs(folders) do
 	else
 		dest = destination.."/config/"
 	end
-	print("copying "..folder.." to "..dest);
-	exitcp=os.execute("cp -r "..folder.." "..dest);
+	print("copying "..folder.." to "..dest.."...");
+	exitcp=os.execute("cp -r \""..folder.."\" \""..dest.."\"");
 	--[[if not exitcp then
 		print("cp exited with an error.\nContinue anyway? [y/n]: ")
 		ans=io.read()
@@ -91,5 +91,15 @@ for number,folder in pairs(folders) do
 		end
 	end]]
 end
+os.execute([[
+	   cd "]]..destination..[[";
+	   for file in $(find . -name ".git");do
+		if [ $file = "./.git" ];then
+			continue;
+		fi;
+	   	echo removing $file...;
+		rm -rf $file;
+	   done
+	   ]]);
 --	print(a);
 --	os.execute();
