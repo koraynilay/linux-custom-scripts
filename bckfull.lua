@@ -34,7 +34,7 @@ os.execute([[
 		rm -rf $file;
 	   done
 	   ]]);
-
+print("Backing up explicitly installed packages..");
 pac_qqen = io.popen("pacman -Qqen");
 pac_qqem = io.popen("pacman -Qqem");
 pkglist = io.open(destination.."/pkglist_bckfull.txt", "w+");
