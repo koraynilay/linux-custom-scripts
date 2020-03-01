@@ -74,6 +74,15 @@ if not os.execute("ls "..destination.." >/dev/null 2>&1") then
 		os.exit(1);
 	end
 end
+
+print("Backing up explicitly installed packages..");
+pac_qqen = io.popen("pacman -Qqen");
+pac_qqem = io.popen("pacman -Qqem");
+pkglist = io.open(destination.."/pkglist_bckmin.txt", "w+");
+pkglist_aur = io.open(destination.."/pkglist_aur_bckmin.txt", "w+");
+pkglist:write("//Written on ",os.date()," by bckmin.lua\n\n",pac_qqen:read("*a"));
+pkglist_aur:write("//Written on ",os.date()," by bckmin.lua\n\n",pac_qqem:read("*a"));
+
 for number,folder in pairs(folders) do
 	config_folder = string.find(folder, "config");
 	if not config_folder then
@@ -83,13 +92,6 @@ for number,folder in pairs(folders) do
 	end
 	print("copying "..folder.." to "..dest.."...");
 	exitcp=os.execute("cp -r \""..folder.."\" \""..dest.."\"");
-	--[[if not exitcp then
-		print("cp exited with an error.\nContinue anyway? [y/n]: ")
-		ans=io.read()
-		if not (ans == "yes" or ans == "y") then
-			os.exit(1);
-		end
-	end]]
 end
 os.execute([[
 	   cd "]]..destination..[[";
@@ -101,5 +103,15 @@ os.execute([[
 		rm -rf $file;
 	   done
 	   ]]);
---	print(a);
---	os.execute();
+print("Done!");
+
+
+--[[if not exitcp then
+	print("cp exited with an error.\nContinue anyway? [y/n]: ")
+	ans=io.read()
+	if not (ans == "yes" or ans == "y") then
+		os.exit(1);
+	end
+end]]
+--[[os.execute("echo '#"..os.date().."' >> "..destination.."/pkglist.txt; pacman -Qqen >> "..destination.."/pkglist.txt");
+os.execute("echo '#"..os.date().."' >> "..destination.."/pkglist_aur.txt; pacman -Qqem >> "..destination.."/pkglist_aur.txt");]]

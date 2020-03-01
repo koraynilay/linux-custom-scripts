@@ -34,3 +34,10 @@ os.execute([[
 		rm -rf $file;
 	   done
 	   ]]);
+
+pac_qqen = io.popen("pacman -Qqen");
+pac_qqem = io.popen("pacman -Qqem");
+pkglist = io.open(destination.."/pkglist_bckfull.txt", "w+");
+pkglist_aur = io.open(destination.."/pkglist_aur_bckfull.txt", "w+");
+pkglist:write("//Written on ",os.date()," by bckfull.lua\n\n",pac_qqen:read("*a"));
+pkglist_aur:write("//Written on ",os.date()," by bckfull.lua\n\n",pac_qqem:read("*a"));
