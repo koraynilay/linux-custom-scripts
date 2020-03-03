@@ -11,6 +11,12 @@ if not os.execute("ls "..destination.." >/dev/null 2>&1") then
 		os.exit(1);
 	end
 end
+print("copying /etc to "..destination);
+os.execute("cp -rf /etc \""..destination.."\"/");
+print("copying /var/log/pacman.log to "..destination);
+os.execute("cp -rf /var/log/pacman.log \""..destination.."\"/");
+print("copying /var/log/Xorg.*.log* to "..destination);
+os.execute("cp -rf /var/log/Xorg.*.log* \""..destination.."\"/");
 print("copying "..home_folder.." to "..destination);
 os.execute("cd \""..home_folder.."\"; cp -rf $(ls -a \""..home_folder.."\" | grep -v '"..dest_basename.."' | awk '/.../') \""..destination.."\"");
 os.execute("rm -rf "..destination.."/.cache");
