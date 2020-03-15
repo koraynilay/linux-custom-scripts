@@ -1,0 +1,17 @@
+#!/bin/sh
+newstxt=/root/linux-custom-scripts/archlinux_updates/news.txt 
+newstxtold=/root/linux-custom-scripts/archlinux_updates/news.txt.old
+mv $newstxt $newstxtold
+
+curl -sS https://www.archlinux.org/news/ | \
+awk '(/td class/ || /title/ || /<td>[0-9]+-[0-9]+-[0-9]+<\/td>/) && \
+!/?page=[0-9]/ && \
+!/td class/ && \
+!/title="[^V]/ && \
+!/(<|<\/)title>/ \
+{gsub(/((<\/|<)td>)|(title="View: .*">)|(<\/a>)/,"");print}' | \
+sed 's/&gt;/>/g' > $newstxt
+
+diff $newstxt $newstxtold | \
+awk '/< / {sub(/< /,"");print}' | \
+sed -e 's/\s//' -e  's/\s//' -e 's/\s//'

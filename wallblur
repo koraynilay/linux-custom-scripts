@@ -1,0 +1,21 @@
+#!/bin/sh
+a=0
+while true;do
+	n=`xdotool search --all --onlyvisible --desktop $(xprop -notype -root _NET_CURRENT_DESKTOP | cut -c 24-) "" 2>/dev/null | wc -m`
+	#n=`i3-save-tree --workspace=$(xprop -notype -root _NET_CURRENT_DESKTOP | cut -c 24-) | awk '!/\/\//' | wc -m`
+	if [ $n -le 1 ]; then
+		if [ $a -eq 0 ]; then
+			feh --bg-fill ~/Pictures/wallpapers/landscape_2_dark.png
+		fi
+	else
+		if [ $a -eq 0 ]; then
+			feh --bg-fill ~/Pictures/wallpapers/landscape_2_dark_blur.png
+		fi
+	fi
+	echo $a
+	a=`echo $a-1 | bc`
+	if [ $a -eq -1 ]; then
+		a=10000
+	fi
+done
+#trap main INT

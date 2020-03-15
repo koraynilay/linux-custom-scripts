@@ -1,0 +1,4 @@
+#!/bin/sh
+for a in {0..999999};do
+	eval $1
+done

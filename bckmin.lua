@@ -10,6 +10,7 @@ folders = {
 	config_folder_path..".config/polybar",
 	config_folder_path..".config/termite",
 	config_folder_path..".config/dunst",
+	config_folder_path..".config/deadd",
 
 	config_folder_path..".config/htop",
 	config_folder_path..".config/neofetch",
