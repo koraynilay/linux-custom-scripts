@@ -3,6 +3,9 @@
 #mpc clear
 for a in /disks/I/Raccolte/Musica/*;do
 	data=$(date -d @`getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'` +%Y-%m-%d_%H-%M-%S)
-	#printf "$(date -d @$((`getfattr --only-values -n system.ntfs_crtime_be '$a' 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'`)) +%Y-%m-%d_%H-%M-%S)\n"
+	echo $data `basename "$a"`
 done
 echo $songs
+
+
+	#printf "$(date -d @$((`getfattr --only-values -n system.ntfs_crtime_be '$a' 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'`)) +%Y-%m-%d_%H-%M-%S)\n"
