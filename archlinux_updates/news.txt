@@ -1,0 +1,100 @@
+                2020-04-14
+                        zn_poly 0.9.2-2 update requires manual intervention
+                2020-04-13
+                        nss>=3.51.1-1 and lib32-nss>=3.51.1-1 updates require manual intervention
+                2020-03-19
+                        hplip 3.20.3-2 update requires manual intervention
+                2020-03-01
+                        firewalld>=0.8.1-2 update requires manual intervention
+                2020-02-24
+                        The Future of the Arch Linux Project Leader
+                2020-02-22
+                        Planet Arch Linux migration
+                2020-02-17
+                        sshd needs restarting after upgrading to openssh-8.2p1
+                2020-01-15
+                        rsync compatibility
+                2020-01-04
+                        Now using Zstandard instead of xz for package compression
+                2019-12-20
+                        Xorg cleanup requires manual intervention
+                2019-11-25
+                        primus_vk>=1.3-1 update requires manual intervention
+                2019-11-10
+                        New kernel packages and mkinitcpio hooks
+                2019-10-25
+                        Clarification regarding recent email activity on the arch-announce list
+                2019-10-16
+                        Required update to recent libarchive
+                2019-10-06
+                        `base` group replaced by mandatory `base` package - manual intervention required
+                2019-08-26
+                        astyle>=3.1-2 update requires manual intervention
+                2019-08-20
+                        tensorflow>=1.14.0-5 update requires manual intervention
+                2019-07-11
+                        libbloom>=1.6-2 update requires manual intervention
+                2019-06-27
+                        mariadb 10.4.x update requires manual intervention
+                2018-07-14
+                        libutf8proc>=2.1.1-3 update requires manual intervention
+                2018-05-04
+                        js52 52.7.3-2 upgrade requires intervention
+                2018-04-20
+                        glibc 2.27-2 and pam 1.3.0-2 may require manual intervention
+                2018-02-22
+                        zita-resampler 1.6.0-1 -> 2 update requires manual intervention
+                2017-11-08
+                         The end of i686 support
+                2017-09-02
+                        Perl library path change
+                2017-05-15
+                        Deprecation of ABS tool and rsync endpoint
+                2017-03-15
+                        ca-certificates-utils 20170307-1 upgrade requires manual intervention
+                2017-02-27
+                        mesa  with libglvnd support is now in testing
+                2017-01-25
+                        Phasing out i686 support
+                2017-01-14
+                        xorg-server 1.19.1 is now in extra
+                2016-12-30
+                        OpenVPN 2.4.0 update requires administrative interaction
+                2016-10-31
+                        ttf-dejavu 2.37 will require forced upgrade
+                2016-08-06
+                        TeXLive 2016 packages are now available
+                2016-07-18
+                        test-sec-flags: Call for Assistance
+                2016-06-26
+                        screen-4.4.0-1 unable to attach old sessions
+                2016-03-24
+                        Required update to pacman-5.0.1 before 2016-04-23
+                2016-01-02
+                        PHP 7.0 packages released
+                2015-12-12
+                        Dropping Plasma 4
+                2015-12-10
+                        C++ ABI change
+                2015-11-13
+                        Xorg 1.18.0 enters [testing]
+                2015-10-08
+                        Downtime (rsync, mail)
+                2015-09-20
+                        D-Bus now launches user buses
+                2015-08-14
+                        openssh-7.0p1 deprecates ssh-dss keys
+                2015-05-22
+                        Data corruption on software RAID 0 when discard is used
+                2015-05-17
+                        Puppet 4.0 enters [community]
+                2015-05-16
+                        PulseAudio split
+                2015-02-15
+                        xorg-server 1.17.1 is now available
+                2015-01-26
+                        Transition of KDE software to the KDE Framework and Qt 5
+                2015-01-20
+                        Packaging changes in lirc 0.9.2
+                2014-12-11
+                        ca-certificates update

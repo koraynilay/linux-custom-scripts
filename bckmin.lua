@@ -63,7 +63,9 @@ folders = {
 	config_folder_path..".zsh_history",
 	config_folder_path..".oh-my-zsh/custom",
 
-	config_folder_path..".local/share/SpeedCrunch"
+	config_folder_path..".local/share/SpeedCrunch",
+-- / folders
+	"/etc"
 };
 
 if not os.execute("ls "..destination.." >/dev/null 2>&1") then

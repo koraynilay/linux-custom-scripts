@@ -2,14 +2,14 @@
 #win_id=`xdotool search --class Polybar | tr '\n' ' ' | awk '// {print $1}'`
 #win_id_tray=`xdotool search --class Polybar | tr '\n' ' ' | awk '// {print $2}'`
 
-if cat /tmp/polybar_hidden>/dev/null;then
+if cat /tmp/polybar_down>/dev/null;then
 	#go up
-	rm /tmp/polybar_hidden
+	rm /tmp/polybar_down
 	xdo move -y `echo 1080-25 | bc` -a polybar-bottom_DVI-D-0
 	xdo move -y `echo 1080-25 | bc` -a Polybar\ tray\ window
 else
 	#go down
-	touch /tmp/polybar_hidden
+	touch /tmp/polybar_down
 	xdo move -y `echo 1080-3 | bc` -a polybar-bottom_DVI-D-0
 	xdo move -y `echo 1080-3 | bc` -a Polybar\ tray\ window
 fi

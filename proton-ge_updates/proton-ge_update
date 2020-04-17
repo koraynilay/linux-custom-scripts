@@ -1,0 +1,16 @@
+#!/bin/sh
+version=$(curl -s https://github.com/GloriousEggroll/proton-ge-custom/releases | \
+awk '/Proton-[0-9]\.[0-9]-GE-[0-9]\.tar\.gz/ && !/span/ {FS="/";gsub(/(<a href=")|(rel="nofollow".+)/,"");print $NF;exit}' | \
+sed 's/"//g')
+url=$(curl -s https://github.com/GloriousEggroll/proton-ge-custom/releases | \
+awk '/Proton-[0-9]\.[0-9]-GE-[0-9]\.tar\.gz/ && !/span/ {FS="/";gsub(/(<a href=")|(rel="nofollow".+)|(\s)/,"");print;exit}' | \
+sed 's/"//g')
+echo $version
+echo $url
+
+if [ "$(cat version | tr -d '\n')" != "$version" ];then
+	echo $version > version
+	axel https://github.com/$url
+else
+	exit 1
+fi
