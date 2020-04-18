@@ -3,6 +3,7 @@ config_folder_path = "/root/"
 destination = config_folder_path.."dotfiles-minimal"
 folders = {
 -- .config folder
+	config_folder_path..".config/autostart.sh",
 	config_folder_path..".config/i3",
 	config_folder_path..".config/picom.conf",
 	config_folder_path..".config/picom_launch.sh",
@@ -37,6 +38,7 @@ folders = {
 	config_folder_path..".config/google-chrome/configs",
 	config_folder_path..".config/user-dirs.dirs",
 	config_folder_path..".config/user-dirs.locale",
+	config_folder_path..".config/BetterDiscord",
 -- home folder
 	config_folder_path..".ashrc",
 	config_folder_path..".assaultcube",
