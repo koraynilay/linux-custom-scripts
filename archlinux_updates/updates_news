@@ -1,7 +1,7 @@
 #!/bin/sh
 newstxt=/root/linux-custom-scripts/archlinux_updates/news.txt 
 newstxtold=/root/linux-custom-scripts/archlinux_updates/news.txt.old
-mv $newstxt $newstxtold
+mv -f $newstxt $newstxtold
 
 curl -sS https://www.archlinux.org/news/ | \
 awk '(/td class/ || /title/ || /<td>[0-9]+-[0-9]+-[0-9]+<\/td>/) && \
@@ -13,5 +13,4 @@ awk '(/td class/ || /title/ || /<td>[0-9]+-[0-9]+-[0-9]+<\/td>/) && \
 sed 's/&gt;/>/g' > $newstxt
 
 diff $newstxt $newstxtold | \
-awk '/< / {sub(/< /,"");print}' | \
-sed -e 's/\s//' -e  's/\s//' -e 's/\s//'
+awk '/< / {sub(/<\s+/,"");print}'
