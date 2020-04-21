@@ -1,25 +1,21 @@
 #!/bin/sh
 font='Tw Cen MT'
-#font='Anonymous Pro'
-#font='Product Sans'
-#font='Cascadia Code'
-#font='IBM 3270'
 i3lock --pass-media-keys -n -k \
 	-i "/root/Pictures/wallpapers/landscape_2_dark_lock.png" \
 	\
 	--timepos='x+30:h-200' \
-	--timesize='100' \
+	--timesize='140' \
 	--timecolor=ffffffff \
 	--time-align 1 \
 	--time-font="$font" \
-	--timestr='%H %M %S' \
+	--timestr='%H %M' \
 	\
 	--datepos='x+30:h-125' \
-	--datesize='40' \
+	--datesize='70' \
 	--datecolor=ffffffff \
 	--date-align 1 \
 	--date-font="$font" \
-	--datestr='%A %d %B %Y' \
+	--datestr='%S' \
 	\
 	--insidevercolor=00000000 \
 	--insidewrongcolor=ff000000 \
@@ -44,9 +40,6 @@ i3lock --pass-media-keys -n -k \
 	--layout-font="$font" \
 	--verif-font="$font" \
 	--wrong-font="$font"
-
-
-#	--timestr='%l %M %S %p' \
 
 #	\
 #	--greetersize='30' \
