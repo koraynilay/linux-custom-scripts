@@ -1,8 +1,56 @@
 #!/bin/sh
-i3lock --pass-media-keys -i "/root/Pictures/wallpapers/landscape_2_dark_lock.png" -n -k --timecolor=000000ff --datecolor=000000ff --insidevercolor=00000000 --insidewrongcolor=ff000000 --insidecolor=00000000 --ringcolor=ff000000 --linecolor=ff000050 --keyhlcolor=000000ff --bshlcolor=ff0000ff --separatorcolor=00000000 --keylayout 0 --radius=120 --ringvercolor=00000050 --ringwrongcolor=ff000050 --verifcolor=ffffffff --wrongcolor=ff0000ff --layoutcolor=000000ff --veriftext="Breaking in..." --wrongtext="Couldn't break in" --noinputtext="Nothing to break with" --locktext="Locking..." --lockfailedtext="Couldn't lock" --time-font="Tw Cen MT" --date-font="Tw Cen MT" --layout-font="Tw Cen MT" --verif-font="Tw Cen MT" --wrong-font="Tw Cen MT"
-#i3lock -m -i "/root/Pictures/wallpapers/landscape_lock.png" -n -k --timecolor=ffffffff --datecolor=ffffffff --insidevercolor=00000000 --insidewrongcolor=ff000000 --insidecolor=00000000 --ringcolor=ff000000 --linecolor=ff000050 --keyhlcolor=000000ff --bshlcolor=ff0000ff --separatorcolor=00000000 --keylayout 0 --radius=120 --ringvercolor=00000050 --ringwrongcolor=ff000050 --verifcolor=ffffffff --wrongcolor=ff0000ff --layoutcolor=ddddddff --veriftext="Breaking in..." --wrongtext="Couldn't break in" --noinputtext="Nothing to break with" --locktext="Locking..." --lockfailedtext="Couldn't lock" --time-font="Tw Cen MT" --date-font="Tw Cen MT" --layout-font="Tw Cen MT" --verif-font="Tw Cen MT" --wrong-font="Tw Cen MT"
+font='Tw Cen MT'
+i3lock --pass-media-keys -n -k \
+	-i "/root/Pictures/wallpapers/landscape_2_dark_lock.png" \
+	\
+	--timepos='x+30:h-200' \
+	--timesize='140' \
+	--timecolor=ffffffff \
+	--time-align 1 \
+	--time-font="$font" \
+	--timestr='%H:%M' \
+	\
+	--datepos='x+30:h-125' \
+	--datesize='70' \
+	--datecolor=ffffffff \
+	--date-align 1 \
+	--date-font="$font" \
+	--datestr='%A %d %B' \
+	\
+	--insidevercolor=00000000 \
+	--insidewrongcolor=ff000000 \
+	--insidecolor=00000000 \
+	\
+	--indpos='x+1980:h-50' \
+	--keyhlcolor=ffffffff \
+	--bshlcolor=ff0000ff \
+	--separatorcolor=00000000 \
+	--radius=30 \
+	--linecolor=ff000050 \
+	--ringcolor=ff000000 \
+	--ringvercolor=00000050 \
+	--ringwrongcolor=ff000050 \
+	--verifcolor=ffffffff \
+	--wrongcolor=ff0000ff \
+	--veriftext="." \
+	--wrongtext="." \
+	--noinputtext="" \
+	--locktext="" \
+	--lockfailedtext="" \
+	--layout-font="$font" \
+	--verif-font="$font" \
+	--wrong-font="$font"
 
+#	\
+#	--greetersize='30' \
+#	--greeterpos='x+30:h-30' \
+#	--greetercolor=ffffffff \
+#	--greeter-align 1 \
+#	--greeter-font="$font" \
+#	--greetertext='Type your password...' \
 
-
-# --bar-base-width=0 --bar-width=5 #--bar-indicator --bar-color=ff000000 --bar-orientation=vertical --bar-direction=0
-#1303263-widescreen-beretta-wallpaper-1920x1080.jpg
+#	\
+#	--keylayout 0 \
+#	--layoutcolor=ffffffff \
+#	--layout-align 1 \
+#	--layoutsize='20' \

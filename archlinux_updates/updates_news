@@ -14,3 +14,5 @@ sed 's/&gt;/>/g' > $newstxt
 
 diff $newstxt $newstxtold | \
 awk '/< / {sub(/<\s+/,"");print}'
+
+printf "\n"

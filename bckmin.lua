@@ -39,6 +39,8 @@ folders = {
 	config_folder_path..".config/user-dirs.dirs",
 	config_folder_path..".config/user-dirs.locale",
 	config_folder_path..".config/BetterDiscord",
+	config_folder_path..".config/Code - OSS/User/keybindings.json",
+	config_folder_path..".config/Code - OSS/User/settings.json",
 -- home folder
 	config_folder_path..".ashrc",
 	config_folder_path..".assaultcube",
@@ -95,8 +97,13 @@ for number,folder in pairs(folders) do
 	else
 		dest = destination.."/config/"
 	end
-	print("copying "..folder.." to "..dest.."...");
-	exitcp=os.execute("cp -r \""..folder.."\" \""..dest.."\"");
+	if string.find(folder, "Code - ") then
+		print("copying "..folder.." to "..dest.."...");
+		exitcp=os.execute("cp -r \""..folder.."\" \""..dest.."Code - OSS/\"");
+	else
+		print("copying "..folder.." to "..dest.."...");
+		exitcp=os.execute("cp -r \""..folder.."\" \""..dest.."\"");
+	end
 end
 os.execute([[
 	   cd "]]..destination..[[";
