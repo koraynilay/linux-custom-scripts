@@ -12,7 +12,7 @@ i3lock --pass-media-keys -n -k \
 	--timecolor=ffffffff \
 	--time-align 1 \
 	--time-font="$font" \
-	--timestr='%H %M %S' \
+	--timestr='%k %M %S' \
 	\
 	--datepos='x+30:h-125' \
 	--datesize='40' \
