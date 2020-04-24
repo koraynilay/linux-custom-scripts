@@ -1,11 +1,12 @@
 #!/bin/sh
+home="/home/koraynilay"
 font='Tw Cen MT'
 #font='Anonymous Pro'
 #font='Product Sans'
 #font='Cascadia Code'
 #font='IBM 3270'
 i3lock --pass-media-keys -n -k \
-	-i "~/Pictures/wallpapers/landscape_2_dark_lock.png" \
+	-i "$home/Pictures/wallpapers/landscape_2_dark_lock.png" \
 	\
 	--timepos='x+30:h-200' \
 	--timesize='100' \
