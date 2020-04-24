@@ -1,7 +1,7 @@
 #!/bin/sh
 font='Tw Cen MT'
 i3lock --pass-media-keys -n -k \
-	-i "/root/Pictures/wallpapers/landscape_2_dark_lock.png" \
+	-i "~/Pictures/wallpapers/landscape_2_dark_lock.png" \
 	\
 	--timepos='x+30:h-200' \
 	--timesize='140' \

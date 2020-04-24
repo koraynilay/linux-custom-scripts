@@ -1,5 +1,5 @@
 #!/bin/lua
-home_folder = "/root/"
+home_folder = "/home/koraynilay/"
 dest_basename= "dotfiles-full"
 destination = home_folder..dest_basename
 if not os.execute("ls "..destination.." >/dev/null 2>&1") then

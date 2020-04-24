@@ -4,4 +4,4 @@ program=$1
 ln -s $PWD/$program /bin/$program
 echo linked $PWD/$program
 
-#ln -s /root/linux-custom-scripts/$program /bin/$program
+#ln -s ~/linux-custom-scripts/$program /bin/$program

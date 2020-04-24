@@ -3,8 +3,10 @@ while true;do
 	checkupdates
 	exit_code=$?
 	if [ $exit_code -ne 2 ];then
-		act=`dunstify -a Updates -A "update,up" "Updates are available"`
-		! [[ $act -eq 2 ]] && mapunmap_updates.sh
+		act=$(dunstify -a Updates -A "update,up" "Updates are available" | bc)
+		if [ $act -eq 0 ];then
+			mapunmap_updates.sh
+		fi
 	else
 		echo no_updates
 	fi

@@ -1,5 +1,5 @@
 #!/bin/lua
-config_folder_path = "/root/"
+config_folder_path = "/home/koraynilay/"
 destination = config_folder_path.."dotfiles-minimal"
 folders = {
 -- .config folder

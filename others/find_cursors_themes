@@ -1,1 +1,1 @@
-find /usr/share/icons /root/.local/share/icons /root/.icons -type d -name cursors
+find /usr/share/icons ~/.local/share/icons ~/.icons -type d -name cursors

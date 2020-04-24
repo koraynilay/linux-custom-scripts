@@ -1,5 +1,5 @@
 #!/bin/sh
 killall wallblur
 while pgrep -u $UID wallblur >/dev/null; do sleep 0.1; done
-/root/linux-custom-scripts/wallblur &!
+~/linux-custom-scripts/wallblur &!
 exit 0

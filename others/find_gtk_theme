@@ -1,1 +1,1 @@
-ls /root/.themes /usr/share/themes
+ls ~/.themes /usr/share/themes

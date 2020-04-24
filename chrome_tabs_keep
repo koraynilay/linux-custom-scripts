@@ -1,6 +1,6 @@
 #!/bin/sh
 opt=$1
-h="/root"
+h="/home/koraynilay"
 def="/disks/C/Users/User/AppData/Local/Google/Chrome/User Data/Default"
 scu="/disks/C/Users/User/AppData/Local/Google/Chrome/User Data/Profile 5"
 hdef="$h/.config/google-chrome/Default"

@@ -1,6 +1,6 @@
 #!/bin/sh
-newstxt=/root/linux-custom-scripts/archlinux_updates/news.txt 
-newstxtold=/root/linux-custom-scripts/archlinux_updates/news.txt.old
+newstxt=~/linux-custom-scripts/archlinux_updates/news.txt 
+newstxtold=~/linux-custom-scripts/archlinux_updates/news.txt.old
 mv -f $newstxt $newstxtold
 
 curl -sS https://www.archlinux.org/news/ | \
