@@ -14,7 +14,8 @@ main(){
 	clear
 	printf "Updates available:\n\n"
 	updates_news
-	checkupdates
+	yay -Pw
+	sudo checkupdates
 	exit_code=$?
 	if [ $exit_code -eq 2 ];then
 		return 0

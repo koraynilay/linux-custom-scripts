@@ -1,2 +1,2 @@
 #!/bin/sh
-/opt/discord/Discord --no-sandbox
+/opt/discord/Discord #--no-sandbox
