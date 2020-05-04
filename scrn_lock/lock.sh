@@ -20,7 +20,7 @@ i3lock --pass-media-keys -n -k \
 	--datecolor=ffffffff \
 	--date-align 1 \
 	--date-font="$font" \
-	--datestr='%A %d %B %Y' \
+	--datestr='%A %_d %B %Y' \
 	\
 	--insidevercolor=00000000 \
 	--insidewrongcolor=ff000000 \
