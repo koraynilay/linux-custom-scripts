@@ -1,0 +1,3 @@
+#!/bin/sh
+pid=$(xprop _NET_WM_PID | awk '{print $NF}')
+kill -9 $pid
