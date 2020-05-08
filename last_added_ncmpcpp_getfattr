@@ -16,7 +16,6 @@ mpc update >/dev/null
 mpc clear >/dev/null
 cd "$md"
 IFS=$'\n'
-pwd
 for csong in `cat $mf | sort -nr | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 	mpc add "$csong"
 done
