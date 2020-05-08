@@ -4,21 +4,16 @@ md='/disks/I/Raccolte/Musica'
 
 for a in "$md/*";do
 	if [ -n "$(grep "$a" "$mf")" ];then
-		echo "ciao"
 		continue
 	else
-		echo "add"
+		echo "adding $a to $mf"
 		data=$(date -d @`getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'` +%Y-%m-%d_%H-%M-%S)
 		echo "$data `basename \"$a\"`" >> $mf
 	fi
 done
-
-
 printf "csong\n"
 mpc update >/dev/null
 mpc clear >/dev/null
-
-
 cd "$md"
 IFS=$'\n'
 pwd
