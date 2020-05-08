@@ -16,9 +16,13 @@ mpc update >/dev/null
 mpc clear >/dev/null
 cd "$md"
 IFS=$'\n'
+n=0
 for csong in `cat $mf | sort -nr | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 	mpc add "$csong"
+	let n++
+	if [ $n -eq 200 ];then
+		mpc random off
+		mpc play
+		mpc random on
+	fi
 done
-mpc random off
-mpc play
-mpc random on
