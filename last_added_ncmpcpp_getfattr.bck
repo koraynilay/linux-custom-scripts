@@ -1,0 +1,16 @@
+#!/bin/sh
+for a in /disks/I/Raccolte/Musica/*;do
+	data=$(date -d @`getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'` +%Y-%m-%d_%H-%M-%S)
+	songs+=$(printf "$data `basename \"$a\"`\\\n")
+done
+printf "csong\n"
+mpc update >/dev/null
+mpc clear >/dev/null
+cd "/disks/I/Raccolte/Musica"
+IFS=$'\n'
+for csong in `printf "$songs" | sort -nr | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+	mpc add "$csong"
+done
+mpc random off
+mpc play
+mpc random on

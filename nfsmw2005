@@ -1,0 +1,2 @@
+#!/bin/sh
+env WINEPREFIX='/disks/F/nfsmw2005linux/.wine' wine /disks/F/nfsmw2005linux/Mr\ DJ/Need\ For\ Speed\ Most\ Wanted\ Black\ Edition/speed.exe
