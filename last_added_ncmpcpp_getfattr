@@ -2,8 +2,11 @@
 mf='/disks/I/Raccolte/music_files.txt'
 md='/disks/I/Raccolte/Musica'
 
-for a in "$md/*";do
-	if [ -n "$(grep "$a" "$mf")" ];then
+cd "$md"
+for a in *;do
+	gr=$(grep -F "$a" "$mf")
+	#echo $gr
+	if [ -n "$gr" ];then
 		continue
 	else
 		echo "adding $a to $mf"
@@ -14,7 +17,6 @@ done
 printf "csong\n"
 mpc update >/dev/null
 mpc clear >/dev/null
-cd "$md"
 IFS=$'\n'
 n=0
 for csong in `cat $mf | sort -nr | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
@@ -25,3 +27,4 @@ for csong in `cat $mf | sort -nr | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print su
 		mpc play
 	fi
 done
+exit 0
