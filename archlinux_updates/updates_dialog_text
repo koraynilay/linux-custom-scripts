@@ -5,7 +5,6 @@ answ(){
 	ans="${ans//$'\n'/ }"
 	if [[ "$ans" == "y" || $ans == "yes" ]];then
 		sudo pacman -Syu --noconfirm
-		main
 	else
 		main
 	fi
