@@ -16,9 +16,9 @@ qemu-system-x86_64 \
 	\
 	-drive file=win10.qcow2,if=virtio,cache=none,aio=native,cache.direct=on \
 	\
-	-vga virtio -display sdl,gl=on \
+	-device virtio-gpu,virgl=on  \
 	\
 	-device ich9-intel-hda \
 	-audiodev pa,id=snd0 \
-	-device hda-output,audiodev=snd0
-	#-cdrom virtio-win-0.1.171.iso \
+	-device hda-output,audiodev=snd0 \
+	-cdrom virtio-win-0.1.171.iso 

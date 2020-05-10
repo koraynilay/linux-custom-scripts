@@ -1,12 +1,17 @@
 #!/bin/sh
 home="/home/koraynilay"
+light_pic="$home/Pictures/wallpapers/wave/landscape_wave_blur.png"
+dark_pic="$home/Pictures/wallpapers/wave/landscape_wave_4_blur.png"
 font='Tw Cen MT'
-#font='Anonymous Pro'
-#font='Product Sans'
-#font='Cascadia Code'
-#font='IBM 3270'
-i3lock --pass-media-keys -n -k \
-	-i "$home/Pictures/wallpapers/landscape_2_dark_lock.png" \
+if [ `date +%H` -lt 20 -a `date +%H` -gt 8 ];then
+	pic=$light_pic
+else
+	pic=$dark_pic
+fi
+i3lock -n -k \
+	-i "$pic" \
+	-t \
+	-c 000000 \
 	\
 	--timepos='x+30:h-200' \
 	--timesize='100' \
@@ -25,6 +30,9 @@ i3lock --pass-media-keys -n -k \
 	--insidevercolor=00000000 \
 	--insidewrongcolor=ff000000 \
 	--insidecolor=00000000 \
+	\
+	--pass-media-keys \
+	--pass-screen-keys \
 	\
 	--indpos='x+1980:h-50' \
 	--keyhlcolor=ffffffff \
@@ -62,3 +70,10 @@ i3lock --pass-media-keys -n -k \
 #	--layoutcolor=ffffffff \
 #	--layout-align 1 \
 #	--layoutsize='20' \
+
+#font='Anonymous Pro'
+#font='Product Sans'
+#font='Cascadia Code'
+#font='IBM 3270'
+
+#convert landscape_wave_4_blur.png -resize $(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/') RGB:- | i3lock --raw $(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/'):rgb --image /dev/stdin
