@@ -1,14 +1,16 @@
 #!/bin/sh
-vmsfolder='/C/linux/vms'
+vmsfolder='/F/linux/vms'
 cd "$vmsfolder"
 qemu-system-x86_64 \
+	-name win10 \
+	\
 	-enable-kvm \
 	-machine type=q35,accel=kvm \
        	\
 	-device intel-iommu \
 	-cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
-	-m 10000 \
-	-smp 2 \
+	-m 8G \
+	-smp 3 \
 	\
 	-net nic,model=virtio \
 	-net user,smb=$HOME/share_win \
@@ -16,9 +18,15 @@ qemu-system-x86_64 \
 	\
 	-drive file=win10.qcow2,if=virtio,cache=none,aio=native,cache.direct=on \
 	\
-	-device virtio-gpu,virgl=on  \
+	-vga virtio  \
+	-display sdl,gl=on \
 	\
 	-device ich9-intel-hda \
 	-audiodev pa,id=snd0 \
 	-device hda-output,audiodev=snd0 \
 	-cdrom virtio-win-0.1.171.iso 
+
+	#-device virtio-keyboard-pci \
+	#-device virtio-tablet-pci \
+	#-device virtio-gpu-pci \
+	#-device virtio-net-pci,netdev=net0 \
