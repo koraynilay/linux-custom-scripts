@@ -1,0 +1,22 @@
+#!/bin/sh
+archive=$1
+back=$PWD
+files=$(7z l -slt $archive | awk '/Attributes/ {print substr($0,17,1)} /Path/ {print substr($0,8)}')
+mkdir -p "/tmp/7z-explore_${archive}_tmp"
+IFS=$'\n'
+cd "/tmp/7z-explore_${archive}_tmp"
+for f in $files;do
+	if [ "$f" == "d" ];then
+		mkdir -p $current
+	elif [ "$f" == "-" ];then
+		touch $current
+	fi
+	current=$f
+done
+printf "\nNow you are in the archive, use usual shell commands to navigate and to exit.\nNOTE: you can't open files\n\n"
+#xdg-open "/tmp/7z-explore_${archive}_tmp"
+$SHELL
+cd $back
+rm -rf "/tmp/7z-explore_${archive}_tmp"
+
+#ext="alias extract='7z x \"$back/$archive\" -o\"$HOME/extracted\"'"
