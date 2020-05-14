@@ -2,9 +2,10 @@
 #old name: "last_added_ncmpcpp_getfattr"
 mf='/disks/I/Raccolte/music_files.txt'
 md='/disks/I/Raccolte/Musica'
+IFS=$'\n'
 
 cd "$md"
-for a in *;do
+for a in `find .`;do
 	gr=$(grep -F "$a" "$mf")
 	#echo $gr
 	if [ -n "$gr" ];then
@@ -12,15 +13,16 @@ for a in *;do
 	else
 		echo "adding $a to $mf"
 		data=$(date -d @`getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'` +%Y-%m-%d_%H-%M-%S)
-		echo "$data `basename \"$a\"`" >> $mf
+		echo "$data \"$a\"" >> $mf
 	fi
 done
 printf "csong\n"
 mpc update >/dev/null
 mpc clear >/dev/null
-IFS=$'\n'
+pwd
 n=0
-for csong in `cat $mf | sort -nr | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+for csong in `cat $mf | sort -nr | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+	#echo $csong
 	mpc add "$csong"
 	let n++
 	if [ $n -eq 100 ];then
