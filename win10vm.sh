@@ -11,8 +11,8 @@ qemu-system-x86_64 \
        	\
 	-device intel-iommu \
 	-cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
-	-m 8G \
-	-smp 3 \
+	-m 6G \
+	-smp 2 \
 	\
 	-net nic,model=virtio \
 	-net user,smb=$HOME/share_win \

@@ -1,0 +1,35 @@
+#!/bin/sh
+deskcat='cava_desktop'
+deskpct='peaclock_desktop'
+geomcava='360 260' #width height
+geompeaclock='470 260' #width height
+poscava='1550 800' #width height
+pospeaclock='10 440' #width height
+cava_id=$(xdotool search --name "$deskcat")
+peaclock_id=$(xdotool search --name "$deskpct")
+if [ -n $cava_id ];then
+	xdotool windowkill $cava_id
+elif [ -n $peaclock_id ];then
+	xdotool windowkill $peaclock_id
+fi
+nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskcat -e 'cava' &!
+nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskpct -e 'peaclock' &!
+sleep 1
+echo ciao
+cava_id=$(xdotool search --name "$deskcat")
+peaclock_id=$(xdotool search --name "$deskpct")
+xdotool windowunmap $cava_id
+xdotool set_window --overrideredirect 1 $cava_id
+xdotool windowmap $cava_id
+
+xdotool windowunmap $peaclock_id
+xdotool set_window --overrideredirect 1 $peaclock_id
+xdotool windowmap $peaclock_id
+
+xdotool windowsize $cava_id $geomcava
+xdotool windowsize $peaclock_id $geompeaclock
+xdotool windowmove $cava_id $poscava
+xdotool windowmove $peaclock_id $pospeaclock
+
+xdo lower $cava_id
+xdo lower $peaclock_id
