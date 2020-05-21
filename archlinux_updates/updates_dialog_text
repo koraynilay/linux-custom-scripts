@@ -1,10 +1,12 @@
 #!/bin/sh
+aur_helper='yay'
+
 answ(){
 	printf "Update?: "
 	read ans
 	ans="${ans//$'\n'/ }"
 	if [[ "$ans" == "y" || $ans == "yes" ]];then
-		sudo pacman -Syu --noconfirm
+		$aur_helper
 	else
 		main
 	fi

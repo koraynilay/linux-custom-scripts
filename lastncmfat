@@ -2,6 +2,7 @@
 #old name: "last_added_ncmpcpp_getfattr"
 mf='/disks/I/Raccolte/music_files.txt'
 md='/disks/I/Raccolte/Musica'
+arg=$1
 IFS=$'\n'
 
 cd "$md"
@@ -17,17 +18,31 @@ for a in `find .`;do
 	fi
 done
 printf "csong\n"
-mpc update >/dev/null
-mpc clear >/dev/null
-pwd
-n=0
-for csong in `cat $mf | sort -nr | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
-	#echo $csong
-	mpc add "$csong"
-	let n++
-	if [ $n -eq 100 ];then
-		mpc random off
-		mpc play
-	fi
-done
+if [ "$arg" = "add" ];then
+	n=0
+	for csong in `cat $mf | sort -nr | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+		#echo $csong
+		if [ -z "`mpc search filename \"$csong\"`" ];then
+			mpc add "$csong"
+			mpc move `mpc status | perl -ne 'print "$1\n" if /#[0-9]+\/([0-9]+)/'` 1
+			echo $csong
+		fi
+	done
+fi
+
+if [ "$arg" = "play" ];then
+	mpc update >/dev/null
+	mpc clear >/dev/null
+	pwd
+	n=0
+	for csong in `cat $mf | sort -nr | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+		#echo $csong
+		mpc add "$csong"
+		let n++
+		if [ $n -eq 100 ];then
+			mpc random off
+			mpc play
+		fi
+	done
+fi
 exit 0
