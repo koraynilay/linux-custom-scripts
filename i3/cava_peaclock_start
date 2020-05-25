@@ -18,18 +18,19 @@ nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskpct -e 'peaclock'
 sleep 0.2
 cava_id=$(xdotool search --name "^$deskcat\$")
 peaclock_id=$(xdotool search --name "^$deskpct\$")
-xdotool windowunmap $cava_id
+
+xdotool windowunmap --sync $cava_id
 xdotool set_window --overrideredirect 1 $cava_id
-xdotool windowmap $cava_id
+xdotool windowmap --sync $cava_id
 
-xdotool windowunmap $peaclock_id
+xdotool windowunmap --sync $peaclock_id
 xdotool set_window --overrideredirect 1 $peaclock_id
-xdotool windowmap $peaclock_id
+xdotool windowmap --sync $peaclock_id
 
-xdotool windowsize $cava_id $geomcava
-xdotool windowsize $peaclock_id $geompeaclock
-xdotool windowmove $cava_id $poscava
-xdotool windowmove $peaclock_id $pospeaclock
+xdotool windowsize --sync $cava_id $geomcava
+xdotool windowsize --sync $peaclock_id $geompeaclock
+xdotool windowmove --sync $cava_id $poscava
+xdotool windowmove --sync $peaclock_id $pospeaclock
 
 xdo lower $cava_id
 xdo lower $peaclock_id

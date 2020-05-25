@@ -53,7 +53,7 @@ i3lock -n -k \
 	--layout-font="$font" \
 	--verif-font="$font" \
 	--wrong-font="$font"
-
+xset -dpms
 
 #	--timestr='%l %M %S %p' \
 
