@@ -1,9 +1,17 @@
 #!/bin/sh
 mainfolder=$1
+extensionfile='/home/koraynilay/linux-custom-scripts/extensions.json'
+ext_non_exe=$(jq '.non_exe' $extensionfile | tr -d '"')
+echo $ext_non_exe
 echo $mainfolder
 sleep 5
+
 find $mainfolder -type d -exec echo {} \; -exec chmod 700 {} \;
+
+find $mainfolder -type f -regextype awk -iregex "\.*/.*\.($ext_non_exe)" -exec echo {} \; -exec chmod 600 {} \;
+find $mainfolder -type f -regextype awk -not -iregex "\.*/.*\.($ext_non_exe)" -exec echo {} \; -exec chmod 700 {} \;
+
+
+
 #find $mainfolder -type d -exec echo {} \; -exec chmod o-rwx,g+rwx {} \;
-find $mainfolder -type f -regextype awk -regex "\.*/.*\.(7z|zip|tar|gz|bz2|lzip|lz|lzo|lzma|pk3|zlib|sb|sb2|sb3|viv|rar|arj|deb|pkg|rpm|z|mp3|flac|wav|aif|cda|mid|midi|mpa|m4a|ogg|wma|wpl|mp4|ogv|avi|mkv|3g2|3gp|flv|h264|m4v|mov|mpg|mpeg|rm|swf|vob|wmv|png|jpg|jpeg|bmp|ico|gif|ps|svg|tif|tiff|tga|c4d|blender|veg|ae|psd|ai|xfc|txt|md|mdown|markdown|js|c|cpp|a|h|hpp|java|jar|class|cs|asm|au3|asp|cer|cfm|css|htm|html|xml|jsp|part|st|php|rss|xhtml|mdl|mtl|obj|ini|cfg|flp|reg|lnk|dwg|xls|xlsm|xlsx|pps|ppt|pptx|tex|wpd|pdf|rtf|doc|docx|odt|ods|odp|iso|bin|dmg|toast|vcd|csv|dat|dbf|db|bsp|mdb|sav|zds|sql|log|email|eml|msg|oft|ost|pst|vcf|fnt|fon|otf|ttf|bak|cab|cpl|cur|dll|dmp|drv|icns|sys|tmp|mrp|act|sfk|osz|osk|diskname)" -exec echo {} \; -exec chmod 600 {} \;
-find $mainfolder -type f -regextype awk -regex "\!\.*/.*\.(7z|zip|tar|gz|bz2|lzip|lz|lzo|lzma|pk3|zlib|sb|sb2|sb3|viv|rar|arj|deb|pkg|rpm|z|mp3|flac|wav|aif|cda|mid|midi|mpa|m4a|ogg|wma|wpl|mp4|ogv|avi|mkv|3g2|3gp|flv|h264|m4v|mov|mpg|mpeg|rm|swf|vob|wmv|png|jpg|jpeg|bmp|ico|gif|ps|svg|tif|tiff|tga|c4d|blender|veg|ae|psd|ai|xfc|txt|md|mdown|markdown|js|c|cpp|a|h|hpp|java|jar|class|cs|asm|au3|asp|cer|cfm|css|htm|html|xml|jsp|part|st|php|rss|xhtml|mdl|mtl|obj|ini|cfg|flp|reg|lnk|dwg|xls|xlsm|xlsx|pps|ppt|pptx|tex|wpd|pdf|rtf|doc|docx|odt|ods|odp|iso|bin|dmg|toast|vcd|csv|dat|dbf|db|bsp|mdb|sav|zds|sql|log|email|eml|msg|oft|ost|pst|vcf|fnt|fon|otf|ttf|bak|cab|cpl|cur|dll|dmp|drv|icns|sys|tmp|mrp|act|sfk|osz|osk|diskname)" -exec echo {} \; -exec chmod 700 {} \;
 #find $mainfolder -regextype awk -regex "\.*/.*\.(7z|zip|tar|gz|bz2|lzip|lz|lzo|lzma|pk3|zlib|sb|sb2|sb3|viv|rar|arj|deb|pkg|rpm|z|mp3|flac|wav|aif|cda|mid|midi|mpa|m4a|ogg|wma|wpl|mp4|ogv|avi|mkv|3g2|3gp|flv|h264|m4v|mov|mpg|mpeg|rm|swf|vob|wmv|png|jpg|jpeg|bmp|ico|gif|ps|svg|tif|tiff|tga|c4d|blender|veg|ae|psd|ai|xfc|txt|md|mdown|markdown|js|c|cpp|a|h|hpp|java|jar|class|cs|asm|au3|asp|cer|cfm|css|htm|html|xml|jsp|part|st|php|rss|xhtml|mdl|mtl|obj|ini|cfg|flp|reg|lnk|dwg|xls|xlsm|xlsx|pps|ppt|pptx|tex|wpd|pdf|rtf|doc|docx|odt|ods|odp|iso|bin|dmg|toast|vcd|csv|dat|dbf|db|bsp|mdb|sav|zds|sql|log|email|eml|msg|oft|ost|pst|vcf|fnt|fon|otf|ttf|bak|cab|cpl|cur|dll|dmp|drv|icns|sys|tmp|mrp|act|sfk|osz|osk|diskname)" -exec echo {} \; -exec chmod -x {} \;

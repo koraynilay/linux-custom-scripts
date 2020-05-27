@@ -15,10 +15,10 @@ if [ -n $peaclock_id ];then
 fi
 nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskcat -e 'cava' >/dev/null 2>&1 &!
 nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskpct -e 'peaclock' >/dev/null 2>&1 &!
-sleep 0.2
+sleep 0.5
 cava_id=$(xdotool search --name "^$deskcat\$")
 peaclock_id=$(xdotool search --name "^$deskpct\$")
-
+sleep 0.5
 xdotool windowunmap --sync $cava_id
 xdotool set_window --overrideredirect 1 $cava_id
 xdotool windowmap --sync $cava_id
@@ -35,5 +35,5 @@ xdotool windowmove --sync $peaclock_id $pospeaclock
 xdo lower $cava_id
 xdo lower $peaclock_id
 
-sleep 1
+sleep 0.2
 exit 0
