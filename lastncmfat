@@ -24,12 +24,13 @@ if [ "$arg" = "add" ];then
 		#echo $csong
 		is_there=`mpc -f '%file%' playlist | grep -F "$csong"`
 		#echo $is_there
-		if [ -z $is_there ];then
+		if [ -z "$is_there" ];then
 			mpc add "$csong"
 			mpc move `mpc status | perl -ne 'print "$1\n" if /#[0-9]+\/([0-9]+)/'` 1
 			printf "added: $csong\n"
 		fi
 	done
+	exit 0
 fi
 
 if [ "$arg" = "play" ];then
@@ -46,5 +47,5 @@ if [ "$arg" = "play" ];then
 			mpc play
 		fi
 	done
+	exit 0
 fi
-exit 0
