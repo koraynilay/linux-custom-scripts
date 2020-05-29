@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 			sys=system(pgrep_lock)/256;
 			printf("sys = %d\n",sys);
 			if(sys == 1){
-				system("");
+				system(cmd_lock);
 				system(kill_sleep);
 				system(cmd_sleep);
 			}else{
