@@ -25,6 +25,7 @@ void printUsage(){
 		pr("-r [saver]\t\t(REQUIRED) screensaver (e.g. an xscreensaver module)\n");
 		pr("-l [locker]\t\t(REQUIRED) program that locks your screen\n");
 		pr("-s [blanker]\t\t(REQUIRED) program that sets your screen off\n");
+		pr("-n [blanker]\t\tDisables 'Saving in ~n secs' notifications\n");
 		exit(1);
 }
 
@@ -58,6 +59,7 @@ int main(int argc, char *argv[])
 	int timeout = 120*1000;
 	int time_saver = 30;
 	int time_sleep = 180;
+	int notifs = 0;
 
 	for(int i = 0; i < argc; i++){
 		if(argv[i][0] == '-'){
@@ -82,6 +84,9 @@ int main(int argc, char *argv[])
 					break;
 				case 's':
 					sprintf(sleeper, "%s", argv[i+1]);
+					break;
+				case 'n':
+					notifs = 1;
 					break;
 			}
 		}
@@ -157,20 +162,22 @@ debug*/
 			sys=system(pgrep_lock)/256;
 	//		printf("sys = %d\n",sys);
 			if(sys == 1){
-				if(info->idle >= timeout-1000){ //1 sec
-					system("dunstify -r 3 -u C -t 200 -a scrnsvr 'Locking in ~1 sec'");
-				}
-				else if(info->idle >= timeout-2000){ //2 secs
-					system("dunstify -r 3 -u C -t 200 -a scrnsvr 'Locking in ~2 secs'");
-				}
-				else if(info->idle >= timeout-3000){ //3 secs
-					system("dunstify -r 3 -u C -t 200 -a scrnsvr 'Locking in ~3 secs'");
-				}
-				else if(info->idle >= timeout-4000){ //4 secs
-					system("dunstify -r 3 -u N -t 200 -a scrnsvr 'Locking in ~4 secs'");
-				}
-				else if(info->idle >= timeout-5000){ //5 secs
-					system("dunstify -r 3 -u N -t 200 -a scrnsvr 'Locking in ~5 secs'");
+				if(notifs == 0){
+					if(info->idle >= timeout-1000){ //1 sec
+						system("dunstify -r 3 -u C -t 200 -a scrnsvr 'Saving in ~1 sec'");
+					}
+					else if(info->idle >= timeout-2000){ //2 secs
+						system("dunstify -r 3 -u C -t 200 -a scrnsvr 'Saving in ~2 secs'");
+					}
+					else if(info->idle >= timeout-3000){ //3 secs
+						system("dunstify -r 3 -u C -t 200 -a scrnsvr 'Saving in ~3 secs'");
+					}
+					else if(info->idle >= timeout-4000){ //4 secs
+						system("dunstify -r 3 -u N -t 200 -a scrnsvr 'Saving in ~4 secs'");
+					}
+					else if(info->idle >= timeout-5000){ //5 secs
+						system("dunstify -r 3 -u N -t 200 -a scrnsvr 'Saving in ~5 secs'");
+					}
 				}
 				//debug printf("%d %d\n",cpid,spid);
 				if(spid != 69420){pthread_cancel(sle);}
