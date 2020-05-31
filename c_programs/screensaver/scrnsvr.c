@@ -19,13 +19,13 @@ void svf(char *cmd_saver);
 
 void printUsage(){
 		pr("Usage: scrnsvr [OPTIONS]\n\n");
-		pr("-t [timeout]\t\ttime in seconds before [saver] gets activated (default: 120)\n");
-		pr("-a [timeout]\t\ttime in seconds before [blanker] gets activated (default: 180)\n");
-		pr("-e [timeout]\t\ttime in seconds before [locker] gets activated AFTER [saver] has been activated (default: 30)\n");
-		pr("-r [saver]\t\t(REQUIRED) screensaver (e.g. an xscreensaver module)\n");
-		pr("-l [locker]\t\t(REQUIRED) program that locks your screen\n");
-		pr("-s [blanker]\t\t(REQUIRED) program that sets your screen off\n");
-		pr("-n [blanker]\t\tDisables 'Saving in ~n secs' notifications\n");
+		pr("-t [timeout]\ttime in seconds before [saver] gets activated (default: 120)\n");
+		pr("-a [timeout]\ttime in seconds before [blanker] gets activated (default: 180)\n");
+		pr("-e [timeout]\ttime in seconds before [locker] gets activated AFTER [saver] has been activated (default: 30)\n");
+		pr("-r [saver]\t(REQUIRED) screensaver (e.g. an xscreensaver module)\n");
+		pr("-l [locker]\t(REQUIRED) program that locks your screen\n");
+		pr("-s [blanker]\t(REQUIRED) program that sets your screen off\n");
+		pr("-n\t\tDisables 'Saving in ~n secs' notifications\n");
 		exit(1);
 }
 
