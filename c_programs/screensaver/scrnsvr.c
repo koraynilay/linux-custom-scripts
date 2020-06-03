@@ -12,7 +12,7 @@
 #include <X11/extensions/scrnsaver.h>
 
 #define pr(...) (fprintf(stderr,__VA_ARGS__))
-#define ckea(x) (x[0] == '\0' || (x[0] == '-' && (x[1] == 'r' || x[1] == 'l' || x[1] == 's'))) //check if required options exist
+#define ckea(x) (x[0] == '\0' || (x[0] == '-' && (x[1] == 'r' || x[1] == 'l' || x[1] == 'b'))) //check if required options exist
 #define len(x) (sizeof(x)/sizeof(x[0]))
 #define print_array(z,x) for(int y=0;y<z;y++)printf("%d element: %s\n",y,x[y]);
 
