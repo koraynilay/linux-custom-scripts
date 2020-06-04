@@ -1,6 +1,10 @@
 /*
  * compile with:
  * gcc [options] scrnsvr.c -o scrnsvr -lXss -lX11 -lpthread
+ *
+ * OR for full RELRO (more info: https://www.redhat.com/en/blog/hardening-elf-binaries-using-relocation-read-only-relro)
+ *
+ * gcc -g -O0 -Wl,-z,relro,-z,now [options] scrnsvr.c -o scrnsvr -lXss -lX11 -lpthread
 */
 
 #include <stdio.h>
@@ -11,25 +15,25 @@
 #include <pthread.h>
 #include <X11/extensions/scrnsaver.h>
 
-#define pr(...) (fprintf(stderr,__VA_ARGS__))
+#define pr(...) (fprintf(stderr,__VA_ARGS__)) //print errors to stderr
 #define ckea(x) (x[0] == '\0' || (x[0] == '-' && (x[1] == 'r' || x[1] == 'l' || x[1] == 'b'))) //check if required options exist
-#define len(x) (sizeof(x)/sizeof(x[0]))
-#define print_array(z,x) for(int y=0;y<z;y++)printf("%d element: %s\n",y,x[y]);
+#define len(x) (sizeof(x)/sizeof(x[0])) //array length
+#define print_array(z,x) for(int y=0;y<z;y++)printf("%d element: %s\n",y,x[y]); //print every array element
 
 void child(void *ptr);
 void slf(void *ptr);
 void svf(char *cmd_saver);
 
-void printUsage(){
+void printUsage(){ 
 		//pr("Usage: scrnsvr -[tearlswncc1c2c3c4c5xdDuU]\n\n");
 		pr("Usage: scrnsvr [OPTIONS]\n\n");
 		pr("--help\t\tShows this help\n\n");
-		pr("-t [timeout]\ttime in seconds before [saver] gets activated (default: 120)\n");
-		pr("-a [timeout]\ttime in seconds before [locker] gets activated AFTER [saver] has been activated (default: 30)\n");
-		pr("-s [timeout]\ttime in seconds before [blanker] gets activated (default: 180)\n");
-		pr("-r [saver]\t(REQUIRED) screensaver (e.g. an xscreensaver module)\n");
-		pr("-l [locker]\t(REQUIRED) program that locks your screen\n");
-		pr("-b [blanker]\t(REQUIRED) program that sets your screen off\n\n");
+		pr("-t [timeout]\tTime in seconds before [saver] gets activated (default: 120)\n");
+		pr("-a [timeout]\tTime in seconds before [locker] gets activated AFTER [saver] has been activated (default: 30)\n");
+		pr("-s [timeout]\tTime in seconds before [blanker] gets activated (default: 180)\n");
+		pr("-r [saver]\t(REQUIRED) Screensaver (e.g. an xscreensaver module)\n");
+		pr("-l [locker]\t(REQUIRED) Program that locks your screen\n");
+		pr("-b [blanker]\t(REQUIRED) Program that blanks/sets your screen off\n\n");
 		pr("-w [list]\tSpace-separated case-insensitive list of windows titles which inhibit the screensaver (added to: youtube vlc mpv vimeo 'picture in picture')\n");
 		pr("-n\t\tDisables 'Saving in ~n secs' notifications\n");
 		pr("-c [notifier]\tCommand used to send notifications (if -n is NOT specified) (not uses different levels)\n");
@@ -39,18 +43,19 @@ void printUsage(){
 		pr("-c4 [notifier]\tCommand used to send notifications when there is 4 second left(if -n is NOT specified)\n");
 		pr("-c5 [notifier]\tCommand used to send notifications when there is 5 second left(if -n is NOT specified)\n");
 		pr("-x\t\tExecutes until the loop (without entering it) and exits\n");
+		pr("-v\t\tPrints selected options (even if defaulted)\n");
 		pr("-d\t\tShows debug info (Use -D,-u,-U for more levels of debugging)\n");
 		exit(1);
 }
 
-struct child_struct
+struct child_struct //struct for thread locker arguments
 {
 	int vpid;
 	int time_saver;
 	char *cmd_lock;
 	pthread_t svr;
 };
-struct slf_struct
+struct slf_struct //struct for thread sleeper arguments
 {
 	int time_sleep;
 	char *cmd_sleep;
@@ -58,17 +63,17 @@ struct slf_struct
 
 int main(int argc, char *argv[])
 {
-	if(getuid() == 0){
-		pr("\nYou should NOT run this as root. Press Control-C to cancel (10 seconds timeout)\n\n");
+	if(getuid() == 0){ //check if root
+		pr("\nYou should NOT run this program as root. Press Control-C to cancel (10 seconds timeout, then continue running as normal)\n\n");
 		sleep(10);
 	}
-	if(argc < 7){
+	if(argc < 7){ //are there the required switches?
 		printUsage();
 		return 1;
 	}
 	char saver[50] = "";
 	char locker[50] = "";
-	char sleeper[50] = "";
+	char sleeper[50] = ""; //it's called blanker in the switch
 	char cmd_saver[60] = "";
 	char cmd_lock[60] = "";
 	char cmd_sleep[60] = "";
@@ -85,6 +90,7 @@ int main(int argc, char *argv[])
 	int time_saver = 30;
 	int time_sleep = 180;
 	int notifs = 1;
+	int print_opts = 0;
 	int debug = 0;
 	int debug_high = 0;
 	int debug_ultra_high = 0;
@@ -104,45 +110,45 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < argc; i++){
 		if(argv[i][0] == '-'){
 			switch(argv[i][1]){
-				case 't':
+				case 't': //time before screensaver
 					if(argv[i+1])timeout = atoi(argv[i+1])*1000;
 					else printUsage();
 					break;
-				case 'a':
+				case 'a': //time after timeout
 					if(argv[i+1])time_saver = atoi(argv[i+1]);
 					else printUsage();
 					break;
-				case 's':
+				case 's': //time for blanker
 					if(argv[i+1])time_sleep = atoi(argv[i+1]); //time before screen off
 					else printUsage();
 					break;
-				case 'r':
+				case 'r': //screensaver
 					sprintf(saver, "%s", argv[i+1]);
 					break;
-				case 'l':
+				case 'l': //locker
 					sprintf(locker, "%s", argv[i+1]);
 					break;
-				case 'b':
+				case 'b': //blanker
 					sprintf(sleeper, "%s", argv[i+1]);
 					break;
-				case 'n':
+				case 'n': //no notifs
 					notifs = 0;
 					break;
-				case 'c':
+				case 'c': //custom notifiers
 					switch(argv[i][2]){
-						case '1':
+						case '1': //1 sec
 							sprintf(notifier_1, "%s", argv[i+1]);
 							break;
-						case '2':
+						case '2': //2 secs
 							sprintf(notifier_2, "%s", argv[i+1]);
 							break;
-						case '3':
+						case '3': //3 secs
 							sprintf(notifier_3, "%s", argv[i+1]);
 							break;
-						case '4':
+						case '4': //4 secs
 							sprintf(notifier_4, "%s", argv[i+1]);
 							break;
-						case '5':
+						case '5': //5 secs
 							sprintf(notifier_5, "%s", argv[i+1]);
 							break;
 						case '\0':
@@ -150,41 +156,44 @@ int main(int argc, char *argv[])
 							break;
 					}
 					break;
-				case 'x':
+				case 'x': //exits right before loop
 					exits = 1;
 					break;
-				case 'w':
+				case 'v': //prints options
+					print_opts = 1;
+					break;
+				case 'w': //activate get list programs inhibit
 					get_args = 1;
 					break;
-				case 'd':
+				case 'd': //debug
 					debug = 1;
 					break;
-				case 'D':
+				case 'D': //DEBUG
 					debug = 1;
 					debug_high = 1;
 					break;
-				case 'u':
+				case 'u': //ultra debug
 					debug = 1;
 					debug_high = 1;
 					debug_ultra_high = 1;
 					break;
-				case 'U':
+				case 'U': //ULTRA DEBUG
 					debug = 1;
 					debug_high = 1;
 					debug_ultra_high = 1;
 					debug_ultra_mega_high = 1;
 					break;
-				case '-':
+				case '-': //double dashes options
 					if(!strcmp(argv[i],"--help")){
 						printUsage();
 					}
 					break;
-				default:
+				default: //Uknown option
 					pr("Uknown option: %s. Use only '%s', or the switch '--help', to get a list of options\n",argv[i],argv[0]);
 					exit(4);
 			}
 		}
-		else if(get_args == 1){
+		else if(get_args == 1){ //get args for -w
 			if(strlen(argv[i])>=50){
 				pr("Argument '%s' of the -w flag is too long\n",argv[i]);
 				exit(3);
@@ -195,21 +204,31 @@ int main(int argc, char *argv[])
 		}
 	}
 	if(debug_ultra_high == 1)print_array(len(servs),servs);
-	if(ckea(saver) || ckea(locker) || ckea(sleeper)){
+
+	if(ckea(saver) || ckea(locker) || ckea(sleeper)){ //check if required parameters are valid
 		printUsage();
 	}
+
+	if(print_opts == 1){
+		printf("Before [Screensaver] from now (-t): %d s\n",timeout/1000);
+		printf("Before [Locker] from [Screensaver] (-a): %d s\n",time_saver);
+		printf("Before [Blanker] from now (-s): %d s\n",time_sleep);
+		printf("Screensaver (-r): %s\n",saver);
+		printf("Locker (-l): %s\n",locker);
+		printf("Blanker (-b): %s\n",sleeper);
+	}
 	
-	if(debug_high == 1)printf("notifier: %s\n",notifier);
-	if(debug_high == 1)printf("notifier_1: %s\n",notifier_1);
-	if(debug_high == 1)printf("notifier_2: %s\n",notifier_2);
-	if(debug_high == 1)printf("notifier_3: %s\n",notifier_3);
-	if(debug_high == 1)printf("notifier_4: %s\n",notifier_4);
-	if(debug_high == 1)printf("notifier_5: %s\n",notifier_5);
+	if(debug_high == 1 || (print_opts == 1 && notifier[0] != '\0'))printf("notifier: %s\n",notifier);
+	if(debug_high == 1 || (print_opts == 1 && notifier_1[0] != '\0'))printf("notifier_1: %s\n",notifier_1);
+	if(debug_high == 1 || (print_opts == 1 && notifier_2[0] != '\0'))printf("notifier_2: %s\n",notifier_2);
+	if(debug_high == 1 || (print_opts == 1 && notifier_3[0] != '\0'))printf("notifier_3: %s\n",notifier_3);
+	if(debug_high == 1 || (print_opts == 1 && notifier_4[0] != '\0'))printf("notifier_4: %s\n",notifier_4);
+	if(debug_high == 1 || (print_opts == 1 && notifier_5[0] != '\0'))printf("notifier_5: %s\n",notifier_5);
 
 	char pipe[] = "|";
 	char devnull[] = "' >/dev/null";
 	int i;
-	for(i=0;i<len_servs;i++){
+	for(i=0;i<len_servs;i++){ //compiles wmctrl command grep regex
 		if(debug_ultra_high == 1)printf("%s\n",servs[i]);
 		if(debug_ultra_mega_high == 1)printf("%d\n",i);
 		strcpy(pipe,"|");
@@ -226,7 +245,8 @@ int main(int argc, char *argv[])
 	strcat(cmd_wmctrl,devnull);
 	if(debug == 1)printf("%s\n",cmd_wmctrl);
 	
-	time_sleep -= (timeout/1000);
+	time_sleep -= (timeout/1000); //makes sure the specified blank time is the time before blanker executes (instead of putting that time after the locker)
+	//compiles commands
 	sprintf(cmd_saver, "%s", saver);
 	sprintf(cmd_lock, "%s &", locker);
 	sprintf(cmd_sleep, "%s", sleeper);
@@ -234,7 +254,6 @@ int main(int argc, char *argv[])
 	sprintf(pgrep_sleep, "pgrep -x '%s' >/dev/null", sleeper);
 
 	if(debug_high == 1)printf("%s\n",cmd_saver);
-	//execv(cmd_saver,0);
 	if(debug_high == 1){
 		printf("%s\n",locker);
 		printf("%s\n",sleeper);
@@ -246,7 +265,7 @@ int main(int argc, char *argv[])
 
 	int dunstify = 0;
 	int noti=system("dunstify --help > /dev/null 2>&1")/256;
-	if(noti == 0){
+	if(noti == 0){//if dunstify is present use it
 		dunstify = 1;
 		if(debug_ultra_high == 1)printf("noti = %d\n",noti);
 	}
@@ -261,18 +280,21 @@ int main(int argc, char *argv[])
 	}
 	if(debug == 1)printf("dunstify = %d\n",dunstify);
 	if(debug == 1)printf("notifs = %d\n",notifs);
-
+	
+	//variables required for the loop
 	unsigned int milliseconds;
 	milliseconds = 100;
-	useconds_t useconds = milliseconds * 1000;
+	useconds_t useconds = milliseconds * 1000; //time between the loops in micro-seconds
 	int sys;
 	Display *my_display = XOpenDisplay(NULL);
-
-	int cpid = 69420;
-	int spid = 69420;
-	int vpid = 69420;
+	
+	//threads "pid"
+	int vpid = 69420; //saver thread
+	int cpid = 69420; //locker thread
+	int spid = 69420; //sleeper thread
 
 	pthread_t chi, sle, svr;
+	//args for threads functions
 	struct child_struct args_child;
 	struct slf_struct args_slf;
 
@@ -284,40 +306,41 @@ int main(int argc, char *argv[])
 	args_slf.time_sleep = time_sleep;
 	args_slf.cmd_sleep = cmd_sleep;
 	
-	char cmd_parun[] = "pactl list short | grep RUNNING >/dev/null";
+	char cmd_parun[] = "pactl list short | grep RUNNING >/dev/null"; //if I put it at the start, it could get overwritten by servs[] (idk why, but ok)
 	if(debug_high == 1)printf("%s\n",cmd_parun);
-	if(exits == 1)exit(0);
+	if(exits == 1)exit(0); //if -x is specified exit
+	//loop
 	while(my_display){
-		usleep(useconds);
-		Display *my_display = XOpenDisplay(NULL);
-		XScreenSaverInfo *info = XScreenSaverAllocInfo();
-		XScreenSaverQueryInfo(my_display, DefaultRootWindow(my_display), info);
-		can_lock_pa=system(cmd_parun)/256;
-		can_lock_wm=system(cmd_wmctrl)/256;
+		usleep(useconds); //pause for useconds micro-seconds
+		Display *my_display = XOpenDisplay(NULL); //get display
+		XScreenSaverInfo *info = XScreenSaverAllocInfo(); //assing display info
+		XScreenSaverQueryInfo(my_display, DefaultRootWindow(my_display), info); //get display info
+		can_lock_pa=system(cmd_parun)/256; //audio playing?
+		can_lock_wm=system(cmd_wmctrl)/256; //focused tab title contains one of servs[]?
 		if(debug == 1)printf("can_lock_pa = %d\n",can_lock_pa);
 		if(debug == 1)printf("can_lock_wm = %d\n",can_lock_wm);
 		if(can_lock_pa == 1 || can_lock_wm == 1){
-			if(info->idle >= timeout && info->idle <= timeout+180){
-				sys=system(pgrep_lock)/256;
+			if(info->idle >= timeout && info->idle <= timeout+180){ //has timeout passed?
+				sys=system(pgrep_lock)/256; //is the locker running?
 				if(debug_high == 1)printf("sys = %d\n",sys);
-				if(sys == 1){
+				if(sys == 1){ //if no then
 					if(spid != 69420){pthread_cancel(sle);}
 					if(cpid != 69420){pthread_cancel(chi);}
 					if(vpid != 69420){pthread_cancel(svr);}
 					vpid=pthread_create(&svr,NULL,(void *)&svf, (void *)cmd_saver);
 					cpid=pthread_create(&chi,NULL,(void *)&child, (void *)&args_child);
 					spid=pthread_create(&sle,NULL,(void *)&slf, (void *)&args_slf);
-				}else{
+				}else{ //if yes then
 					printf("locker running\n");
 					if(spid != 69420){pthread_cancel(sle);}
 					spid=pthread_create(&sle,NULL,(void *)&slf, (void *)&args_slf);
 				}
 			}
-			else if(info->idle < timeout){
-				sys=system(pgrep_lock)/256;
+			else if(info->idle < timeout){ //is the timeout almost passed?
+				sys=system(pgrep_lock)/256; //is the locker running?
 				if(debug_high == 1)printf("sys = %d\n",sys);
-				if(sys == 1){
-					if(notifs == 1){
+				if(sys == 1){ //if no then
+					if(notifs == 1){ //are the notifications enabled?
 						if(info->idle >= timeout-1000){ //1 sec
 							if(notifier_1[0] == '\0'){
 								if(notifier[0] == '\0'){
@@ -370,22 +393,23 @@ int main(int argc, char *argv[])
 						}
 					}
 					if(debug_ultra_mega_high == 1)printf("%d %d\n",cpid,spid);
+					//cancel threads if idle time is less than timeout
 					if(spid != 69420){pthread_cancel(sle);}
 					if(cpid != 69420){pthread_cancel(chi);}
 					if(vpid != 69420){pthread_cancel(svr);}
 				}
 			}
 		}
-		//printf("%lu\n", (*info).idle);
-		printf("%lu\n", info->idle);
-		XCloseDisplay(my_display);
+		printf("%lu\n", info->idle); //printf idle time in milliseconds
+		//printf("%lu\n", (*info).idle); //just another form of the line before this one
+		XCloseDisplay(my_display); //close diplay, it'll be reopened at the start of the loop
 	}
 	return 0;
 }
-void svf(char *cmd_saver){
+void svf(char *cmd_saver){ //function for screensaver thread
 	system(cmd_saver);
 }
-void child(void *ptr){
+void child(void *ptr){ //function for locker thread
 	printf("forked\n");
 	struct child_struct *args = ptr;
 	sleep(args->time_saver);
@@ -393,7 +417,7 @@ void child(void *ptr){
 	system(args->cmd_lock);
 	if(args->vpid != 69420){pthread_cancel(args->svr);}
 }
-void slf(void *ptr){
+void slf(void *ptr){ //function for sleeper thread
 	struct slf_struct *args = ptr;
 	sleep(args->time_sleep);
 	printf("off\n");
