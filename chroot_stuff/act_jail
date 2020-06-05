@@ -1,0 +1,10 @@
+#!/bin/sh
+newrt="$HOME/chrrr"
+mntrt="$HOME/plip_chr"
+echo $newrt
+echo $mntrt
+sudo mount --bind "$newrt" "$mntrt"
+#--verbose
+sudo arch-chroot $mntrt /bin/zsh -c "su -l koray"
+sudo umount --recursive $mntrt
+#--verbose
