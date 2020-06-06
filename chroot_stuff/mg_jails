@@ -1,26 +1,53 @@
 #!/bin/sh
-while getopts n:m:h:r:p:u option;do
+print_usage(){
+	printf "Usage: $0 [options]\n"
+	printf "  -a\tactivate chroot with specified parameters\n"
+	printf "  -c\tcreate chroot with the other options\n"
+	printf "  -n\tnew root (absolute path)\n"
+	printf "  -m\tmount point for the root (absolute path)\n"
+	printf "  -f\tuser home from where dotfiles are copied\n"
+	printf "  -r\troot home from where dotfiles are copied\n"
+	printf "  -p\tlist of packages to install\n"
+	printf "  -u\tname of the user in the new root\n"
+	printf "  -h\tshow this help\n"
+}
+
+create=0
+act=0
+[[ -z $0 ]] && print_usage
+while getopts n:m:f:r:p:u:cah option;do
 	case $option in
+		a)act=1;;
+		c)create=1;;
 		n)newrt=$OPTARG;;
 		m)mntrt=$OPTARG;;
-		h)homef=$OPTARG;;
+		f)homef=$OPTARG;;
 		r)rootf=$OPTARG;;
 		p)pkgs=$OPTARG;;
 		u)usernr=$OPTARG;;
+		h)print_usage;exit 0;;
 		?)exit 1;;
 	esac
 done
-
-
-newrt=${newrt-"$HOME/chrrr"}
-mntrt=${mntrt-"$HOME/plip_chr"}
-homef=${homef-"$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
-rootf=${rootf-"$HOME/linux-custom-scripts/chroot_stuff/users/root"}
-pkgs=${pkgs-('git' 'vim' 'zsh')}
-usernr=${usernr-"koray"}
+export newrt=${newrt:="$HOME/chrrr"}
+export mntrt=${mntrt:="$HOME/plip_chr"}
+export homef=${homef:="$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
+export rootf=${rootf:="$HOME/linux-custom-scripts/chroot_stuff/users/root"}
+pkgs=${pkgs:=('git' 'vim' 'zsh')}
+export usernr=${usernr:="koray"}
 echo $newrt
 echo $mntrt
 echo $homef
 echo $rootf
+pkgs=${pkgs#\(}
+pkgs=${pkgs%\)}
 echo $pkgs
 echo $usernr
+printf "5 seconds timeout, press Control-C to cancel"
+sleep 5
+if [ $create -eq 1 ];then
+	./new_jail
+fi
+if [ $act -eq 1 ];then
+	./act_jail
+fi

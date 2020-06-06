@@ -1,9 +1,18 @@
 #!/bin/sh
-newrt="$HOME/chrrr"
-mntrt="$HOME/plip_chr"
-usernr="koray"
+#newrt="$HOME/chrrr"
+#mntrt="$HOME/plip_chr"
+#usernr="koray"
 #debug echo $newrt
 #debug echo $mntrt
+
+#echo $newrt
+#echo $mntrt
+#echo $homef
+#echo $rootf
+#echo $pkgs
+#echo $usernr
+#exit 10
+
 sudo mount --bind "$newrt" "$mntrt"
 sudo arch-chroot $mntrt /bin/zsh -c "su -l $usernr"
 sudo umount --recursive $mntrt
