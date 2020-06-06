@@ -29,25 +29,38 @@ while getopts n:m:f:r:p:u:cah option;do
 		?)exit 1;;
 	esac
 done
-export newrt=${newrt:="$HOME/chrrr"}
-export mntrt=${mntrt:="$HOME/plip_chr"}
-export homef=${homef:="$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
-export rootf=${rootf:="$HOME/linux-custom-scripts/chroot_stuff/users/root"}
+newrt=${newrt:="$HOME/chrrr"}
+mntrt=${mntrt:="$HOME/plip_chr"}
+homef=${homef:="$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
+rootf=${rootf:="$HOME/linux-custom-scripts/chroot_stuff/users/root"}
 pkgs=${pkgs:=('git' 'vim' 'zsh')}
-export usernr=${usernr:="koray"}
+pkgs=${pkgs#\(}
+pkgs=${pkgs%\)}
+usernr=${usernr:="koray"}
 echo $newrt
 echo $mntrt
 echo $homef
 echo $rootf
-pkgs=${pkgs#\(}
-pkgs=${pkgs%\)}
 echo $pkgs
 echo $usernr
 printf "5 seconds timeout, press Control-C to cancel"
 sleep 5
 if [ $create -eq 1 ];then
-	./new_jail
+	if [ ! -d $newrt ];then
+		printf "New root folder doesn't exist, create it [y/n]? "
+		read ans
+		if [ "$ans" = "y" ];then
+			mkdir -p $newrt
+		fi
+	fi
+	sudo pacstrap $newrt base $pkgs
+	sudo mount --bind "$newrt" "$mntrt"
+	sudo arch-chroot $mntrt -c "useradd -m $usernr"
+	cp -r "$homef/*" "$homef/.*" "$newrt/home/$usernr/"
+	cp -r "$rootf/*" "$rootf/.*" "$newrt/root/"
 fi
 if [ $act -eq 1 ];then
-	./act_jail
+	sudo mount --bind "$newrt" "$mntrt"
+	sudo arch-chroot $mntrt /bin/zsh -c "su -l $usernr"
+	sudo umount --recursive $mntrt
 fi
