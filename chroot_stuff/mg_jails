@@ -9,16 +9,19 @@ print_usage(){
 	printf "  -r\troot home from where dotfiles are copied\n"
 	printf "  -p\tlist of packages to install\n"
 	printf "  -u\tname of the user in the new root\n"
+	printf "  -v\tprint variables\n"
 	printf "  -h\tshow this help\n"
 }
 
-create=0
 act=0
+create=0
+verbose=0
 [[ -z $0 ]] && print_usage
 while getopts n:m:f:r:p:u:cah option;do
 	case $option in
 		a)act=1;;
 		c)create=1;;
+		v)verbose=1;;
 		n)newrt=$OPTARG;;
 		m)mntrt=$OPTARG;;
 		f)homef=$OPTARG;;
@@ -37,14 +40,16 @@ pkgs=${pkgs:=('git' 'vim' 'zsh')}
 pkgs=${pkgs#\(}
 pkgs=${pkgs%\)}
 usernr=${usernr:="koray"}
-echo $newrt
-echo $mntrt
-echo $homef
-echo $rootf
-echo $pkgs
-echo $usernr
-printf "5 seconds timeout, press Control-C to cancel"
-sleep 5
+if [ $verbose -eq 1 ];then
+	echo $newrt
+	echo $mntrt
+	echo $homef
+	echo $rootf
+	echo $pkgs
+	echo $usernr
+	printf "5 seconds timeout, press Control-C to cancel"
+	sleep 5
+fi
 if [ $create -eq 1 ];then
 	if [ ! -d $newrt ];then
 		printf "New root folder doesn't exist, create it [y/n]? "
