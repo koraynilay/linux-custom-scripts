@@ -80,11 +80,7 @@ if [ $create -eq 1 ];then
 	sleep 0.5
 	umount --force --recursive $mntrt
 	find $homef -not -name "$(basename \"$homef\")" -prune -exec cp -vr {} "$newrt/home/$usernr" \;
-	#cp -vr $homef "$newrt/home/$usernr/"
-	#mv "$newrt/home/$usernr/$usernr" "$newrt/home/$usernr"
 	find $rootf -not -name "$(basename \"$rootf\")" -prune -exec cp -vr {} "$newrt/root" \;
-	#cp -vr $rootf "$newrt/root/"
-	#mv "$newrt/root/root" "$newrt/root"
 	mount --bind "$newrt" "$mntrt"
 	arch-chroot $mntrt /bin/bash -c \
 	       	"su -l $usernr -c \
