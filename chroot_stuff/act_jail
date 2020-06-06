@@ -1,10 +1,14 @@
 #!/bin/sh
 newrt="$HOME/chrrr"
 mntrt="$HOME/plip_chr"
+usernr="koray"
 #debug echo $newrt
 #debug echo $mntrt
 sudo mount --bind "$newrt" "$mntrt"
-#--verbose
-sudo arch-chroot $mntrt /bin/zsh -c "su -l koray"
+sudo arch-chroot $mntrt /bin/zsh -c "su -l $usernr"
 sudo umount --recursive $mntrt
-#--verbose
+
+
+#--verbose # line 7
+#;exit # line 8
+#--verbose # line 9

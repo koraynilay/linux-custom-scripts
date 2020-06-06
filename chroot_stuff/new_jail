@@ -1,0 +1,19 @@
+#!/bin/sh
+newrt="$HOME/chrrr"
+mntrt="$HOME/plip_chr"
+homef="$HOME/linux-custom-scripts/chroot_stuff/users/koray"
+rootf="$HOME/linux-custom-scripts/chroot_stuff/users/koray"
+pkgs=('git' 'vim' 'zsh')
+usernr="koray"
+if [ ! -d $newrt ];then
+	printf "New root folder doesn't exist, create it [y/n]? "
+	read ans
+	if [ "$ans" = "y" ];then
+		mkdir -p $newrt
+	fi
+fi
+sudo pacstrap $newrt base $pkgs
+sudo mount --bind "$newrt" "$mntrt"
+sudo arch-chroot $mntrt -c "useradd -m $usernr"
+cp -r "$homef/*" "$homef/.*" "$newrt/home/$usernr/"
+cp -r "$rootf/*" "$rootf/.*" "$newrt/root/"

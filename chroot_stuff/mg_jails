@@ -1,0 +1,27 @@
+#!/bin/sh
+while getopts n:m:h:r:p:u option;do
+	case $option in
+		n)newrt=$OPTARG;;
+		m)mntrt=$OPTARG;;
+		h)homef=$OPTARG;;
+		r)rootf=$OPTARG;;
+		p)pkgs=$OPTARG;;
+		u)usernr=$OPTARG;;
+		:)printf "option '%s' requires an argument.\n" "$option";exit 1;;
+		?)printf "unknown option '%s'.\n" "$option";exit 2;;
+	esac
+done
+
+
+newrt=${newrt-"$HOME/chrrr"}
+mntrt=${mntrt-"$HOME/plip_chr"}
+homef=${homef-"$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
+rootf=${rootf-"$HOME/linux-custom-scripts/chroot_stuff/users/root"}
+pkgs=${pkgs-('git' 'vim' 'zsh')}
+usernr=${usernr-"koray"}
+echo $newrt
+echo $mntrt
+echo $homef
+echo $rootf
+echo $pkgs
+echo $usernr
