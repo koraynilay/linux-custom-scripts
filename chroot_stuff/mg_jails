@@ -7,8 +7,7 @@ while getopts n:m:h:r:p:u option;do
 		r)rootf=$OPTARG;;
 		p)pkgs=$OPTARG;;
 		u)usernr=$OPTARG;;
-		:)printf "option '%s' requires an argument.\n" "$option";exit 1;;
-		?)printf "unknown option '%s'.\n" "$option";exit 2;;
+		?)exit 1;;
 	esac
 done
 
