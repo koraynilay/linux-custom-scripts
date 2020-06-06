@@ -58,6 +58,8 @@ if [ $create -eq 1 ];then
 		read ans
 		if [ "$ans" = "y" ];then
 			mkdir -p $newrt
+		else
+		       exit 2
 		fi
 	fi
 	if [ ! -d $mntrt ];then
@@ -65,19 +67,35 @@ if [ $create -eq 1 ];then
 		read ans
 		if [ "$ans" = "y" ];then
 			mkdir -p $mntrt
+		else
+			exit 2
 		fi
 	fi
 	pacstrap $newrt base $pkgs
 	mount --bind "$newrt" "$mntrt"
-	arch-chroot $mntrt /bin/bash -c "useradd -m $usernr;passwd $usernr"
-	umount --recursive $mntrt
-	cp -vr $homef/* $homef/.* "$newrt/home/$usernr/"
-	cp -vr $rootf/* $rootf/.* "$newrt/root/"
-	cp -vr /usr/share/terminfo $mntrt/usr/share/
-	mount --bind "$newrt" "$mntrt"
-	arch-chroot $mntrt /bin/zsh -c "chown -hR $usernr:$usernr /home/$usernr && su -l $usernr -c \"cd ~;./install_omz.sh;exit\""
+	arch-chroot $mntrt /bin/bash -c \
+		"useradd -m $usernr; \
+		passwd $usernr; \
+		chown -hR $usernr:$usernr /home/$usernr"
 	sleep 0.5
-	umount --recursive $mntrt $newrt
+	umount --force --recursive $mntrt
+	find $homef -not -name "$(basename \"$homef\")" -prune -exec cp -vr {} "$newrt/home/$usernr" \;
+	#cp -vr $homef "$newrt/home/$usernr/"
+	#mv "$newrt/home/$usernr/$usernr" "$newrt/home/$usernr"
+	find $rootf -not -name "$(basename \"$rootf\")" -prune -exec cp -vr {} "$newrt/root" \;
+	#cp -vr $rootf "$newrt/root/"
+	#mv "$newrt/root/root" "$newrt/root"
+	mount --bind "$newrt" "$mntrt"
+	arch-chroot $mntrt /bin/bash -c \
+	       	"su -l $usernr -c \
+			\"cd ~; \
+			./install_omz.sh; \
+			exit;\" \
+		"
+	sleep 0.5
+	umount --force --recursive $mntrt
+
+	#cp -vr /usr/share/terminfo $newrt/usr/share/
 fi
 if [ $act -eq 1 ];then
 	mount --bind "$newrt" "$mntrt"
