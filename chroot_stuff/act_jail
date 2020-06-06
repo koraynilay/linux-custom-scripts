@@ -1,7 +1,7 @@
 #!/bin/sh
-#newrt="$HOME/chrrr"
-#mntrt="$HOME/plip_chr"
-#usernr="koray"
+newrt="$HOME/chrrr"
+mntrt="$HOME/plip_chr"
+usernr="koray"
 #debug echo $newrt
 #debug echo $mntrt
 
