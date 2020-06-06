@@ -17,7 +17,9 @@ act=0
 create=0
 verbose=0
 [[ -z $0 ]] && print_usage
-while getopts n:m:f:r:p:u:cah option;do
+#echo $UID
+[[ $UID -ne 0 ]] && printf "This script needs root privileges.\n" && exit 5
+while getopts n:m:f:r:p:u:cahv option;do
 	case $option in
 		a)act=1;;
 		c)create=1;;
@@ -36,7 +38,7 @@ newrt=${newrt:="$HOME/chrrr"}
 mntrt=${mntrt:="$HOME/plip_chr"}
 homef=${homef:="$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
 rootf=${rootf:="$HOME/linux-custom-scripts/chroot_stuff/users/root"}
-pkgs=${pkgs:=('git' 'vim' 'zsh')}
+pkgs=${pkgs:=('git' 'vim' 'zsh' 'which')}
 pkgs=${pkgs#\(}
 pkgs=${pkgs%\)}
 usernr=${usernr:="koray"}
@@ -47,7 +49,7 @@ if [ $verbose -eq 1 ];then
 	echo $rootf
 	echo $pkgs
 	echo $usernr
-	printf "5 seconds timeout, press Control-C to cancel"
+	printf "5 seconds timeout, press Control-C to cancel\r"
 	sleep 5
 fi
 if [ $create -eq 1 ];then
@@ -58,14 +60,27 @@ if [ $create -eq 1 ];then
 			mkdir -p $newrt
 		fi
 	fi
-	sudo pacstrap $newrt base $pkgs
-	sudo mount --bind "$newrt" "$mntrt"
-	sudo arch-chroot $mntrt -c "useradd -m $usernr"
-	cp -r "$homef/*" "$homef/.*" "$newrt/home/$usernr/"
-	cp -r "$rootf/*" "$rootf/.*" "$newrt/root/"
+	if [ ! -d $mntrt ];then
+		printf "New mount folder doesn't exist, create it [y/n]? "
+		read ans
+		if [ "$ans" = "y" ];then
+			mkdir -p $mntrt
+		fi
+	fi
+	pacstrap $newrt base $pkgs
+	mount --bind "$newrt" "$mntrt"
+	arch-chroot $mntrt /bin/bash -c "useradd -m $usernr;passwd $usernr"
+	umount --recursive $mntrt
+	cp -vr $homef/* $homef/.* "$newrt/home/$usernr/"
+	cp -vr $rootf/* $rootf/.* "$newrt/root/"
+	cp -vr /usr/share/terminfo $mntrt/usr/share/
+	mount --bind "$newrt" "$mntrt"
+	arch-chroot $mntrt /bin/zsh -c "chown -hR $usernr:$usernr /home/$usernr && su -l $usernr -c \"cd ~;./install_omz.sh;exit\""
+	sleep 0.5
+	umount --recursive $mntrt $newrt
 fi
 if [ $act -eq 1 ];then
-	sudo mount --bind "$newrt" "$mntrt"
-	sudo arch-chroot $mntrt /bin/zsh -c "su -l $usernr"
-	sudo umount --recursive $mntrt
+	mount --bind "$newrt" "$mntrt"
+	arch-chroot $mntrt /bin/zsh -c "su -l $usernr"
+	umount --recursive $mntrt
 fi
