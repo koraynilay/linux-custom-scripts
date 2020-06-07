@@ -1,9 +1,20 @@
 {
-	"gname": {
+"groups":[
+	{
+		"name": "prov",
 		"location": "/home/koraynilay",
 		"files": [
 			"prova1.txt",
 			"prova2.txt"
 		]
+	},
+	{
+		"name": "prov2",
+		"location": "/home/koraynilay",
+		"files": [
+			"prova3.txt",
+			"prova4.txt"
+		]
 	}
+]
 }
