@@ -6,8 +6,7 @@ recdesk_multi_opt="	-fps 60 \
 			-device pulse \
 			--stop-shortcut Control+Delete \
 			--pause-shortcut Control+Insert \
-			--on-the-fly-encoding \
-			-o \"$HOME/Videos/screencasts/$(date +%d-%m-%Y_%H-%M-%S).ogv\""
+			--on-the-fly-encoding"
 case $1 in
 	shot)
 		maim "$HOME/Pictures/screens/$(date +%d-%m-%Y_%H-%M-%S).png" \
@@ -20,6 +19,7 @@ case $1 in
 	;;
 	cast)
 		recordmydesktop $recdesk_multi_opt \
+			-o "$HOME/Videos/screencasts/$(date +%d-%m-%Y_%H-%M-%S).ogv" \
 			&& dunstify -a recordmydesktop 'video saved in ~/Videos/screencasts'
 	;;
 	casts)
@@ -31,16 +31,10 @@ case $1 in
 			-y $Y \
 			--width $W \
 			--height $H \
-			-fps 60 \
-			-freq 44100 \
-			--no-wm-check \
-			-device pulse \
-			--stop-shortcut Control+Delete \
-			--pause-shortcut Control+Insert \
-			--on-the-fly-encoding \
-			-o "$HOME/Videos/screencasts/$(date +%d-%m-%Y_%H-%M-%S).ogv" \
+			$recdesk_multi_opt \
+			-o "$HOME/Videos/screencasts/$(date +%d-%m-%Y_%H-%M-%S)_select.ogv" \
 			&& dunstify -a recordmydesktop 'video saved in ~/Videos/screencasts'
 			#--windowid $ID \ #for recordmydesktop
 	;;
-	*)printf "Usage: $0 [shot|shots|cast]\n";exit 1;;
+	*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
 esac
