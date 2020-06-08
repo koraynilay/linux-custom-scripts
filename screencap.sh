@@ -23,8 +23,8 @@ case $1 in
 			&& dunstify -a recordmydesktop 'video saved in ~/Videos/screencasts'
 	;;
 	casts)
-		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1
-		read -r X Y W H G ID < <(echo $slop) #from github page
+		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
+		read -r X Y W H G ID < <(echo $slop) #[1]
 		echo $X $Y $W $H $G $ID
 		recordmydesktop \
 			-x $X \
@@ -36,5 +36,8 @@ case $1 in
 			&& dunstify -a recordmydesktop 'video saved in ~/Videos/screencasts'
 			#--windowid $ID \ #for recordmydesktop
 	;;
-	*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
+	*)printf "Usage: $0 [shot|shots|cast|casts]\n";exit 1;;
+	#*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
 esac
+
+#[1]: from https://github.com/naelstrof/slop/blob/master/README.md#practical-applications
