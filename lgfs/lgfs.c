@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#define pr(...) (fprintf(stderr,__VA_ARGS__)) //print errors to stderr
+#define ex(x) (x) ? (x) : ""
 
 //char *trimwhitespace(char *str)
 char *strtrm(char *str)
@@ -41,10 +43,13 @@ char *strtrm(char *str)
 //	printf("%s\n",p);
 //	return *p;
 //}
-struct group {
+struct section {
 	char *name;
 	char *location;
-	char *files;
+	char *entries;
+};
+struct group {
+	struct section *array_sections;
 };
 
 int main(int argc, char *argv[]){
@@ -58,35 +63,61 @@ int main(int argc, char *argv[]){
 	
 	conf = fopen("/home/koraynilay/.config/zlgfs.conf","r");
 	if(conf == NULL)return 5;
-	char *key = NULL;
-	char *value = NULL;
-	int i;
 	size_t len;
 	//rewind(conf);
+	char comment[1];
+	struct group all;
+	int j;
 	while(!feof(conf)){
-		struct group gr;
+		struct section gr;
+		gr.name = "";
+		gr.location = "";
+		gr.entries = "";
 		if(fgetc(conf) == '['){
+			fscanf(conf,"%[^\n]\n",comment);
 			for(int i=0;i<3;i++){
 				if(fgetc(conf) == com){
 					i--;
-					char comment[1];
-					fscanf(conf,"%[^\n]",comment);
-				//	fgets(NULL,0,conf);
-				//	fseek(conf,-1,SEEK_CUR);
+					fscanf(conf,"%[^\n]\n",comment);
+					//printf("ciao\n");
 					continue;
 				}
 				fseek(conf,-1,SEEK_CUR);
+				char *key = NULL;
+				char *value = NULL;
 				getdelim(&key,&len,'=',conf);
 				getdelim(&value,&len,'\n',conf);
 				key[strlen(key)-1] = '\0';
 				char *k = strtrm(key),*v = strtrm(value);
-				/*switch(k[0]){
+				//printf("%p\n",v);
+				//printf("%p\n",value);
+				//printf("%c\n",k[0]);
+				/*if(k[0] == 'n') gr.name = v;
+				else if(k[0] == 'l')gr.location = v;
+				else if(k[0] == 'e')gr.entries = v;*/
+				switch(k[0]){
 					case 'n':
 						gr.name = v;
-				}*/
+						break;
+					case 'l':
+						gr.location = v;
+						break;
+					case 'e':
+						gr.entries = v;
+						break;
+					default:
+						pr("Uknown key: %s\n",k);
+						exit(2);
+				}
 				//printf("key: %s\nvalue: %s\n",strtrm(key),strtrm(value));
-				printf("key: %s\nvalue: %s\n",k,v);
 			}
+			struct section array[1024];
+			array[0] = gr;
+			all.array_sections = array;
+			printf("name: %s\n",gr.name);
+			printf("location: %s\n",gr.location);
+			printf("entries: %s\n\n",gr.entries);
+			//here checks cwd
 		}
 	}
 	fclose(conf);
