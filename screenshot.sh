@@ -1,21 +1,18 @@
 #!/bin/sh
-#slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k -D"
+slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k -D"
 case $1 in
 	shot)
 		maim "$HOME/Pictures/screens/$(date +%d-%m-%Y_%H-%M-%S).png" \
 		&& dunstify -a maim "screenshot in ~/Pictures/screens"
 	;;
 	shos)
-		maim \ 
-			-s -l -k -D \
-			-c 0.2,0,0.15,0.3 \
-			-b 1.5 \
-			"$HOME/Pictures/screens/$(date +%d-%m-%Y_%H-%M-%S).png" \
+		maim -s $slop_opts \
+		"$HOME/Pictures/screens/$(date +%d-%m-%Y_%H-%M-%S).png" \
 		&& dunstify -a maim "screenshot in ~/Pictures/screens"
 	;;
 	cast)
-		slop=$(slop -l -c "0.2,0,0.15,0.3" -b 1.5 -k -D -f "%x %y %w %h %g %i") || exit 1
-		read -r X Y W H G ID < <(echo $slop)
+		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1
+		read -r X Y W H G ID < <(echo $slop) #from github page
 		recordmydesktop \
 			-fps 60 \
 			-freq 44100 \
