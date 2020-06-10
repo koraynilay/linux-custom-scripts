@@ -308,48 +308,50 @@ int main(int argc, char *argv[])
 		if(debug_high == 1)printf("Display geom: %dx%d\n",display_height,display_width);
 
 		//get current focused window
-		Window focused;
+		Window focused = 0; // Window {aka long unsigned int}
 		int revto;
 		XWindowAttributes attribs;
 		XGetInputFocus(my_display, &focused, &revto);
-		XGetWindowAttributes(my_display, focused, &attribs);
-		if(debug_high == 1)printf("Focused window geom: %dx%d\n",attribs.width,attribs.height);
-		
-		//check if focused window is fullscreen
-		if(check_fullscreen == 1){
-			Atom prop_state = XInternAtom(my_display, "_NET_WM_STATE",False);
-			Atom prop_fullscreen = XInternAtom(my_display, "_NET_WM_STATE_FULLSCREEN",True);
-			Atom actype;
-			Atom cprop;
-			int fmt;
-			unsigned long nitems,bytesafter;
-			unsigned char *states;
+		if(focused != 0){
+			XGetWindowAttributes(my_display, focused, &attribs);
+			if(debug_high == 1)printf("Focused window geom: %dx%d\n",attribs.width,attribs.height);
+			
+			//check if focused window is fullscreen
+			if(check_fullscreen == 1){
+				Atom prop_state = XInternAtom(my_display, "_NET_WM_STATE",False);
+				Atom prop_fullscreen = XInternAtom(my_display, "_NET_WM_STATE_FULLSCREEN",True);
+				Atom actype;
+				Atom cprop;
+				int fmt;
+				unsigned long nitems,bytesafter;
+				unsigned char *states;
 
-			int status = XGetWindowProperty(my_display, focused, prop_state, 0L, sizeof(Atom), False, AnyPropertyType, &actype, &fmt, &nitems, &bytesafter, &states);
-			if(status == Success && states){
-				for(int i=0;i<nitems;i++){
-					cprop = ((Atom *)states)[i];
-					if(cprop == prop_fullscreen)is_fullscreen = True;
-					else is_fullscreen = False;
+				int status = XGetWindowProperty(my_display, focused, prop_state, 0L, sizeof(Atom), False, AnyPropertyType, &actype, &fmt, &nitems, &bytesafter, &states);
+				if(status == Success && states){
+					for(int i=0;i<nitems;i++){
+						cprop = ((Atom *)states)[i];
+						if(cprop == prop_fullscreen)is_fullscreen = True;
+						else is_fullscreen = False;
+					}
 				}
 			}
-		}
 
-		//check if name is one of servs
-		XTextProperty fname;
-		Status fst = XGetWMName(my_display, focused, &fname);
-		if(fst && debug_high == 1)printf("%s\n",fname.value);
+			//check if name is one of servs
+			XTextProperty fname;
+			Status fst = XGetWMName(my_display, focused, &fname);
+			if(fst && debug_high == 1)printf("%s\n",fname.value);
 
-		if(fst){
-			for(int i=0;i<len_servs;i++){
-				if(debug_ultra_high == 1)printf("%s\n",servs[i]);
-				if(debug_ultra_mega_high == 1)printf("%d\n",i);
-				if(debug_ultra_mega_high == 1)printf("%s\n",fname.value);
-				char *pl=strcasestr((const char *)fname.value,servs[i]);
-				if(servs[i][0] && pl != NULL){
-					can_lock_wm = 0;
-					break;
-				}else can_lock_wm = 1;
+			if(fst){
+				for(int i=0;i<len_servs;i++){
+					if(debug_ultra_high == 1)printf("%s\n",servs[i]);
+					if(debug_ultra_mega_high == 1)printf("%d\n",i);
+					if(debug_ultra_mega_high == 1)printf("%s\n",fname.value);
+					char *pl=strcasestr((const char *)fname.value,servs[i]);
+					if(servs[i][0] && pl != NULL){
+						can_lock_wm = 0;
+						break;
+					}else can_lock_wm = 1;
+				}
 			}
 		}
 

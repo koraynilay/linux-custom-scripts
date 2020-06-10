@@ -7,67 +7,13 @@
 #define pr(...) (fprintf(stderr,__VA_ARGS__)) //print errors to stderr
 #define ex(x) (x) ? (x) : ""
 
-//char *trimwhitespace(char *str)
-char *strtrm(char *str) //from https://stackoverflow.com/a/122721/12206923 (first solution)
-{
-	char *end;
+char *strtrm(char *str); //from https://stackoverflow.com/a/122721/12206923 (first solution)
+void replace(char *str, char to_replace, char replace_with);
+void escape_space(char *str);
+int has_space(char *str);
 
-	// Trim leading space
-	while(isspace((unsigned char)*str)) str++;
-
-	if(*str == 0)  // All spaces?
-	  return str;
-
-	// Trim trailing space
-	end = str + strlen(str) - 1;
-	while(end > str && isspace((unsigned char)*end)) end--;
-
-	// Write new null terminator character
-	end[1] = '\0';
-
-	return str;
-}
-void replace(char *str, char to_replace, char replace_with)
-{
-    for(int i = 0; i < strlen(str);i++)
-    {
-        if(str[i] == to_replace)
-        {
-            str[i] = replace_with;
-            break;
-        }
-    }
-}
-void escape_space(char *str)
-{
-	printf("\n\n:%s:\n\n",str);
-	int l = strlen(str);
-	strcat(str," ");
-	printf("\n\n:%s:\n\n",str);
-	for(int i=l;i>=l;i++)
-	{
-		printf("ciao");
-		if(str[i] == ' ')
-		{
-		printf("ciao");
-			for(int j=i;j>=l;j++){
-				str[j] = str[j-1];
-			}
-			break;
-		}
-	}
-	printf("\n\n%s\n\n",str);
-}
-int has_space(char *str){
-	if(str){
-		for(int i=0;i<strlen(str);i++){
-			if(str[i]==' '){
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
+int debug = 0;
+int debug_high = 0;
 
 struct section {
 	char *name;
@@ -80,7 +26,6 @@ struct group {
 
 int main(int argc, char *argv[]){
 	FILE *conf;
-	int debug = 0;
 	char com = ';';
 	char home[100] = "";
 	char config_file[100] = "";
@@ -91,6 +36,10 @@ int main(int argc, char *argv[]){
 			switch(argv[i][1]){
 				case 'o':
 					strcat(ls_opts,strcat(argv[i+1]," "));
+					break;
+				case 'D':
+					debug = 1;
+					debug_high = 1;
 					break;
 				case 'd':
 					debug = 1;
@@ -169,12 +118,17 @@ int main(int argc, char *argv[]){
 				char ff[200000] = "";
 				if(d){
 					while((dir = readdir(d)) != NULL){
-						char *n = dir->d_name;
-						if(strcmp(n,"..")){
-							if(strcmp(n,".")){
-								if(has_space(n))escape_space(n);
+						//char *mc = malloc(sizeof(dir->d_name)+10);
+						//char *n = memcpy(mc,dir->d_name,sizeof(dir->d_name)+10);
+						//char *n = realloc(&(dir->d_name),sizeof(&(dir->d_name))+10);
+						//char *n = dir->d_name;
+						//printf("n:%ld\n",sizeof(n));
+						//printf("dir->d_name:%ld\n",sizeof(dir->d_name));
+						if(strcmp(dir->d_name,"..")){
+							if(strcmp(dir->d_name,".")){
+								if(has_space(dir->d_name))escape_space(dir->d_name);
 								strcat(ff," ");
-								strcat(ff,n);
+								strcat(ff,dir->d_name);
 							}
 						}
 					}
@@ -201,6 +155,74 @@ int main(int argc, char *argv[]){
 	/*if(str[i] = '\\'){
 		case
 	}*/
+}
+
+//char *trimwhitespace(char *str)
+char *strtrm(char *str) //from https://stackoverflow.com/a/122721/12206923 (first solution)
+{
+	char *end;
+
+	// Trim leading space
+	while(isspace((unsigned char)*str)) str++;
+
+	if(*str == 0)  // All spaces?
+	  return str;
+
+	// Trim trailing space
+	end = str + strlen(str) - 1;
+	while(end > str && isspace((unsigned char)*end)) end--;
+
+	// Write new null terminator character
+	end[1] = '\0';
+
+	return str;
+}
+void replace(char *str, char to_replace, char replace_with)
+{
+    for(int i = 0; i < strlen(str);i++)
+    {
+        if(str[i] == to_replace)
+        {
+            str[i] = replace_with;
+            break;
+        }
+    }
+}
+void escape_space(char *str)
+{
+	//printf("str:%ld\n",sizeof(str));
+	//printf("\n\n:%s:\n\n",str);
+	strcat(str," ");
+	int l = strlen(str);
+	//printf("%s\n",str);
+	if(debug == 1)printf("%s:%d\n",str,l);
+	for(int i=l-2;i>0;i--)
+	{
+		if(debug_high == 1)printf("i:%d\n",i);
+		if(str[i] == ' ')
+		{
+			for(int j=l;j>=i;j--){
+				if(debug_high == 1)printf("j:%d\n",j);
+				if(j == i){
+					str[j] = '\\';
+				}else{
+					str[j] = str[j-1];
+				}
+			}
+			break;
+		}
+	}
+	if(debug == 1)printf("%s\n",str);
+}
+int has_space(char *str){
+	if(str){
+		for(int i=0;i<strlen(str);i++){
+			if(str[i]==' '){
+				return 1;
+			}
+		}
+	}
+	return 0;
 }
 
 //char *strtrm(char *s){
