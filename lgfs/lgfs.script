@@ -1,6 +1,0 @@
-#!/bin/python
-import os
-import json
-home = '/home/koraynilay';
-config = json.load(home+'/linux-custom-scripts/lgfs/lgfs.json');
-print(config)

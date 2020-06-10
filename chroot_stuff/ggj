@@ -10,6 +10,8 @@ print_usage(){
 	printf "  -f\tuser home from where dotfiles are copied $needcreate\n"
 	printf "  -r\troot home from where dotfiles are copied $needcreate\n"
 	printf "  -p\tlist of packages to install\n"
+	printf "  -s\tscript to execute right after creation of the chroot\n"
+	printf "  -z\tzsh theme file\n"
 	printf "  -u\tname of the user in the new root $needcreactiv\n"
 	printf "  -v\tprint variables\n"
 	printf "  -h\tshow this help\n"
@@ -18,7 +20,7 @@ print_usage(){
 act=0
 create=0
 verbose=0
-while getopts n:m:f:r:p:u:cahv option;do
+while getopts n:m:f:r:p:u:z:s:cahv option;do
 	case $option in
 		a)act=1;;
 		c)create=1;;
@@ -29,6 +31,8 @@ while getopts n:m:f:r:p:u:cahv option;do
 		r)rootf=$OPTARG;;
 		p)pkgs=$OPTARG;;
 		u)usernr=$OPTARG;;
+		s)script=$OPTARG;;
+		z)zsh_theme=$OPTARG;;
 		h)print_usage;exit 0;;
 		?)exit 1;;
 	esac
@@ -36,14 +40,16 @@ done
 [[ -z $1 ]] && print_usage && exit 3
 #echo $UID
 [[ $UID -ne 0 ]] && printf "This script needs root privileges.\n" && exit 5
-newrt=${newrt:="$HOME/chrrr"}
-mntrt=${mntrt:="$HOME/plip_chr"}
-homef=${homef:="$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
-rootf=${rootf:="$HOME/linux-custom-scripts/chroot_stuff/users/root"}
-pkgs=${pkgs:=('git' 'vim' 'zsh' 'which' 'sudo')}
-pkgs=${pkgs#\(}
-pkgs=${pkgs%\)}
-usernr=${usernr:="koray"}
+export newrt=${newrt:="$HOME/chrrr"}
+export mntrt=${mntrt:="$HOME/plip_chr"}
+export homef=${homef:="$HOME/linux-custom-scripts/chroot_stuff/users/koray"}
+export rootf=${rootf:="$HOME/linux-custom-scripts/chroot_stuff/users/root"}
+export script=${script:="$HOME/linux-custom-scripts/chroot_stuff/init_chroot.sh"}
+export pkgs=${pkgs:=('git' 'vim' 'zsh' 'which' 'sudo')}
+export pkgs=${pkgs#\(}
+export pkgs=${pkgs%\)}
+export usernr=${usernr:="koray"}
+export zsh_theme=${zsh_theme:="kora.zsh-theme"}
 if [ $verbose -eq 1 ];then
 	echo $newrt
 	echo $mntrt
@@ -74,31 +80,20 @@ if [ $create -eq 1 ];then
 		fi
 	fi
 	pacstrap $newrt base $pkgs
-	zsh_theme="kora.zsh-theme"
-	hb=`basename "$homef"`
-	rb=`basename "$rootf"`
-	find $homef -not -name "$hb" -prune -exec cp -vr {} "$newrt/home/$usernr" \;
-	find $rootf -not -name "$rb" -prune -exec cp -vr {} "$newrt/root" \;
-
-	mount --bind "$newrt" "$mntrt"
-	arch-chroot $mntrt /bin/bash -c \
-		"useradd $usernr; \
-		passwd $usernr \
-	       	chown -hR $usernr:$usernr /home/$usernr; \
-		su -l $usernr -c \
-			\"cd ~; \
-			chmod +x install_omz.sh; \
-			./install_omz.sh; \
-			mv ~/$zsh_theme ~/.oh-my-zsh/custom/themes/; \
-			exit;\" \
-		"
-	sleep 0.5
-	umount --force --recursive $mntrt
-	cp "$homef/.zshrc" "$newrt/home/$usernr"
-
+	
+	mkdir -p "$newrt/home/$usernr"
+	cp -vr $homef/* "$newrt/home/$usernr/"
+	cp -vr $homef/.* "$newrt/home/$usernr/"
+	cp -vr $rootf/* "$newrt/root/"
+	cp -vr $rootf/.* "$newrt/root/"
+	cp -vr $script "$newrt/"
 	printf "Copying terminfo to $newrt...\n"
 	cp -r /usr/share/terminfo $newrt/usr/share/
 	printf "Done\n"
+
+	mount --bind "$newrt" "$mntrt"
+	arch-chroot $mntrt "/`basename $script`"
+	umount --recursive $mntrt
 fi
 if [ $act -eq 1 ];then
 	mount --bind "$newrt" "$mntrt"
