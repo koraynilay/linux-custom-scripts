@@ -25,6 +25,7 @@
 void child(void *ptr);
 void slf(void *ptr);
 void svf(char *cmd_saver);
+int xerrh(Display *d,XErrorEvent *e);
 
 void printUsage(){ 
 		//pr("Usage: scrnsvr -[tearlswncc1c2c3c4c5xdDuU]\n\n");
@@ -297,6 +298,7 @@ int main(int argc, char *argv[])
 
 	if(exits == 1)exit(0); //if -x is specified exit
 	//loop
+	XSetErrorHandler(xerrh);
 	while(my_display){
 		usleep(useconds); //pause for useconds micro-seconds
 		Display *my_display = XOpenDisplay(NULL); //get display
@@ -310,11 +312,12 @@ int main(int argc, char *argv[])
 		//get current focused window
 		Window focused = 0; // Window {aka long unsigned int}
 		int revto;
-		XWindowAttributes attribs;
-		XGetInputFocus(my_display, &focused, &revto);
+		int ciao = XGetInputFocus(my_display, &focused, &revto);
+		//printf("%d:%d:%ld\n",ciao,revto,focused);
 		if(focused != 0){
+			/*XWindowAttributes attribs;
 			XGetWindowAttributes(my_display, focused, &attribs);
-			if(debug_high == 1)printf("Focused window geom: %dx%d\n",attribs.width,attribs.height);
+			if(debug_high == 1)printf("Focused window geom: %dx%d\n",attribs.width,attribs.height);*/
 			
 			//check if focused window is fullscreen
 			if(check_fullscreen == 1){
@@ -354,7 +357,6 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
-
 
 		can_lock_pa=system(cmd_parun)/256; //audio playing?
 		if(debug == 1)printf("can_lock_pa = %d\n",can_lock_pa);
@@ -469,4 +471,10 @@ void slf(void *ptr){ //function for sleeper thread
 	sleep(args->time_sleep);
 	printf("off\n");
 	system(args->cmd_sleep);
+}
+int xerrh(Display *d,XErrorEvent *e){
+	char txt[100];
+	XGetErrorText(d,e->error_code,txt,sizeof(txt));
+	pr("Error: %d (%s). Maj: %d. Min: %d. Serial: %ld",e->error_code,txt,e->request_code,e->minor_code,e->serial);
+	return 0;
 }

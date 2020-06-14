@@ -1,5 +1,5 @@
 #!/bin/bash
-slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k -D"
+slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 recdesk_multi_opt="	-fps 60 \
 			-freq 44100 \
 			--no-wm-check \

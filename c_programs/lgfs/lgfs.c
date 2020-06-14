@@ -1,0 +1,296 @@
+/* To compile: 
+ * gcc [options] lgfs.c -o lgfs
+ * For FULL RELRO (from https://www.redhat.com/en/blog/hardening-elf-binaries-using-relocation-read-only-relro ):
+ * gcc -g -O0 -Wl,-z,relro,-z,now [options] lgfs.c -o lgfs
+*/
+
+#include <stdio.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#define pr(...) (fprintf(stderr,__VA_ARGS__)) //print errors to stderr
+#define ex(x) (x) ? (x) : ""
+#define ARLEN 1024
+#define lar(x) (sizeof(x)/sizeof(x[0]))
+#ifdef _WIN32
+#define HOME "CSIDL_PROFILE"
+#else
+#define HOME "HOME"
+#endif
+
+char *strtrm(char *str); //from https://stackoverflow.com/a/122721/12206923 (first solution)
+void replace(char *str, char to_replace, char replace_with);
+void escape_space(char *str);
+int has_space(char *str);
+void printUsage(){ 
+		pr("Usage: lgfs [OPTIONS]\n\n");
+		pr("--help\t\tShows this help\n\n");
+		pr("-o [options]\tOptions of -l\n");
+		pr("-n\t\tTurns off the notice if a config file doesn't exist\n");
+		//pr("-l\t\tExecutable to list the files (Default: 'ls')\n");
+		//pr("-p\t\tPrints config file, if it exists, then exits\n");
+		pr("-d\t\tShows debug info (Use -D for more levels of debugging)\n");
+}
+
+int debug = 0;
+int debug_high = 0;
+struct section {
+	char *name;
+	char *location;
+	char *entries;
+};
+
+int main(int argc, char *argv[]){
+	FILE *conf;
+	char com = ';';
+	char home[100] = "";
+	char config_file[100] = "";
+	const char *s = getenv(HOME);
+	char ls_opts[200] = "ls -d --color=auto ";
+	int config = 1;
+	int print_notice = 1;
+	for(int i=0;i<argc;i++){
+		if(argv[i][0] == '-'){
+			switch(argv[i][1]){
+				case 'o':
+					if(!argv[i+1]){
+						pr("Option -o requires an argument\n");
+						exit(2);
+					}
+					strcat(ls_opts,"-");
+					strcat(ls_opts,strcat(argv[i+1]," "));
+					break;
+				case 'n':
+					print_notice = 0;
+					break;
+				case '-': //double dashes options
+					if(!strcmp(argv[i],"--help")){
+						printUsage();
+						exit(0);
+					}
+					break;
+				case 'd':
+					debug = 1;
+					break;
+				case 'D':
+					debug = 1;
+					debug_high = 1;
+					break;
+				default:
+					pr("Uknown option: %s\n",argv[i]);
+					exit(6);
+			}
+		}
+	}
+	if(debug == 1)printf("%s\n",ls_opts);
+       	strcat(home,(s!=NULL)? s : "getenv returned NULL");
+	strcat(config_file,strcat(home,"/.config/lgfs.conf"));
+	
+	conf = fopen(config_file,"r");
+	if(conf == NULL){
+		if(print_notice == 1)pr("No config file, to turn off this notice run, without quotes, 'touch $HOME/.config/lgfs.conf' or you the option -n\n");
+		config = 0;
+	}
+	char cwd[1024];
+	getcwd(cwd,1024);
+	struct section argr[ARLEN] = {};
+	if(config == 1){
+		size_t len;
+		//rewind(conf);
+		char comment[1];
+		int j = 0;
+		while(!feof(conf)){
+			struct section gr;
+			gr.name = "";
+			gr.location = "";
+			gr.entries = "";
+			char cch = fgetc(conf);
+			//printf("%c\n",cch);
+			if(cch == com){
+				fscanf(conf,"%[^\n]\n",comment);
+				fseek(conf,-1,SEEK_CUR);
+				continue;
+			}
+			if(cch == '['){
+				fscanf(conf,"%[^\n]\n",comment);
+				for(int i=0;i<3;i++){
+					if(fgetc(conf) == com){
+						i--;
+						fscanf(conf,"%[^\n]\n",comment);
+						continue;
+					}
+					fseek(conf,-1,SEEK_CUR);
+					char *key = NULL;
+					char *value = NULL;
+					getdelim(&key,&len,'=',conf);
+					getdelim(&value,&len,'\n',conf);
+					key[strlen(key)-1] = '\0';
+					char *k = strtrm(key);
+					char *v = strtrm(value);
+					//printf("%p\n",v);
+					//printf("%c\n",k[0]);
+					switch(k[0]){
+						case 'n':
+							gr.name = v;
+							break;
+						case 'l':
+							gr.location = v;
+							break;
+						case 'e':
+							gr.entries = v;
+							break;
+						default:
+							pr("Uknown key: %s\n",k);
+							exit(2);
+					}
+				}
+				if(debug == 1)printf("name: %s\n",gr.name);
+				if(debug == 1)printf("location: %s\n",gr.location);
+				if(debug == 1)printf("entries: %s\n\n",gr.entries);
+				argr[j] = gr;
+				j++;
+			}
+		}
+	}
+	//get files in cwd
+	DIR *d;
+	struct dirent *dir;
+	d=opendir(".");
+
+	char *array[200000] = {};
+	char ff[200000] = "";
+	int b = 0;
+	if(d){ //if not NULL go
+		while((dir = readdir(d)) != NULL){ //get every filename in cwd
+			if(strcmp(dir->d_name,"..")){ //if compare returns non-zero (d_name is NOT "..")
+				if(strcmp(dir->d_name,".")){
+					if(has_space(dir->d_name))escape_space(dir->d_name);
+					if(debug_high == 1)printf("%s\n",dir->d_name);
+					array[b] = dir->d_name;
+				}
+			}
+			b++;
+		}
+		if(debug == 1)printf("%s\n",array[b]);
+	}
+	for(int j=0;j<lar(array);j++){ //remove files/folders already in lgfs.conf
+		if(array[j]){
+			if(debug_high == 1)printf("[%d]%s\n",j,array[j]);
+			for(int y=0;y<ARLEN;y++){
+				if(argr[y].entries){
+					if(strstr(argr[y].entries,array[j])){
+						array[j] = "";
+					}
+					if(debug_high == 1)printf("[%dy]%s\n",y,argr[y].name);
+				}
+			}
+			if(debug_high == 1)printf("[%d]%s\n",j,array[j]);
+		}
+	}
+	strcpy(ff,"");
+	for(int a=0;a<lar(array);a++){
+		if(array[a]){
+			strcat(ff," ");
+			strcat(ff,array[a]);
+		}
+	}
+	//printf("lss:%s\n",ff);
+	char ls[200000];
+	strcpy(ls,ls_opts);
+	strcat(ls,ff);
+	if(debug == 1)printf("ls: %s\n",ls);
+	system(ls);
+	//here checks cwd
+	if(config == 1){
+		for(int i=0;i<ARLEN;i++){
+			if(argr[i].name && argr[i].location && argr[i].entries){
+				if(debug == 1)printf("name: %s\n",argr[i].name);
+				if(debug == 1)printf("location: %s\n",argr[i].location);
+				if(debug == 1)printf("entries: %s\n\n",argr[i].entries);
+				if(!strcmp(cwd,argr[i].location)){
+					char lg[200000];
+
+					strcpy(lg,ls_opts);
+					strcat(lg,argr[i].entries);
+					if(debug == 1)printf("lg: %s\n",lg);
+
+					printf("=== %s ===\n",argr[i].name);
+					system(lg);
+					//printf("%s\n",argr[i].entries);
+				}
+				//printf("=== %s ===\n",argr[i].name);
+			}
+		}
+		fclose(conf);
+	}
+	return 0;
+}
+
+//char *trimwhitespace(char *str)
+char *strtrm(char *str) //from https://stackoverflow.com/a/122721/12206923 (first solution)
+{
+	char *end;
+
+	// Trim leading space
+	while(isspace((unsigned char)*str)) str++;
+
+	if(*str == 0)  // All spaces?
+	  return str;
+
+	// Trim trailing space
+	end = str + strlen(str) - 1;
+	while(end > str && isspace((unsigned char)*end)) end--;
+
+	// Write new null terminator character
+	end[1] = '\0';
+
+	return str;
+}
+void replace(char *str, char to_replace, char replace_with)
+{
+    for(int i = 0; i < strlen(str);i++)
+    {
+        if(str[i] == to_replace)
+        {
+            str[i] = replace_with;
+            break;
+        }
+    }
+}
+void escape_space(char *str)
+{
+	//printf("str:%ld\n",sizeof(str));
+	//printf("\n\n:%s:\n\n",str);
+	strcat(str," ");
+	int l = strlen(str);
+	//printf("%s\n",str);
+	if(debug == 1)printf("%s:%d\n",str,l);
+	for(int i=l-2;i>0;i--)
+	{
+		if(debug_high == 1)printf("i:%d\n",i);
+		if(str[i] == ' ')
+		{
+			for(int j=l;j>=i;j--){
+				if(debug_high == 1)printf("j:%d\n",j);
+				if(j == i){
+					str[j] = '\\';
+				}else{
+					str[j] = str[j-1];
+				}
+			}
+		}
+	}
+	if(debug == 1)printf("%s\n",str);
+}
+int has_space(char *str){
+	if(str){
+		for(int i=0;i<strlen(str);i++){
+			if(str[i]==' '){
+				return 1;
+			}
+		}
+	}
+	return 0;
+}

@@ -1,5 +1,6 @@
 #!/bin/sh
 vmsfolder='/C/linux/vms'
+#vmsfolder='/I/VitualVMs'
 vmname="win10"
 cd "$vmsfolder"
 cd "$vmname"
@@ -25,8 +26,8 @@ qemu-system-x86_64 \
 	\
 	-device ich9-intel-hda \
 	-audiodev pa,id=snd0 \
-	-device hda-output,audiodev=snd0 \
-	-cdrom virtio-win-0.1.171.iso 
+	-device hda-output,audiodev=snd0 #\
+	#-cdrom virtio-win-0.1.171.iso 
 
 	#-device virtio-keyboard-pci \
 	#-device virtio-tablet-pci \
