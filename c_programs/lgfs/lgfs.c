@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <errno.h>
+#include <time.h>
 #define pr(...) (fprintf(stderr,__VA_ARGS__)) //print errors to stderr
 #define ex(x) (x) ? (x) : ""
 #define ARLEN 1024
@@ -36,6 +38,7 @@ void printUsage(){
 
 int debug = 0;
 int debug_high = 0;
+int debug_time = 0;
 struct section {
 	char *name;
 	char *location;
@@ -44,45 +47,64 @@ struct section {
 
 int main(int argc, char *argv[]){
 	FILE *conf;
+	clock_t start = clock();
+	int config = 1;
+	int print_notice = 1;
+	int elems;
+	char *dr = NULL;
 	char com = ';';
 	char home[100] = "";
 	char config_file[100] = "";
-	const char *s = getenv(HOME);
 	char ls_opts[200] = "ls -d --color=auto ";
-	int config = 1;
-	int print_notice = 1;
-	for(int i=0;i<argc;i++){
-		if(argv[i][0] == '-'){
-			switch(argv[i][1]){
-				case 'o':
-					if(!argv[i+1]){
-						pr("Option -o requires an argument\n");
-						exit(2);
-					}
-					strcat(ls_opts,"-");
-					strcat(ls_opts,strcat(argv[i+1]," "));
-					break;
-				case 'n':
-					print_notice = 0;
-					break;
-				case '-': //double dashes options
-					if(!strcmp(argv[i],"--help")){
-						printUsage();
-						exit(0);
-					}
-					break;
-				case 'd':
-					debug = 1;
-					break;
-				case 'D':
-					debug = 1;
-					debug_high = 1;
-					break;
-				default:
-					pr("Uknown option: %s\n",argv[i]);
-					exit(6);
+	const char *s = getenv(HOME);
+	for(int i=1;i<argc;i++){
+		if(argv[i]){
+			if(argv[i][0] == '-'){
+				switch(argv[i][1]){
+					case 'o':
+						if(!argv[i+1]){
+							pr("Option -o requires an argument\n");
+							exit(2);
+						}
+						strcat(ls_opts,"-");
+						strcat(ls_opts,strcat(argv[i+1]," "));
+						i++;
+						break;
+					case 'n':
+						config = 0;
+						break;
+					case '_':
+						print_notice = 0;
+						break;
+					case '-': //double dashes options
+						if(!strcmp(argv[i],"--help")){
+							printUsage();
+							exit(0);
+						}
+						break;
+					case 't':
+						debug_time = 1;
+						break;
+					case 'd':
+						debug = 1;
+						break;
+					case 'D':
+						debug = 1;
+						debug_high = 1;
+						break;
+					default:
+						pr("Uknown option: %s\n",argv[i]);
+						exit(6);
+				}
+			}
+			else{
+				dr = argv[i];
 			}
 		}
+	}
+	if(debug_time == 1){
+		clock_t first = clock();
+		printf("first: %f\n",(double)(first - start) / CLOCKS_PER_SEC);
 	}
 	if(debug == 1)printf("%s\n",ls_opts);
        	strcat(home,(s!=NULL)? s : "getenv returned NULL");
@@ -95,6 +117,11 @@ int main(int argc, char *argv[]){
 	}
 	char cwd[1024];
 	getcwd(cwd,1024);
+	if(errno == ERANGE){
+		pr("Current Working Directory is more than 1024 characters long.");
+		exit(221);
+	}
+
 	struct section argr[ARLEN] = {};
 	if(config == 1){
 		size_t len;
@@ -143,7 +170,7 @@ int main(int argc, char *argv[]){
 							break;
 						default:
 							pr("Uknown key: %s\n",k);
-							exit(2);
+							exit(3);
 					}
 				}
 				if(debug == 1)printf("name: %s\n",gr.name);
@@ -151,13 +178,24 @@ int main(int argc, char *argv[]){
 				if(debug == 1)printf("entries: %s\n\n",gr.entries);
 				argr[j] = gr;
 				j++;
+				if(j == 1024)break;
 			}
 		}
+		elems = j+1;
+	}
+	if(debug_time == 1){
+		clock_t second = clock();
+		printf("second: %f\n",(double)(second - start) / CLOCKS_PER_SEC);
 	}
 	//get files in cwd
 	DIR *d;
 	struct dirent *dir;
-	d=opendir(".");
+	if(dr == NULL){
+		d=opendir(".");
+	}else{
+		d=opendir(dr);
+		strcat(dr,"/");
+	}
 
 	char *array[200000] = {};
 	char ff[200000] = "";
@@ -165,36 +203,34 @@ int main(int argc, char *argv[]){
 	if(d){ //if not NULL go
 		while((dir = readdir(d)) != NULL){ //get every filename in cwd
 			if(strcmp(dir->d_name,"..")){ //if compare returns non-zero (d_name is NOT "..")
-				if(strcmp(dir->d_name,".")){
+				if(strcmp(dir->d_name,".")){ //if d_name is NOT "."
 					if(has_space(dir->d_name))escape_space(dir->d_name);
 					if(debug_high == 1)printf("%s\n",dir->d_name);
-					array[b] = dir->d_name;
+					for(int y=0;y<elems;y++){
+						if(argr[y].entries){
+							if(!strstr(argr[y].entries,dir->d_name)){ //if NOT found
+								strcat(ff," ");
+								if(dr)strcat(ff,dr);
+								strcat(ff,dir->d_name);
+								break;
+							}
+							if(debug_high == 1)printf("[%dy]%s\n",y,argr[y].name);
+						}
+					}
 				}
 			}
 			b++;
 		}
-		if(debug == 1)printf("%s\n",array[b]);
+		if(debug == 1)if(array[b])printf("%s\n",array[b]);
 	}
-	for(int j=0;j<lar(array);j++){ //remove files/folders already in lgfs.conf
-		if(array[j]){
-			if(debug_high == 1)printf("[%d]%s\n",j,array[j]);
-			for(int y=0;y<ARLEN;y++){
-				if(argr[y].entries){
-					if(strstr(argr[y].entries,array[j])){
-						array[j] = "";
-					}
-					if(debug_high == 1)printf("[%dy]%s\n",y,argr[y].name);
-				}
-			}
-			if(debug_high == 1)printf("[%d]%s\n",j,array[j]);
-		}
+	else{
+		pr("Can't open '%s'\n",dr);
+		exit(1);
 	}
-	strcpy(ff,"");
-	for(int a=0;a<lar(array);a++){
-		if(array[a]){
-			strcat(ff," ");
-			strcat(ff,array[a]);
-		}
+	closedir(d);
+	if(debug_time == 1){
+		clock_t third = clock();
+		printf("third: %f\n",(double)(third - start) / CLOCKS_PER_SEC);
 	}
 	//printf("lss:%s\n",ff);
 	char ls[200000];
@@ -202,7 +238,6 @@ int main(int argc, char *argv[]){
 	strcat(ls,ff);
 	if(debug == 1)printf("ls: %s\n",ls);
 	system(ls);
-	//here checks cwd
 	if(config == 1){
 		for(int i=0;i<ARLEN;i++){
 			if(argr[i].name && argr[i].location && argr[i].entries){
@@ -224,6 +259,10 @@ int main(int argc, char *argv[]){
 			}
 		}
 		fclose(conf);
+	}
+	if(debug_time == 1){
+		clock_t end = clock();
+		printf("end: %f\n",((double)(end - start) / CLOCKS_PER_SEC));
 	}
 	return 0;
 }
