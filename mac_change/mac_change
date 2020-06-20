@@ -1,0 +1,36 @@
+#!/bin/sh
+print_usage(){
+	printf "This script need root privileges\n"
+	printf "Usage: $0 [on|off]\n"
+}
+
+#[[ $UID -ne 0 || -z "$1" ]] && echo this script needs root privileges && exit 1 #works
+[[ $UID -ne 0 ]] && echo This script needs root privileges && exit 1
+[[ -z "$1" ]] && print_usage && exit 3
+#macon
+o="$(cat /dev/urandom | tr -dc 'ace2468' | fold -w 1 | head -n 1 | tr -d '\n')" #one
+t="$(cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 2 | head -n 1 | tr -d '\n')" #two
+r="$(cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 2 | head -n 1 | tr -d '\n')" #three
+f="$(cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 2 | head -n 1 | tr -d '\n')" #four
+v="$(cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 2 | head -n 1 | tr -d '\n')" #five
+s="$(cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 2 | head -n 1 | tr -d '\n')" #six
+#custom
+o="b$o"
+#t="" #two
+#r="" #three
+#f="" #four
+v="eb" #five
+s="1c" #six
+if [ "$1" = "on" ];then
+	mac="$o:$t:$r:$f:$v:$s"
+elif [ "$1" = "off" ];then
+	mac="b0:6e:bf:33:eb:1c"
+else
+	print_usage
+	exit 2
+fi
+echo new mac: $mac
+#exit 0
+ip link set dev enp3s0 down
+ip link set dev enp3s0 address "$mac"
+ip link set dev enp3s0 up
