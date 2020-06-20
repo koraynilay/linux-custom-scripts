@@ -24,7 +24,7 @@
 
 char *strtrm(char *str); //from https://stackoverflow.com/a/122721/12206923 (first solution)
 void replace(char *str, char to_replace, char replace_with);
-void escape_space(char *str);
+void escape_char(char *str, char toesc);
 int has_space(char *str);
 void printUsage(){ 
 		pr("Usage: lgfs [OPTIONS]\n\n");
@@ -204,7 +204,11 @@ int main(int argc, char *argv[]){
 		while((dir = readdir(d)) != NULL){ //get every filename in cwd
 			if(strcmp(dir->d_name,"..")){ //if compare returns non-zero (d_name is NOT "..")
 				if(strcmp(dir->d_name,".")){ //if d_name is NOT "."
-					if(has_space(dir->d_name))escape_space(dir->d_name);
+					if(has_space(dir->d_name)){
+						escape_char(dir->d_name, ' ');
+						escape_char(dir->d_name, '(');
+						escape_char(dir->d_name, ')');
+					}
 					if(debug_high == 1)printf("%s\n",dir->d_name);
 					for(int y=0;y<elems;y++){
 						if(argr[y].entries){
@@ -298,7 +302,7 @@ void replace(char *str, char to_replace, char replace_with)
         }
     }
 }
-void escape_space(char *str)
+void escape_char(char *str, char toesc)
 {
 	//printf("str:%ld\n",sizeof(str));
 	//printf("\n\n:%s:\n\n",str);
@@ -309,7 +313,7 @@ void escape_space(char *str)
 	for(int i=l-2;i>0;i--)
 	{
 		if(debug_high == 1)printf("i:%d\n",i);
-		if(str[i] == ' ')
+		if(str[i] == toesc)
 		{
 			for(int j=l;j>=i;j--){
 				if(debug_high == 1)printf("j:%d\n",j);
@@ -323,6 +327,31 @@ void escape_space(char *str)
 	}
 	if(debug == 1)printf("%s\n",str);
 }
+//void escape_space(char *str)
+//{
+//	//printf("str:%ld\n",sizeof(str));
+//	//printf("\n\n:%s:\n\n",str);
+//	strcat(str," ");
+//	int l = strlen(str);
+//	//printf("%s\n",str);
+//	if(debug == 1)printf("%s:%d\n",str,l);
+//	for(int i=l-2;i>0;i--)
+//	{
+//		if(debug_high == 1)printf("i:%d\n",i);
+//		if(str[i] == ' ')
+//		{
+//			for(int j=l;j>=i;j--){
+//				if(debug_high == 1)printf("j:%d\n",j);
+//				if(j == i){
+//					str[j] = '\\';
+//				}else{
+//					str[j] = str[j-1];
+//				}
+//			}
+//		}
+//	}
+//	if(debug == 1)printf("%s\n",str);
+//}
 int has_space(char *str){
 	if(str){
 		for(int i=0;i<strlen(str);i++){
