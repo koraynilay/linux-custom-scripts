@@ -1,7 +1,8 @@
 #!/bin/sh
+[[ $UID -ne 0 ]] && echo this script needs root privileges && exit 1
 #macoff
 mac="b0:6e:bf:33:eb:1c"
 echo new mac: $mac
-sudo ip link set dev enp3s0 down
-sudo ip link set dev enp3s0 address $mac
-sudo ip link set dev enp3s0 up
+ip link set dev enp3s0 down
+ip link set dev enp3s0 address $mac
+ip link set dev enp3s0 up

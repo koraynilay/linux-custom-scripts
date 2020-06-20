@@ -1,4 +1,5 @@
 #!/bin/sh
+[[ $UID -ne 0 ]] && echo this script needs root privileges && exit 1
 #macon
 o="$(cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 1 | head -n 1 | tr -d '\n')" #one
 t="$(cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 2 | head -n 1 | tr -d '\n')" #two
@@ -16,6 +17,6 @@ s="1c" #six
 mac="$o:$t:$r:$f:$v:$s"
 echo new mac: $mac
 #exit 0
-sudo ip link set dev enp3s0 down
-sudo ip link set dev enp3s0 address $mac
-sudo ip link set dev enp3s0 up
+ip link set dev enp3s0 down
+ip link set dev enp3s0 address $mac
+ip link set dev enp3s0 up
