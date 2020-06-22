@@ -34,7 +34,7 @@ i3lock -n -k \
 	--pass-media-keys \
 	--pass-screen-keys \
 	\
-	--indpos='x+1980:h-50' \
+	--indpos='x+1870:h-50' \
 	--keyhlcolor=ffffffff \
 	--bshlcolor=ff0000ff \
 	--separatorcolor=00000000 \
