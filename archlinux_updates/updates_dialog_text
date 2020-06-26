@@ -17,6 +17,7 @@ main(){
 	updates_news
 	yay -Pw
 	sudo checkupdates
+	printf "AUR:\n"
 	yay -Qu
 	exit_code=$?
 	if [ $exit_code -eq 2 ];then

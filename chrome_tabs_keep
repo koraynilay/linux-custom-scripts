@@ -22,3 +22,4 @@ elif [ "$opt" = "shut_pc" ];then
 else
 	printf "Usage: $0 [start_pc] [shut_pc]\n"
 fi
+dunstify -a chrome_tabs_keep "chrome_tabs_keep $1"
