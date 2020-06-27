@@ -1,6 +1,7 @@
 #!/bin/bash
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%d-%m-%Y_%H-%M-%S)
+xclip_gopts=""
 recdesk_multi_opt="	-fps 60 \
 			-freq 44100 \
 			--no-wm-check \
@@ -10,21 +11,28 @@ recdesk_multi_opt="	-fps 60 \
 			--on-the-fly-encoding"
 case $1 in
 	shot)
-		maim "$HOME/Pictures/screens/${date}.png" \
-		&& dunstify -a maim "screenshot in ~/Pictures/screens"
+		filename="$HOME/Pictures/screens/${date}.png"
+		maim $filename \
+		&& dunstify -a maim "screenshot is $filename" \
+		&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
 	;;
 	shots)
+		filename="$HOME/Pictures/screens/${date}.png"
 		maim -s $slop_opts \
-		"$HOME/Pictures/screens/${date}.png" \
-		&& dunstify -a maim "screenshot in ~/Pictures/screens"
+		$filename \
+		&& dunstify -a maim "screenshot is $filename" \
+		&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
+		filename="$HOME/Videos/screencasts/${date}.ogv"
 		recordmydesktop $recdesk_multi_opt \
-			-o "$HOME/Videos/screencasts/${date}.ogv" \
-			&& dunstify -a recordmydesktop 'video saved in ~/Videos/screencasts'
+			-o $filename \
+			&& dunstify -a recordmydesktop "video is $filename" \
+			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 	;;
 	casts)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
+		filename="$HOME/Videos/screencasts/${date}_select.ogv"
 		read -r X Y W H G ID < <(echo $slop) #[1]
 		echo $X $Y $W $H $G $ID
 		recordmydesktop \
@@ -33,8 +41,9 @@ case $1 in
 			--width $W \
 			--height $H \
 			$recdesk_multi_opt \
-			-o "$HOME/Videos/screencasts/$(date +%d-%m-%Y_%H-%M-%S)_select.ogv" \
-			&& dunstify -a recordmydesktop 'video saved in ~/Videos/screencasts'
+			-o $filename \
+			&& dunstify -a recordmydesktop "video is $filename" \
+			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 			#--windowid $ID \ #for recordmydesktop
 	;;
 	*)printf "Usage: $0 [shot|shots|cast|casts]\n";exit 1;;

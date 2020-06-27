@@ -15,6 +15,7 @@
 #define pr(...) (fprintf(stderr,__VA_ARGS__)) //print errors to stderr
 #define ex(x) (x) ? (x) : ""
 #define ARLEN 1024
+//#define CLOCKS_PER_SEC 2700000
 #define lar(x) (sizeof(x)/sizeof(x[0]))
 #ifdef _WIN32
 #define HOME "CSIDL_PROFILE"
@@ -25,7 +26,7 @@
 char *strtrm(char *str); //from https://stackoverflow.com/a/122721/12206923 (first solution)
 void replace(char *str, char to_replace, char replace_with);
 void escape_char(char *str, char toesc);
-int has_space(char *str);
+int has_char(char *str, char c);
 void printUsage(){ 
 		pr("Usage: lgfs [OPTIONS]\n\n");
 		pr("--help\t\tShows this help\n\n");
@@ -51,6 +52,7 @@ int main(int argc, char *argv[]){
 	int config = 1;
 	int print_notice = 1;
 	int elems;
+	int all = 0;
 	char *dr = NULL;
 	char com = ';';
 	char home[100] = "";
@@ -72,6 +74,9 @@ int main(int argc, char *argv[]){
 						break;
 					case 'n':
 						config = 0;
+						break;
+					case 'a':
+						all = 1;
 						break;
 					case '_':
 						print_notice = 0;
@@ -111,15 +116,19 @@ int main(int argc, char *argv[]){
 	strcat(config_file,strcat(home,"/.config/lgfs.conf"));
 	
 	conf = fopen(config_file,"r");
-	if(conf == NULL){
+	if(conf == NULL && config == 1){
 		if(print_notice == 1)pr("No config file, to turn off this notice run, without quotes, 'touch $HOME/.config/lgfs.conf' or you the option -n\n");
 		config = 0;
 	}
 	char cwd[1024];
-	getcwd(cwd,1024);
+	char *ret=getcwd(cwd,1024);
 	if(errno == ERANGE){
-		pr("Current Working Directory is more than 1024 characters long.");
+		pr("Current Working Directory is more than 1024 characters long.\n");
 		exit(221);
+	}
+	if(ret == NULL){
+		pr("Can't open Current Working Directory: it probably doesn't exist.\n");
+		exit(20);
 	}
 
 	struct section argr[ARLEN] = {};
@@ -181,11 +190,12 @@ int main(int argc, char *argv[]){
 				if(j == 1024)break;
 			}
 		}
+		fclose(conf);
 		elems = j+1;
 	}
 	if(debug_time == 1){
 		clock_t second = clock();
-		printf("second: %f\n",(double)(second - start) / CLOCKS_PER_SEC);
+		printf("secnd: %f\n",(double)(second - start) / CLOCKS_PER_SEC);
 	}
 	//get files in cwd
 	DIR *d;
@@ -195,37 +205,41 @@ int main(int argc, char *argv[]){
 	}else{
 		d=opendir(dr);
 		strcat(dr,"/");
+		strcat(cwd,"/");
+		strcat(cwd,dr);
 	}
 
-	char *array[200000] = {};
 	char ff[200000] = "";
-	int b = 0;
 	if(d){ //if not NULL go
 		while((dir = readdir(d)) != NULL){ //get every filename in cwd
-			if(strcmp(dir->d_name,"..")){ //if compare returns non-zero (d_name is NOT "..")
-				if(strcmp(dir->d_name,".")){ //if d_name is NOT "."
-					if(has_space(dir->d_name)){
-						escape_char(dir->d_name, ' ');
-						escape_char(dir->d_name, '(');
-						escape_char(dir->d_name, ')');
-					}
-					if(debug_high == 1)printf("%s\n",dir->d_name);
-					for(int y=0;y<elems;y++){
-						if(argr[y].entries){
-							if(!strstr(argr[y].entries,dir->d_name)){ //if NOT found
-								strcat(ff," ");
-								if(dr)strcat(ff,dr);
-								strcat(ff,dir->d_name);
-								break;
-							}
-							if(debug_high == 1)printf("[%dy]%s\n",y,argr[y].name);
+			int concat = 1;
+			if(dir->d_name[0] == '.' && all == 0) continue;
+			if(has_char(dir->d_name,' ')) escape_char(dir->d_name, ' ');
+			if(has_char(dir->d_name,'(')) escape_char(dir->d_name, '(');
+			if(has_char(dir->d_name,')')) escape_char(dir->d_name, ')');
+			if(has_char(dir->d_name,'#')) escape_char(dir->d_name, '#');
+			if(has_char(dir->d_name,'*')) escape_char(dir->d_name, '*');
+			if(has_char(dir->d_name,'$')) escape_char(dir->d_name, '$');
+			if(has_char(dir->d_name,'/')) escape_char(dir->d_name, '/'); //do not escape '\' otherwise it won't work
+			if(debug_high == 1)printf("%s\n",dir->d_name);
+			if(debug_high == 1)printf("%s\n",dir->d_name);
+			for(int y=0;y<elems;y++){
+				if(argr[y].entries && argr[y].location){
+					if(strcmp(cwd,argr[y].location) == 0){ //if equals
+						if(strstr(argr[y].entries,dir->d_name)){ //if found
+							concat = 0;
+							break;
 						}
 					}
+					if(debug_high == 1)printf("[%dy]%s\n",y,argr[y].name);
 				}
 			}
-			b++;
+			if(concat == 1){
+				strcat(ff," ");
+				if(dr)strcat(ff,dr);
+				strcat(ff,dir->d_name);
+			}
 		}
-		if(debug == 1)if(array[b])printf("%s\n",array[b]);
 	}
 	else{
 		pr("Can't open '%s'\n",dr);
@@ -243,7 +257,7 @@ int main(int argc, char *argv[]){
 	if(debug == 1)printf("ls: %s\n",ls);
 	system(ls);
 	if(config == 1){
-		for(int i=0;i<ARLEN;i++){
+		for(int i=0;i<elems;i++){
 			if(argr[i].name && argr[i].location && argr[i].entries){
 				if(debug == 1)printf("name: %s\n",argr[i].name);
 				if(debug == 1)printf("location: %s\n",argr[i].location);
@@ -262,11 +276,10 @@ int main(int argc, char *argv[]){
 				//printf("=== %s ===\n",argr[i].name);
 			}
 		}
-		fclose(conf);
 	}
 	if(debug_time == 1){
 		clock_t end = clock();
-		printf("end: %f\n",((double)(end - start) / CLOCKS_PER_SEC));
+		printf("enddd: %f\n",((double)(end - start) / CLOCKS_PER_SEC));
 	}
 	return 0;
 }
@@ -352,10 +365,10 @@ void escape_char(char *str, char toesc)
 //	}
 //	if(debug == 1)printf("%s\n",str);
 //}
-int has_space(char *str){
+int has_char(char *str, char c){
 	if(str){
 		for(int i=0;i<strlen(str);i++){
-			if(str[i]==' '){
+			if(str[i] == c){
 				return 1;
 			}
 		}
