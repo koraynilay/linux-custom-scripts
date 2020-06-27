@@ -1,5 +1,6 @@
 #!/bin/bash
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
+date=$(date +%d-%m-%Y_%H-%M-%S)
 recdesk_multi_opt="	-fps 60 \
 			-freq 44100 \
 			--no-wm-check \
@@ -9,17 +10,17 @@ recdesk_multi_opt="	-fps 60 \
 			--on-the-fly-encoding"
 case $1 in
 	shot)
-		maim "$HOME/Pictures/screens/$(date +%d-%m-%Y_%H-%M-%S).png" \
+		maim "$HOME/Pictures/screens/${date}.png" \
 		&& dunstify -a maim "screenshot in ~/Pictures/screens"
 	;;
 	shots)
 		maim -s $slop_opts \
-		"$HOME/Pictures/screens/$(date +%d-%m-%Y_%H-%M-%S).png" \
+		"$HOME/Pictures/screens/${date}.png" \
 		&& dunstify -a maim "screenshot in ~/Pictures/screens"
 	;;
 	cast)
 		recordmydesktop $recdesk_multi_opt \
-			-o "$HOME/Videos/screencasts/$(date +%d-%m-%Y_%H-%M-%S).ogv" \
+			-o "$HOME/Videos/screencasts/${date}.ogv" \
 			&& dunstify -a recordmydesktop 'video saved in ~/Videos/screencasts'
 	;;
 	casts)
