@@ -3,3 +3,5 @@ push.sh
 scrn
 *.old*
 scrap
+chroot_stuff/users/koray/
+chroot_stuff/users/root/
