@@ -1,12 +1,12 @@
 #!/bin/sh
-aur_helper='yay'
+update_command='yay'
 
 answ(){
 	printf "Update?: "
 	read ans
 	ans="${ans//$'\n'/ }"
 	if [[ "$ans" == "y" || $ans == "yes" ]];then
-		$aur_helper
+		$update_command
 	else
 		main
 	fi
@@ -16,7 +16,7 @@ main(){
 	printf "Updates available:\n\n"
 	updates_news
 	yay -Pw
-	sudo checkupdates
+	checkupdates
 	printf "AUR:\n"
 	yay -Qu
 	exit_code=$?

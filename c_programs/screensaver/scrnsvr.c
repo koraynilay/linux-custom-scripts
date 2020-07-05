@@ -21,6 +21,8 @@
 #define len(x) (sizeof(x)/sizeof(x[0])) //array length
 #define print_array(z,x) for(int y=0;y<z;y++)printf("%d element: %s\n",y,x[y]); //print every array element
 #define pd() (printf("\nciao\n"))
+#define ACTIVATED "Enabled"
+#define DEACTIVATED "Disabled"
 
 void child(void *ptr);
 void slf(void *ptr);
@@ -39,7 +41,8 @@ void printUsage(){
 		pr("-b [blanker]\t(REQUIRED) Program that blanks/sets your screen off\n\n");
 		pr("-w [list]\tSpace-separated case-insensitive list of windows titles which inhibit the screensaver (added to: youtube vlc mpv vimeo 'picture in picture')\n");
 		pr("-n\t\tDisables 'Saving in ~n secs' notifications\n");
-		pr("-c [notifier]\tCommand used to send notifications (if -n is NOT specified) (not uses different levels)\n");
+		pr("-i  [pixels]\tPixels of windows borders (if you want to consider fullscreen also windows that have the same geometry as the display but aren't actually fullscreen)\n");
+		pr("-c  [notifier]\tCommand used to send notifications (if -n is NOT specified) (not uses different levels)\n");
 		pr("-c1 [notifier]\tCommand used to send notifications when there is 1 second left(if -n is NOT specified)\n");
 		pr("-c2 [notifier]\tCommand used to send notifications when there is 2 second left(if -n is NOT specified)\n");
 		pr("-c3 [notifier]\tCommand used to send notifications when there is 3 second left(if -n is NOT specified)\n");
@@ -98,6 +101,8 @@ int main(int argc, char *argv[])
 	int debug_ultra_high = 0;
 	int debug_ultra_mega_high = 0;
 	int is_fullscreen = 0;
+	int is_fullscreen_geom = 0;
+	int borders_pixel = 0;
 	int check_fullscreen = 1;
 	int can_lock_pa = 1;
 	int can_lock_wm = 1;
@@ -122,6 +127,10 @@ int main(int argc, char *argv[])
 				case 's': //time for blanker
 					if(argv[i+1])time_sleep = atoi(argv[i+1]); //time before screen off
 					else {printUsage();exit(4);}
+					break;
+				case 'i': //time for blanker
+					if(argv[i+1])borders_pixel = atoi(argv[i+1]); //time before screen off
+					else {printUsage();exit(5);}
 					break;
 				case 'r': //screensaver
 					sprintf(saver, "%s", argv[i+1]);
@@ -195,13 +204,13 @@ int main(int argc, char *argv[])
 					break;
 				default: //Uknown option
 					pr("Uknown option: %s. Use only '%s', or the switch '--help', to get a list of options\n",argv[i],argv[0]);
-					exit(6);
+					exit(7);
 			}
 		}
 		else if(get_args == 1){ //get args for -w
 			if(strlen(argv[i])>52){
 				pr("Argument '%s' of the -w flag is too long\n",argv[i]);
-				exit(5);
+				exit(6);
 			}
 			strcpy(servs[j],argv[i]);
 			if(debug_high == 1)printf("%s\n",argv[i]);
@@ -223,6 +232,21 @@ int main(int argc, char *argv[])
 		printf("Screensaver (-r): %s\n",saver);
 		printf("Locker (-l): %s\n",locker);
 		printf("Blanker (-b): %s\n",sleeper);
+		printf("Inhibiting windows (-w): ");
+		for(int w = 0;w<len(servs);w++){
+			if(servs[w][0] != '\0'){
+				printf("'%s' ",servs[w]);
+			}
+		}
+		printf("\nNotifs (-n): %s\n",(notifs == 1)?ACTIVATED:DEACTIVATED);
+		printf("Borders (in pixels) (-i): %d\n",borders_pixel);
+		printf("Notifier (-c): %s\n",notifier);
+		printf("Notifier (1 second left) (-c1): %s\n",notifier_1);
+		printf("Notifier (2 second left) (-c2): %s\n",notifier_2);
+		printf("Notifier (3 second left) (-c3): %s\n",notifier_3);
+		printf("Notifier (4 second left) (-c4): %s\n",notifier_4);
+		printf("Notifier (5 second left) (-c5): %s\n",notifier_5);
+		printf("Fullscreen detection (-f): %s\n",(check_fullscreen == 1)?ACTIVATED:DEACTIVATED);
 	}
 	
 	if(debug_high == 1 || (print_opts == 1 && notifier[0] != '\0'))printf("notifier: %s\n",notifier);
@@ -305,8 +329,8 @@ int main(int argc, char *argv[])
 		XScreenSaverInfo *info = XScreenSaverAllocInfo(); //assing display info
 		XScreenSaverQueryInfo(my_display, DefaultRootWindow(my_display), info); //get display info
 
-		int display_height = XDisplayWidth(my_display,XDefaultScreen(my_display));
-		int display_width = XDisplayHeight(my_display,XDefaultScreen(my_display));
+		int display_width = XDisplayWidth(my_display,XDefaultScreen(my_display));
+		int display_height = XDisplayHeight(my_display,XDefaultScreen(my_display));
 		if(debug_high == 1)printf("Display geom: %dx%d\n",display_height,display_width);
 
 		//get current focused window
@@ -315,12 +339,27 @@ int main(int argc, char *argv[])
 		int ciao = XGetInputFocus(my_display, &focused, &revto);
 		//printf("%d:%d:%ld\n",ciao,revto,focused);
 		if(focused != 0){
-			/*XWindowAttributes attribs;
-			XGetWindowAttributes(my_display, focused, &attribs);
-			if(debug_high == 1)printf("Focused window geom: %dx%d\n",attribs.width,attribs.height);*/
-			
 			//check if focused window is fullscreen
 			if(check_fullscreen == 1){
+				XWindowAttributes attribs;
+				XGetWindowAttributes(my_display, focused, &attribs);
+				if(attribs.width && attribs.height){
+					int focused_height = attribs.height;
+					int focused_width = attribs.width;
+					if(debug_high == 1)printf("Focused window geom: %dx%d\n",focused_width,focused_height);
+					if(debug_ultra_mega_high == 1)printf("%d ",display_height == focused_height);
+					if(debug_ultra_mega_high == 1)printf("%d\n",display_width == focused_width);
+					if(display_height == focused_height || display_height == (focused_height - borders_pixel)){
+						if(display_width == focused_width || display_width == (focused_width - borders_pixel)){
+							is_fullscreen_geom = 1;
+						}
+						else{is_fullscreen_geom = 0;}
+					}
+					else{
+						is_fullscreen_geom = 0;
+					}
+				}
+				
 				Atom prop_state = XInternAtom(my_display, "_NET_WM_STATE",False);
 				Atom prop_fullscreen = XInternAtom(my_display, "_NET_WM_STATE_FULLSCREEN",True);
 				Atom actype;
@@ -333,8 +372,8 @@ int main(int argc, char *argv[])
 				if(status == Success && states){
 					for(int i=0;i<nitems;i++){
 						cprop = ((Atom *)states)[i];
-						if(cprop == prop_fullscreen)is_fullscreen = True;
-						else is_fullscreen = False;
+						if(cprop == prop_fullscreen)is_fullscreen = 1;
+						else is_fullscreen = 0;
 					}
 				}
 			}
@@ -359,20 +398,21 @@ int main(int argc, char *argv[])
 		}
 
 		can_lock_pa=system(cmd_parun)/256; //audio playing?
+		sys=system(pgrep_lock)/256; //is the locker running?
 		if(debug == 1)printf("can_lock_pa = %d\n",can_lock_pa);
-		if(debug == 1)printf("is_fullscreen = %d\n",is_fullscreen);
 		if(debug == 1)printf("can_lock_wm = %d\n",can_lock_wm);
+		if(debug == 1)printf("is_fullscreen = %d\n",is_fullscreen);
+		if(debug == 1)printf("is_fullscreen_geom = %d\n",is_fullscreen_geom);
 		//if
 		//   audio not playing then lock
 		//   focused tab hasn't servs then lock
 		//   app is not fullscreen then lock
 
 		//if((can_lock_pa == 1 || can_lock_wm == 1) && !is_fullscreen){ //wasn't sure about the logic lol
-		if(!((can_lock_pa != 1 && can_lock_wm != 1) || is_fullscreen)){
+		if(!((can_lock_pa != 1 && can_lock_wm != 1) || (is_fullscreen || is_fullscreen_geom)) || sys != 1){
 			if(info->idle >= timeout && info->idle <= timeout+180){ //has timeout passed?
-				sys=system(pgrep_lock)/256; //is the locker running?
 				if(debug_high == 1)printf("sys = %d\n",sys);
-				if(sys == 1){ //if no then
+				if(sys == 1){ //if locker not running then
 					if(spid != 69420){pthread_cancel(sle);}
 					if(cpid != 69420){pthread_cancel(chi);}
 					if(vpid != 69420){pthread_cancel(svr);}

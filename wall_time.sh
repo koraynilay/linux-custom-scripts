@@ -1,6 +1,6 @@
 #!/bin/sh
 swi(){
-	if [ `date +%H` -lt 20 -a `date +%H` -gt 8 ];then
+	if [ `date +%H` -lt 20 -a `date +%H` -gt 7 ];then
 		feh --bg-fill ~/Pictures/wallpapers/wave/landscape_wave.png
 	else
 		feh --bg-fill ~/Pictures/wallpapers/wave/landscape_wave_4.png
