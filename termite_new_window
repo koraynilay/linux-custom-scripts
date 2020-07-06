@@ -1,7 +1,9 @@
 #!/bin/sh
 title=$(xdotool getactivewindow getwindowname)
 pat=$(echo $title | awk '{gsub(/[a-zA-Z0-9]*@[a-zA-Z0-9]*:\s/,"",$0);print $0}')
-dunstify "$title"
-dunstify "$pat"
-termite -d "$pat" >/dev/null 2>&1 &!
+pat="${pat/\~/$HOME}"
+termite -d "$pat" >/dev/null 2>&1
 exit 0
+
+#debug dunstify "$pat"
+#debug dunstify "$title"
