@@ -1,4 +1,4 @@
-#dom 5 lug 2020, 21:28:21, CEST
+#gio 9 lug 2020, 10:27:45, CEST
 
 archlinux-artwork
 assaultcube
@@ -15,6 +15,7 @@ debtap
 dirsearch
 downgrade
 dxvk-bin
+evisum
 ezquake-git
 fahcontrol
 fahviewer

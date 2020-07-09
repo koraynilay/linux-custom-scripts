@@ -1,4 +1,4 @@
-#dom 5 lug 2020, 21:28:21, CEST
+#gio 9 lug 2020, 10:27:45, CEST
 
 alsa-utils
 arandr
@@ -79,6 +79,7 @@ git
 gjs
 gnome-clocks
 gnu-netcat
+gnumeric
 gparted
 gpicview
 gst-libav
@@ -120,7 +121,7 @@ libdvdnav
 libdvdread
 libgsf
 libopenraw
-libreoffice-fresh
+libratbag
 libvncserver
 linux
 linux-ck
@@ -191,6 +192,7 @@ parcellite
 patch
 pavucontrol
 pcmanfm
+pcsclite
 perl-anyevent-i3
 perl-image-exiftool
 perl-json-xs
@@ -240,8 +242,10 @@ sharutils
 sl
 slop
 smartmontools
+socat
 speedcrunch
 speedtest-cli
+spice-gtk
 sqlmap
 steam
 strace
@@ -275,6 +279,8 @@ unzip
 usbutils
 viewnior
 vimiv
+virt-viewer
+virtualbox-guest-iso
 vlc
 vulkan-intel
 w3m
