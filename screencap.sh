@@ -2,13 +2,13 @@
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%d-%m-%Y_%H-%M-%S)
 xclip_gopts=""
-recdesk_multi_opt="	-fps 60 \
-			-freq 44100 \
+recdesk_multi_opt="	--freq 44100 \
 			--no-wm-check \
-			-device pulse \
+			--device pulse \
 			--stop-shortcut Control+Delete \
 			--pause-shortcut Control+Insert \
 			--on-the-fly-encoding"
+			# --fps 60 #not working, cause it speeds a lot up the video
 case $1 in
 	shot)
 		filename="$HOME/Pictures/screens/${date}.png"
