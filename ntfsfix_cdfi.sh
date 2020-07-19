@@ -5,3 +5,8 @@ for hd in $disks; do
 	sudo umount /dev/$hd
 	sudo ntfsfix /dev/$hd
 done
+printf "Remount all disks in /etc/fstab? [y/n]: "
+read ans
+if [ "$ans" = "y" ];then
+	sudo mount -a
+fi
