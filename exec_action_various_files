@@ -9,5 +9,5 @@ for a in $(ls | grep file | sed 's/ /*/g'); do
 #	cp ~/linux-custom-scripts/push.sh .
 	./push.sh
 	echo $a
-	cd /disks/I/Raccolte/various_files
+	cd /I/Raccolte/various_files
 done

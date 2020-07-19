@@ -1,8 +1,8 @@
 #!/bin/sh
 opt=$1
 h="/home/koraynilay"
-def="/disks/C/Users/User/AppData/Local/Google/Chrome/User Data/Default"
-scu="/disks/C/Users/User/AppData/Local/Google/Chrome/User Data/Profile 5"
+def="/C/Users/User/AppData/Local/Google/Chrome/User Data/Default"
+scu="/C/Users/User/AppData/Local/Google/Chrome/User Data/Profile 5"
 hdef="$h/.config/google-chrome/Default"
 hscu="$h/.config/google-chrome/Profile 1"
 bdir="$h/bck_chrome_tabs"

@@ -1,6 +1,6 @@
 #!/bin/sh
 mpc clear
-cd '/disks/I/Raccolte/Musica'
+cd '/I/Raccolte/Musica'
 songs=`stat -c "%A %w %n" * | sort -nr | awk '$1 !~ /^d[a-z-]*/ {print substr($0, index($0,$3))}'`
 #echo $songs
 IFS=$'\n'

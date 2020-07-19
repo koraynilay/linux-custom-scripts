@@ -1,7 +1,7 @@
 #!/bin/sh
 #old name: "last_added_ncmpcpp_getfattr"
-mf='/disks/I/Raccolte/music_files.txt'
-md='/disks/I/Raccolte/Musica'
+mf='/I/Raccolte/music_files.txt'
+md='/I/Raccolte/Musica'
 arg=$1
 IFS=$'\n'
 

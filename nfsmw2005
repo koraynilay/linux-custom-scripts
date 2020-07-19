@@ -1,3 +1,3 @@
 #!/bin/sh
-export WINEPREFIX='/disks/F/nfsmw2005linux/.wine'
-wine "/disks/F/nfsmw2005linux/Need For Speed Most Wanted Black Edition/speed.exe"
+export WINEPREFIX='/F/nfsmw2005linux/.wine'
+wine "/F/nfsmw2005linux/Need For Speed Most Wanted Black Edition/speed.exe"
