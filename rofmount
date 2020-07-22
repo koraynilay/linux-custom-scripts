@@ -1,0 +1,9 @@
+#!/bin/sh
+device=$(lsblk -o PATH,SIZE,FSTYPE,LABEL,MOUNTPOINT | rofi -dmenu | awk '{print $1}')
+if [ "$1" = "mount" ];then
+	out=$(gksudo mount $device >&1)
+elif [[ "$1" = "unmount" || "$1" = "umount" ]];then
+	out=$(gksudo umount $device >&1)
+fi
+output=$out
+dunstify "$1 exited with code $?.$output"
