@@ -7,7 +7,7 @@ printf "Continue? [y/n]: "
 read anc
 if [ "$anc" = "y" ];then
 	for mnt in $mntpt; do
-		sudo umount $mnt
+		sudo umount -v $mnt
 		if [ $? -ne 0 ];then
 			printf "Error occured unmounting $mnt, continue anyway? [y/n]: "
 			read an
