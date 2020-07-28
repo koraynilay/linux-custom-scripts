@@ -8,17 +8,17 @@ hscu="$h/.config/google-chrome/Profile 1"
 bdir="$h/bck_chrome_tabs"
 
 if [ "$opt" = "start_pc" ];then
-	cp "$hdef/Current Tabs" "$hdef/Current Session" "$bdir/"
-	cp "$hscu/Current Tabs" "$hscu/Current Session" "$bdir/scuola/"
+	cp -v "$hdef/Current Tabs" "$hdef/Current Session" "$bdir/"
+	cp -v "$hscu/Current Tabs" "$hscu/Current Session" "$bdir/scuola/"
 	touch "$bdir/bck_$(date +%Y-%m-%d_%H-%M-%S)"
-	cp "$def/Current Tabs" "$def/Current Session" "$hdef/"
-	cp "$scu/Current Tabs" "$scu/Current Session" "$hscu/"
+	cp -v "$def/Current Tabs" "$def/Current Session" "$hdef/"
+	cp -v "$scu/Current Tabs" "$scu/Current Session" "$hscu/"
 elif [ "$opt" = "shut_pc" ];then
-	cp "$def/Current Tabs" "$def/Current Session" "$bdir/win/"
-	cp "$scu/Current Tabs" "$scu/Current Session" "$bdir/win/scuola/"
+	cp -v "$def/Current Tabs" "$def/Current Session" "$bdir/win/"
+	cp -v "$scu/Current Tabs" "$scu/Current Session" "$bdir/win/scuola/"
 	touch "$bdir/win/bck_$(date +%Y-%m-%d_%H-%M-%S)"
-	cp "$hdef/Current Tabs" "$hdef/Current Session" "$def/"
-	cp "$hscu/Current Tabs" "$hscu/Current Session" "$scu/"
+	cp -v "$hdef/Current Tabs" "$hdef/Current Session" "$def/"
+	cp -v "$hscu/Current Tabs" "$hscu/Current Session" "$scu/"
 else
 	printf "Usage: $0 [start_pc] [shut_pc]\n"
 fi

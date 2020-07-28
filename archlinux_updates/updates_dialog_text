@@ -14,7 +14,7 @@ answ(){
 main(){
 	clear
 	printf "Updates available:\n\n"
-	updates_news
+	#updates_news
 	yay -Pw
 	checkupdates
 	printf "AUR:\n"
