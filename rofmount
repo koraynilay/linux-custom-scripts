@@ -2,16 +2,24 @@
 com() {
 	device=$(lsblk -o PATH,SIZE,FSTYPE,LABEL,MOUNTPOINT | rofi -dmenu | awk '{print $1}')
 }
+device=""
 if [[ "$1" = "mount" || "$1" = "m" ]];then
 	com
-	out=$(gksudo mount $device >&1)
+	echo -n $device
+	if [ $device ];then
+		out=$(gksudo mount $device >&1)
+	fi
 elif [[ "$1" = "unmount" || "$1" = "umount" || "$1" = "u" ]];then
 	com
-	out=$(gksudo umount $device >&1)
+	if [ $device ];then
+		out=$(gksudo umount $device >&1)
+	fi
 else
 	dunstify -a rofmount "Usage: $0 [m|mount|u|unmount|umount]"
 	echo "Usage: $0 [m|mount|u|unmount|umount]"
 	exit 1
 fi
-[[ -z $out ]] && output="" || output="Output: $out"
-dunstify "$1 command exited with code $?.$output"
+if [ $device ];then
+	[[ -z $out ]] && output="" || output="Output: $out"
+	dunstify "$1 command exited with code $?.$output"
+fi
