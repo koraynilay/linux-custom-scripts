@@ -2,16 +2,21 @@
 folders=("$HOME/.config/google-chrome/Default" "$HOME/.config/google-chrome/Profile 1")
 bck_folder="$HOME/.chtb"
 usage() {
-	echo -e "Usage: $0"
-	echo -e "  -h\tShow this help and exit"
+	echo -e "Usage: $0 [options] action"
+	echo -e ""
+	echo -e " action:"
+	echo -e "  b, backup\tBacks up google-chome current session (tabs) in ~/.chtb/[profile name]"
+	echo -e "  r, restore\tRestores the backed up google-chome session (tabs) from ~/.chtb/[profile name]"
+	echo -e ""
+	echo -e " options:"
+	echo -e "  -h\t\tShow this help and exit"
 	#echo -e " -v\tBe verbose"
 	echo -e "  -o opts\tAdd any cp option (ex. $0 -o -i)"
-	exit 0
 }
 while getopts ho: opt;do
 	case $opt in
 		#v)verbose=1;;
-		h)usage;;
+		h)usage;exit 0;;
 		o)cp_opt="$OPTARG";;
 		?)exit 2;;
 	esac
@@ -52,5 +57,8 @@ case $act in
 			cp -iv "${bn}/Current Tabs" "${bn}/Current Session" "${it}/"
 		done
 		;;
-	*)usage;;
+	*)
+		usage
+		exit 3
+		;;
 esac
