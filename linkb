@@ -2,6 +2,6 @@
 program=$1
 [[ -z $program ]] && printf "Usage: linkb [program to link]\n" && exit 1
 ln -vs $PWD/$program /bin/$program
-echo linked $PWD/$program
+[[ $? -eq 0 ]] && echo linked $PWD/$program
 
 #ln -s ~/linux-custom-scripts/$program /bin/$program

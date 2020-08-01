@@ -3,6 +3,7 @@ slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%d-%m-%Y_%H-%M-%S)
 xclip_gopts=""
 recdesk_multi_opt="	--freq 44100 \
+			--fps 60 \
 			--no-wm-check \
 			--device pulse \
 			--stop-shortcut Control+Delete \
@@ -40,7 +41,6 @@ case $1 in
 			-y $Y \
 			--width $W \
 			--height $H \
-			$recdesk_multi_opt \
 			-o $filename \
 			&& dunstify -a recordmydesktop "video is $filename" \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
