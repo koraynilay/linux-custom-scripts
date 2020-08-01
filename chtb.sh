@@ -13,6 +13,7 @@ usage() {
 	echo -e "  -h\t\tShow this help and exit"
 	#echo -e " -v\tBe verbose"
 	echo -e "  -o opts\tAdd any cp option (ex. $0 -o -i)"
+	echo -e "  -l\t\tEnables the backup in levels (~/.chtb%d%m%Y%H%M%S) (date --help)"
 }
 while getopts hlo: opt;do
 	case $opt in
