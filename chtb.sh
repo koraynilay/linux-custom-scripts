@@ -3,9 +3,21 @@ folders=("$HOME/.config/google-chrome/Default" "$HOME/.config/google-chrome/Prof
 bck_folder="$HOME/.chtb"
 usage() {
 	echo -e "Usage: $0"
+	echo -e "  -h\tShow this help and exit"
+	#echo -e " -v\tBe verbose"
+	echo -e "  -o opts\tAdd any cp option (ex. $0 -o -i)"
 	exit 0
 }
-case $1 in
+while getopts ho: opt;do
+	case $opt in
+		#v)verbose=1;;
+		h)usage;;
+		o)cp_opt="$OPTARG";;
+		?)exit 2;;
+	esac
+done
+act=$(echo $@ | grep -oE "b|backup|r|restore")
+case $act in
 	b|backup)
 		if [ ! -d $bck_folder ];then
 			echo -ne "'$bck_folder' doesn't exist, create it? [y/n]: "
@@ -32,14 +44,13 @@ case $1 in
 			exit 1
 		fi
 		for ((i=0;i<${#folders[@]};i++));do
-			#echo ${folders[i]}
-			#echo cp $@ \"${folders[i]}/Current Tabs\" \"${folders[i]}/Current Session\" \"${bck_folder}/$(basename "${folders[i]}")/
 			it="${folders[i]}"
 			bn=${bck_folder}/$(basename "$it")
 			if [ ! -d "$bn" ];then
 				continue
 			fi
-			cp -v "${bn}/Current Tabs" "${bn}/Current Session" "${bn}/"
+			cp -iv "${bn}/Current Tabs" "${bn}/Current Session" "${it}/"
 		done
 		;;
+	*)usage;;
 esac
