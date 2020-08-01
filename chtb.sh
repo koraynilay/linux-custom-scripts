@@ -1,6 +1,7 @@
 #!/bin/bash
 folders=("$HOME/.config/google-chrome/Default" "$HOME/.config/google-chrome/Profile 1")
 bck_folder="$HOME/.chtb"
+lvl=0
 usage() {
 	echo -e "Usage: $0 [options] action"
 	echo -e ""
@@ -13,11 +14,12 @@ usage() {
 	#echo -e " -v\tBe verbose"
 	echo -e "  -o opts\tAdd any cp option (ex. $0 -o -i)"
 }
-while getopts ho: opt;do
+while getopts hlo: opt;do
 	case $opt in
 		#v)verbose=1;;
 		h)usage;exit 0;;
 		o)cp_opt="$OPTARG";;
+		l)lvl=1;;
 		?)exit 2;;
 	esac
 done
@@ -62,3 +64,6 @@ case $act in
 		exit 3
 		;;
 esac
+if [ $lvl -eq 1 ];then
+	cp -rv "$bck_folder" "${bck_folder}$(date +%d%m%Y%H%M%S)" # ddmmYYYYHHMMSS (dd = day, mm = month, YYYY = year, HH = hour, MM = minute)
+fi
