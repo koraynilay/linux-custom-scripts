@@ -1,0 +1,27 @@
+#!/bin/sh
+cf="$HOME/.cache/archlinux_updates" # cache folder
+pfn="$cf/picom_update" # picom folder name
+bfn="$cf/bains_update" # bashinsulter folder name
+
+
+git clone --recursive git@github.com:jonaburg/picom.git $pfn 2> /dev/null
+cd $pfn
+rlcdp=$(git log -1 --pretty=format:"%cd" --date=raw) # raw last commit date picom
+if [ "$rlcdp" != "$(cat "$HOME/linux-custom-scripts/archlinux_updates/aur_notifs/rlcdp")" ];then
+	echo $rlcdp > "$HOME/linux-custom-scripts/archlinux_updates/aur_notifs/rlcdp" # picom
+	printf "picom-jonaburg-git needs update!\n"
+	#printf "\u001b[31mpicom-jonaburg-git needs update!\n"
+fi
+
+git clone --recursive git@github.com:hkbakke/bash-insulter.git $bfn 2> /dev/null
+cd $bfn
+rlcdb=$(git log -1 --pretty=format:"%cd" --date=raw) # raw last commit date bashinsulter
+if [ "$rlcdb" != "$(cat "$HOME/linux-custom-scripts/archlinux_updates/aur_notifs/rlcdb")" ];then
+	echo $rlcdb > "$HOME/linux-custom-scripts/archlinux_updates/aur_notifs/rlcdb" # bashinsulter
+	printf "bash-zsh-insulter needs update!\n"
+	#printf "\u001b[31mbash-zsh-insulter needs update!\n"
+fi
+
+sleep 1
+rm -rf $bfn
+rm -rf $pfn

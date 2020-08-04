@@ -11,8 +11,8 @@ qemu-system-x86_64 \
 	-machine type=q35,accel=kvm \
 	-device intel-iommu \
 	-cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
-	-m 6G \
-	-smp 2 \
+	-m 8192 \
+	-smp 3 \
 	\
 	-monitor unix:/tmp/monitor.sock,server,nowait \
 	\
@@ -22,7 +22,7 @@ qemu-system-x86_64 \
 	\
 	-drive file=win10.qcow2,if=virtio,cache=none,aio=native,cache.direct=on \
 	\
-	-vga virtio \
+	-vga vmware \
 	-display sdl,gl=on \
 	\
 	-device ich9-intel-hda \

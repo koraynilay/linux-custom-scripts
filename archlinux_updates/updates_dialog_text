@@ -20,6 +20,7 @@ main(){
 	printf "AUR:\n"
 	yay -Qu
 	exit_code=$?
+	aur_pkgs_notif
 	if [ $exit_code -eq 2 ];then
 		return 0
 	fi
