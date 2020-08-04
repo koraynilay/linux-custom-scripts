@@ -8,8 +8,8 @@ swi(){
 }
 
 case $1 in
-	light)feh --bg-fill ~/Pictures/wallpapers/wave/landscape_wave.png;;
-	dark)feh --bg-fill ~/Pictures/wallpapers/wave/landscape_wave_4.png;;
-	auto)swi;;
+	l|light)feh --bg-fill ~/Pictures/wallpapers/wave/landscape_wave.png;;
+	d|dark)feh --bg-fill ~/Pictures/wallpapers/wave/landscape_wave_4.png;;
+	a|auto)swi;;
 	*)printf "Usage: $0 [light|dark|auto]\n";exit 1;;
 esac
