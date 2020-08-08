@@ -5,7 +5,7 @@ answ(){
 	printf "Update?: "
 	read ans
 	ans="${ans//$'\n'/ }"
-	if [[ "$ans" == "y" || $ans == "yes" ]];then
+	if [[ "$ans" == "y" || "$ans" == "yes" ]];then
 		$update_command
 	else
 		main
@@ -20,7 +20,11 @@ main(){
 	printf "AUR:\n"
 	yay -Qu
 	exit_code=$?
-	aur_pkgs_notif
+	printf "Check AUR mantaining pkgs? [y/n]: "
+	read pp
+	if [[ "$pp" == "y" || "$pp" == "yes" ]];then
+		aur_pkgs_notif
+	fi
 	if [ $exit_code -eq 2 ];then
 		return 0
 	fi
