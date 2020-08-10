@@ -1,17 +1,15 @@
 #!/bin/bash
 _mpduser='koraynilay'
 _pre() {
-	dunstify _pre
 	echo _pre
 	case $1 in
 		suspend)echo suspend;;
 		hibernate)
-			dunstify hibernate
 			echo hibernate
-			gksu -u $_mpduser 'systemctl --user stop mpd'
+			sudo -u koraynilay mpd --kill
 			#su -c 'systemctl --user stop mpd' $_mpduser
 			sleep 1
-			umount -R $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
 			;;
 		hybrid-sleep)
 			echo hybrid-sleep
@@ -56,4 +54,6 @@ case $1 in
 	post)_post $2;;
 esac
 touch /_000a_scsleep_cmds.txt__$(date +%0N)
+echo end
 sleep 60
+exit $?
