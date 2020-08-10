@@ -1,22 +1,29 @@
 #!/bin/bash
+_mpduser='koraynilay'
 _pre() {
+	dunstify _pre
 	echo _pre
 	case $1 in
 		suspend)echo suspend;;
 		hibernate)
+			dunstify hibernate
 			echo hibernate
-			su -c 'systemctl --user stop mpd' koraynilay
-			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			gksu -u $_mpduser 'systemctl --user stop mpd'
+			#su -c 'systemctl --user stop mpd' $_mpduser
+			sleep 1
+			umount -R $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
 			;;
 		hybrid-sleep)
 			echo hybrid-sleep
-			su -c 'systemctl --user stop mpd' koraynilay
-			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			su -c 'systemctl --user stop mpd' $_mpduser
+			sleep 1
+			umount -R $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
 			;;
 		suspend-then-hibernate)
 			echo suspend-then-hibernate
-			su -c 'systemctl --user stop mpd' koraynilay
-			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			su -c 'systemctl --user stop mpd' $_mpduser
+			sleep 1
+			umount -R $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
 			;;
 	esac
 }
@@ -26,18 +33,21 @@ _post() {
 		suspend)echo suspend;;
 		hibernate)
 			echo hibernate
-			mount -va
-			su -c 'systemctl --user start mpd' koraynilay
+			mount -a
+			sleep 1
+			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 		hybrid-sleep)
 			echo hybrid-sleep
-			mount -va
-			su -c 'systemctl --user start mpd' koraynilay
+			mount -a
+			sleep 1
+			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 		suspend-then-hibernate)
 			echo suspend-then-hibernate
-			mount -va
-			su -c 'systemctl --user start mpd' koraynilay
+			mount -a
+			sleep 1
+			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 	esac
 }
@@ -45,5 +55,5 @@ case $1 in
 	pre)_pre $2;;
 	post)_post $2;;
 esac
-touch /scsleep_cmds.txt__$(date +%0N)
-sleep 30
+touch /_000a_scsleep_cmds.txt__$(date +%0N)
+sleep 60
