@@ -1,0 +1,45 @@
+#!/bin/sh
+_pre() {
+	case $1 in
+		suspend);;
+		hibernate)
+			mpc pause
+			systemctl --user stop mpd.socket
+			mpd --kill
+			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			;;
+		hybrid-sleep)
+			mpc pause
+			systemctl --user stop mpd.socket
+			mpd --kill
+			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			;;
+		suspend-then-hibernate)
+			mpc pause
+			systemctl --user stop mpd.socket
+			mpd --kill
+			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			;;
+	esac
+}
+_post() {
+	case $1 in
+		suspend);;
+		hibernate)
+			mount -va
+			systemctl --user start mpd.socket
+			;;
+		hybrid-sleep)
+			mount -va
+			systemctl --user start mpd.socket
+			;;
+		suspend-then-hibernate)
+			mount -va
+			systemctl --user start mpd.socket
+			;;
+	esac
+}
+case $1 in
+	pre)_pre $2;;
+	post)_post $2;;
+esac
