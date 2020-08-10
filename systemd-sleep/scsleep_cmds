@@ -1,0 +1,49 @@
+#!/bin/bash
+_pre() {
+	echo _pre
+	case $1 in
+		suspend)echo suspend;;
+		hibernate)
+			echo hibernate
+			su -c 'systemctl --user stop mpd' koraynilay
+			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			;;
+		hybrid-sleep)
+			echo hybrid-sleep
+			su -c 'systemctl --user stop mpd' koraynilay
+			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			;;
+		suspend-then-hibernate)
+			echo suspend-then-hibernate
+			su -c 'systemctl --user stop mpd' koraynilay
+			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs/ {print $1}')
+			;;
+	esac
+}
+_post() {
+	echo _post
+	case $1 in
+		suspend)echo suspend;;
+		hibernate)
+			echo hibernate
+			mount -va
+			su -c 'systemctl --user start mpd' koraynilay
+			;;
+		hybrid-sleep)
+			echo hybrid-sleep
+			mount -va
+			su -c 'systemctl --user start mpd' koraynilay
+			;;
+		suspend-then-hibernate)
+			echo suspend-then-hibernate
+			mount -va
+			su -c 'systemctl --user start mpd' koraynilay
+			;;
+	esac
+}
+case $1 in
+	pre)_pre $2;;
+	post)_post $2;;
+esac
+touch /scsleep_cmds.txt__$(date +%0N)
+sleep 30
