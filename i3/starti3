@@ -1,4 +1,4 @@
 #!/bin/sh
 #echo Press Control-C to cancel \(5 secs timeout\)
 #sleep 5
-startx ~/.xinitrc i3
+#startx ~/.xinitrc i3

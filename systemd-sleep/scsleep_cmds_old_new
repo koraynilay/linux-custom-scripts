@@ -6,17 +6,21 @@ _pre() {
 		suspend)echo suspend;;
 		hibernate)
 			echo hibernate
-			sleep 3
+			sudo -u koraynilay mpd --kill
+			#su -c 'systemctl --user stop mpd' $_mpduser
+			sleep 1
 			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs|fat/ {print $1}')
 			;;
 		hybrid-sleep)
 			echo hybrid-sleep
-			sleep 3
+			su -c 'systemctl --user stop mpd' $_mpduser
+			sleep 1
 			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs|fat/ {print $1}')
 			;;
 		suspend-then-hibernate)
 			echo suspend-then-hibernate
-			sleep 3
+			su -c 'systemctl --user stop mpd' $_mpduser
+			sleep 1
 			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs|fat/ {print $1}')
 			;;
 	esac
@@ -28,21 +32,28 @@ _post() {
 		hibernate)
 			echo hibernate
 			mount -a
+			sleep 1
+			#sudo -u koraynilay ./stmpd
+			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 		hybrid-sleep)
 			echo hybrid-sleep
 			mount -a
+			sleep 1
+			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 		suspend-then-hibernate)
 			echo suspend-then-hibernate
 			mount -a
+			sleep 1
+			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 	esac
 }
-case $1 in
-	pre)_pre $2;;
-	post)_post $2;;
-esac
+#case $1 in
+#	pre)_pre $2;;
+#	post)_post $2;;
+#esac
 touch /_000a_scsleep_cmds.txt__$(date +%0N)
 echo end
 sleep 60
