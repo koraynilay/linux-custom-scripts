@@ -1,27 +1,22 @@
 #!/bin/bash
 _mpduser='koraynilay'
-export XDG_RUNTIME_DIR="/run/user/$(id -u $_mpduser)"
-export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 _pre() {
 	echo _pre
 	case $1 in
 		suspend)echo suspend;;
 		hibernate)
 			echo hibernate
-			su -c 'systemctl --user stop mpd' $_mpduser
-			sleep 1
+			sleep 3
 			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs|fat/ {print $1}')
 			;;
 		hybrid-sleep)
 			echo hybrid-sleep
-			su -c 'systemctl --user stop mpd' $_mpduser
-			sleep 1
+			sleep 3
 			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs|fat/ {print $1}')
 			;;
 		suspend-then-hibernate)
 			echo suspend-then-hibernate
-			su -c 'systemctl --user stop mpd' $_mpduser
-			sleep 1
+			sleep 3
 			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs|fat/ {print $1}')
 			;;
 	esac
@@ -33,21 +28,14 @@ _post() {
 		hibernate)
 			echo hibernate
 			mount -a
-			sleep 1
-			#sudo -u koraynilay ./stmpd
-			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 		hybrid-sleep)
 			echo hybrid-sleep
 			mount -a
-			sleep 1
-			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 		suspend-then-hibernate)
 			echo suspend-then-hibernate
 			mount -a
-			sleep 1
-			su -c 'systemctl --user start mpd' $_mpduser
 			;;
 	esac
 }
