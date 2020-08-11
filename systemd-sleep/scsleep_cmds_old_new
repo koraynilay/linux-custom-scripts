@@ -1,13 +1,14 @@
 #!/bin/bash
 _mpduser='koraynilay'
+export XDG_RUNTIME_DIR="/run/user/$(id -u $_mpduser)"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 _pre() {
 	echo _pre
 	case $1 in
 		suspend)echo suspend;;
 		hibernate)
 			echo hibernate
-			sudo -u koraynilay mpd --kill
-			#su -c 'systemctl --user stop mpd' $_mpduser
+			su -c 'systemctl --user stop mpd' $_mpduser
 			sleep 1
 			umount $(lsblk -o PATH,FSTYPE | awk '/ntfs|fat/ {print $1}')
 			;;
@@ -50,10 +51,10 @@ _post() {
 			;;
 	esac
 }
-#case $1 in
-#	pre)_pre $2;;
-#	post)_post $2;;
-#esac
+case $1 in
+	pre)_pre $2;;
+	post)_post $2;;
+esac
 touch /_000a_scsleep_cmds.txt__$(date +%0N)
 echo end
 sleep 60
