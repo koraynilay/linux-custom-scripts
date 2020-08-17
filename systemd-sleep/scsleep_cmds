@@ -57,5 +57,5 @@ case $1 in
 esac
 touch /_000a_scsleep_cmds.txt__$(date +%0N)
 echo end
-sleep 60
+#sleep 60
 exit $?

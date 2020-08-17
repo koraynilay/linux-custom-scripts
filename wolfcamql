@@ -1,0 +1,4 @@
+#!/bin/sh
+wf="$HOME/wolfcamql12.3"
+cd $wf
+./wolfcamql.x86_64
