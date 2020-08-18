@@ -1,1 +1,7 @@
-expac "%m %n" -l'\n' -Q -H M $(pacman -Qq) | sed s/MiB//g | sort -n
+#!/bin/sh
+if [ -n $1 ];then
+	target=$1
+else
+	target=$(pacman -Qq)
+fi
+expac "%m %n" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n
