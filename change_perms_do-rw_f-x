@@ -1,15 +1,15 @@
 #!/bin/sh
 mainfolder=$1
 extensionfile='/home/koraynilay/linux-custom-scripts/extensions.json'
-ext_non_exe=$(jq '.non_exe' $extensionfile | tr -d '"')
+ext_non_exe=$(jq '.not_exe' $extensionfile | tr -d '"')
 echo $ext_non_exe
 echo $mainfolder
 sleep 5
 
 find $mainfolder -type d -exec echo {} \; -exec chmod 700 {} \;
 
-find $mainfolder -type f -regextype awk -iregex "\.*/.*\.($ext_non_exe)" -exec echo {} \; -exec chmod 600 {} \;
-find $mainfolder -type f -regextype awk -not -iregex "\.*/.*\.($ext_non_exe)" -exec echo {} \; -exec chmod 700 {} \;
+find $mainfolder -type f -regextype awk -iregex "(\./)?.*\.($ext_non_exe)" -exec echo {} \; -exec chmod 600 {} \;
+find $mainfolder -type f -regextype awk -not -iregex "(\./)?.*\.($ext_non_exe)" -exec echo {} \; -exec chmod 700 {} \;
 
 
 
