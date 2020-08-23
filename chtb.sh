@@ -1,13 +1,13 @@
 #!/bin/bash
-folders=("$HOME/.config/google-chrome/Default" "$HOME/.config/google-chrome/Profile 1")
+folders=("$HOME/.config/chromium/Default" "$HOME/.config/chromium/Profile 1")
 bck_folder="$HOME/.chtb"
 lvl=0
 usage() {
 	echo -e "Usage: $0 [options] action"
 	echo -e ""
 	echo -e " action:"
-	echo -e "  b, backup\tBacks up google-chome current session (tabs) in ~/.chtb/[profile name]"
-	echo -e "  r, restore\tRestores the backed up google-chome session (tabs) from ~/.chtb/[profile name]"
+	echo -e "  b, backup\tBacks up chromium/google-chrome current session (tabs) in ~/.chtb/[profile name]"
+	echo -e "  r, restore\tRestores the backed up chromium/google-chrome session (tabs) from ~/.chtb/[profile name]"
 	echo -e ""
 	echo -e " options:"
 	echo -e "  -h\t\tShow this help and exit"
