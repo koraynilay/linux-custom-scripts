@@ -7,7 +7,7 @@ topts='--acls --xattrs -czpvf'
 #echo ${folders[@]}
 #echo ${exfolders[@]}
 for ((i=0;i<${#folders[@]};i++)) do
-#	tar ${topts} ${dest}/${folders[i]/\/}.tar.gz ${folders[i]}
+	echo tar ${topts} ${dest}/${folders[i]/\/}.tar.gz ${folders[i]}
 done
 
 
