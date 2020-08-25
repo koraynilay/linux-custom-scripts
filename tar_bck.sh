@@ -3,31 +3,83 @@
 folders=('/usr' '/var' '/opt' '/etc' '/root')
 exfolders=(${folders[@]} '/swpfl.sys')
 dest='/D/linux/tars'
-topts='--acls --xattrs -czpf'
-v='-v'
+topts='--one-file-system --acls --xattrs -czp'
+v=''
+e=0
 outtar=0
-while getopts noh opt;do
+o='/dev/stdout'
+tob=a
+while getopts xvohf: opt;do
 	case $opt in
-		n)v='';;
+		v)v='-v';;
 		o)outtar=1;;
 		#?)echo -e "'$opt' Uknown option. Exiting"; exit 2;;
 		h)	echo -ne "Usage: $0 [opt]\n";
 			echo -ne "  -n\tdon't be verbose (dont't print processed files)\n";
 			echo -ne "  -o\toutput the tar output to $(eval echo ~$SUDO_USER)/tarbck_{folder_name}\n";
+			echo -ne "  -x\toutput only the commands, don't execute them\n";
 			exit 0;;
+		x)e=1;;
+		f)tob=$OPTARG;;
 		?)exit 2;;
 	esac
 done
+if [ ! -d $dest ];then
+	echo -n "$dest doesn't exists, create it? [y/n]:"
+	read ans
+	if [ "$ans" = "y" ];then
+		mkdir -p "$dest"
+	else
+		exit 3
+	fi
+fi
 #echo ${folders[@]}
 #echo ${exfolders[@]}
-for ((i=0;i<${#folders[@]};i++)) do
-	cf="${folders[i]}"
+fofs() {
+	for ((i=0;i<${#folders[@]};i++)) do
+		cf="${folders[i]}"
+		if [ $outtar -eq 1 ];then
+			o="$(eval echo ~$SUDO_USER)/tarbck_out_${cf/\/}"
+		fi
+		echo $cf
+		if [ $e -eq 1 ];then
+			echo tar ${topts} ${v} -f "${dest}/${cf/\/}.tar.gz" "${cf}" \> $o
+		else
+			tar ${topts} ${v} -f "${dest}/${cf/\/}.tar.gz" "${cf}" > $o
+		fi
+	done
+}
+fofr() {
+	exstring=""
+	for ((i=0;i<${#exfolders[@]};i++)) do
+		exstring+="--exclude=${exfolders[i]} "
+	done
 	if [ $outtar -eq 1 ];then
-		o="> $(eval echo ~$SUDO_USER)/tarbck_out_${cf/\/}"
+		o="$(eval echo ~$SUDO_USER)/tarbck_out_r"
 	fi
-	echo tar ${topts} ${v} ${dest}/${cf/\/}.tar.gz ${cf} ${o}
-done
-
+	echo '/'
+	if [ $e -eq 1 ];then
+		echo tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "/" \> $o
+	else
+		tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "/" > $o
+	fi
+}
+case $tob in
+	a)
+		fofs
+		fofr
+		;;
+	s)
+		fofs
+		;;
+	r)
+		fofr
+		;;
+	*)
+		echo "Invalid -f arg"
+		exit 4
+		;;
+esac
 
 
 
