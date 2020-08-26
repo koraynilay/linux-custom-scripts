@@ -24,35 +24,38 @@ main(){
 			;;
 		restart\ to\ windows)
 			mpc pause
-			systemctl reboot --boot-loader-entry=auto-windows
+			#systemctl reboot --boot-loader-entry=auto-windows
 			#dunstify ciao
 			;;
 		restart)
 			mpc pause
-			systemctl reboot
+			#systemctl reboot
 			;;
 		shutdown)
 			mpc pause
-			systemctl poweroff
+			#systemctl poweroff
 			;;
 	esac
 }
 kerns(){
 	entriesk=""
 	r=""
+	array=()
 	for file in $efif/*;do
-		r+=$(basename "$file")
+		array+=("$(basename "$file")")
 		c=$(awk '/title/ {$1="";print $0}' "$file")
-		entriesk+="${c/\ }\n"
+		array+=("${c#\ }")
+		entriesk+="${c#\ }\n"
 		#entriesk+="$(basename ${file%.conf})\n"
 	done
 	echo -ne $entriesk
+	echo ${array[@]}
 	msg="Up: $(uptime -p | awk '{print $2"h "$4"m"}')"
 	res=$(echo -e "${entriesk%\\n}" | rofi -p "$msg"  -width 10 -xoffset 0 -no-fixed-num-lines -dmenu)
 	IFS=$'\n'
-	for en in $r;do
-		if [ "$en" = "$res" ];then
-			systemctl reboot --boot-loader-entry="$en"
+	for ((i=0;i<${#array[@]};i++)) do
+		if [ "${array[i+1]}" = "$res" ];then
+			echo systemctl reboot --boot-loader-entry="${array[i]}"
 		fi
 	done
 }
