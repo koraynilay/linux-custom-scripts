@@ -39,12 +39,22 @@ main(){
 }
 kerns(){
 	entriesk=""
+	r=""
 	for file in $efif/*;do
-		entriesk+="$(basename ${file%.conf})\n"
+		r+=$(basename "$file")
+		c=$(awk '/title/ {$1="";print $0}' "$file")
+		entriesk+="${c/\ }\n"
+		#entriesk+="$(basename ${file%.conf})\n"
 	done
-	echo $entriesk
+	echo -ne $entriesk
 	msg="Up: $(uptime -p | awk '{print $2"h "$4"m"}')"
 	res=$(echo -e "${entriesk%\\n}" | rofi -p "$msg"  -width 10 -xoffset 0 -no-fixed-num-lines -dmenu)
+	IFS=$'\n'
+	for en in $r;do
+		if [ "$en" = "$res" ];then
+			systemctl reboot --boot-loader-entry="$en"
+		fi
+	done
 }
 
 main
