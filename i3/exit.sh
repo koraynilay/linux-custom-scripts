@@ -13,51 +13,61 @@ main(){
 			termite -e htop
 			;;
 		hibernate)
+			ask
 			mpc pause
 			systemctl hibernate
 			;;
 		logout)
+			ask
 			i3-msg exit
 			;;
 		restart\ to\ other\ kernel)
 			kerns
 			;;
 		restart\ to\ windows)
+			ask
 			mpc pause
-			#systemctl reboot --boot-loader-entry=auto-windows
+			systemctl reboot --boot-loader-entry=auto-windows
 			#dunstify ciao
 			;;
 		restart)
+			ask
 			mpc pause
-			#systemctl reboot
+			systemctl reboot
 			;;
 		shutdown)
+			ask
 			mpc pause
-			#systemctl poweroff
+			systemctl poweroff
 			;;
 	esac
 }
 kerns(){
 	entriesk=""
-	r=""
 	array=()
 	for file in $efif/*;do
-		array+=("$(basename "$file")")
 		c=$(awk '/title/ {$1="";print $0}' "$file")
+		array+=("$(basename "$file")")
 		array+=("${c#\ }")
 		entriesk+="${c#\ }\n"
-		#entriesk+="$(basename ${file%.conf})\n"
 	done
-	echo -ne $entriesk
-	echo ${array[@]}
+	#echo -ne $entriesk
+	#echo ${array[@]}
 	msg="Up: $(uptime -p | awk '{print $2"h "$4"m"}')"
 	res=$(echo -e "${entriesk%\\n}" | rofi -p "$msg"  -width 10 -xoffset 0 -no-fixed-num-lines -dmenu)
-	IFS=$'\n'
 	for ((i=0;i<${#array[@]};i++)) do
 		if [ "${array[i+1]}" = "$res" ];then
-			echo systemctl reboot --boot-loader-entry="${array[i]}"
+			ask
+			systemctl reboot --boot-loader-entry="${array[i]}"
 		fi
 	done
+}
+ask(){
+	res=$(echo -e "Yes\nNo" | rofi -p "Are you sure?"  -width 10 -xoffset 0 -lines 2 -no-fixed-num-lines -dmenu)
+	#echo $res
+	if [ ! "$res" = "Yes" ];then
+		exit 1
+	fi
 }
 
 main
