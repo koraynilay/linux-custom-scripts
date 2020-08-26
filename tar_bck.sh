@@ -1,5 +1,4 @@
 #!/bin/bash
-[[ $UID -ne 0 ]] && echo -e "This script needs root access. Exiting." && exit 1
 folders=('/usr' '/var' '/opt' '/etc' '/root')
 exfolders=(${folders[@]} '/swpfl.sys')
 dest='/D/linux/tars'
@@ -15,15 +14,17 @@ while getopts xvohf: opt;do
 		o)outtar=1;;
 		#?)echo -e "'$opt' Uknown option. Exiting"; exit 2;;
 		h)	echo -ne "Usage: $0 [opt]\n";
-			echo -ne "  -n\tdon't be verbose (dont't print processed files)\n";
-			echo -ne "  -o\toutput the tar output to $(eval echo ~$SUDO_USER)/tarbck_{folder_name}\n";
-			echo -ne "  -x\toutput only the commands, don't execute them\n";
+			echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
+			echo -ne "  -o\t\toutput the tar output to $(eval echo ~$SUDO_USER)/tarbck_{folder_name}\n";
+			echo -ne "  -x\t\toutput only the commands, don't execute them\n";
+			echo -ne "  -f [a|r|s]\ta = all (all the root filesystem), r = root (like a, but without ${folders[@]}), s = slash (only ${folders[@]})\n";
 			exit 0;;
 		x)e=1;;
 		f)tob=$OPTARG;;
 		?)exit 2;;
 	esac
 done
+[[ $UID -ne 0 ]] && echo -e "This script needs root access. Exiting." && exit 1
 if [ ! -d $dest ];then
 	echo -n "$dest doesn't exists, create it? [y/n]:"
 	read ans
