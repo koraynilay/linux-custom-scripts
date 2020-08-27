@@ -65,6 +65,18 @@ fofr() {
 		tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "/" > $o
 	fi
 }
+fofh() {
+	if [ $outtar -eq 1 ];then
+		o="$(eval echo ~$SUDO_USER)/tarbck_out_home"
+	fi
+	echo '/home'
+	if [ $e -eq 1 ];then
+		echo tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "/home" \> $o
+	else
+		tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "/home" > $o
+	fi
+	
+}
 case $tob in
 	a)
 		fofs
@@ -75,6 +87,9 @@ case $tob in
 		;;
 	r)
 		fofr
+		;;
+	h)
+		fofh
 		;;
 	*)
 		echo "Invalid -f arg"
