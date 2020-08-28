@@ -2,7 +2,7 @@
 folders=('/usr' '/var' '/opt' '/etc' '/root')
 exfolders=(${folders[@]} '/swpfl.sys')
 dest='/D/linux/tars'
-topts='--one-file-system --acls --xattrs -czp'
+topts='--one-file-system --acls --xattrs -cp'
 v=''
 e=0
 outtar=0
