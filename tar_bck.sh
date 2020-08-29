@@ -18,7 +18,7 @@ while getopts xvohf: opt;do
 			echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
 			echo -ne "  -o\t\toutput the tar output to $(eval echo ~$SUDO_USER)/tarbck_{folder_name}\n";
 			echo -ne "  -x\t\toutput only the commands, don't execute them\n";
-			echo -ne "  -p [root folder]\tFolder to use as the root folder (e.g. '/mnt' to backup '/mnt/usr', '/mnt/var', etc...)\n";
+			echo -ne "  -p [prefix]\tFolder to use as the root folder (e.g. '/mnt' to backup '/mnt/usr', '/mnt/var', etc...)\n";
 			echo -ne "  -f [a|r|s]\ta = all (all the root filesystem), r = root (like a, but without ${folders[@]}), s = slash (only ${folders[@]}), h = home (only the home folder)\n";
 			exit 0;;
 		x)e=1;;
