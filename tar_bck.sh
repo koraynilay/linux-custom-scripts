@@ -11,7 +11,7 @@ o='/dev/stdout'
 tob=a
 while getopts xvohzf:p: opt;do
 	case $opt in
-		v)v='-v';;
+		v)topts+="v";;
 		o)outtar=1;;
 		#?)echo -e "'$opt' Uknown option. Exiting"; exit 2;;
 		h)	echo -ne "Usage: $0 [opt]\n";
@@ -51,9 +51,9 @@ fofs() {
 		fi
 		echo $cf
 		if [ $e -eq 1 ];then
-			echo tar ${topts} ${v} -f "${dest}/${fn}.tar.gz" "${cf}" \> $o
+			echo tar ${topts} -f "${dest}/${fn}.tar.gz" "${cf}" \> $o
 		else
-			tar ${topts} ${v} -f "${dest}/${fn}.tar.gz" "${cf}" > $o
+			tar ${topts} -f "${dest}/${fn}.tar.gz" "${cf}" > $o
 		fi
 	done
 }
@@ -67,9 +67,9 @@ fofr() {
 	fi
 	echo '/'
 	if [ $e -eq 1 ];then
-		echo tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "${prefix}/" \> $o
+		echo tar ${exstring} ${topts} -f "${dest}/r.tar.gz" "${prefix}/" \> $o
 	else
-		tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "${prefix}/" > $o
+		tar ${exstring} ${topts} -f "${dest}/r.tar.gz" "${prefix}/" > $o
 	fi
 }
 fofh() {
@@ -78,9 +78,9 @@ fofh() {
 	fi
 	echo '/home'
 	if [ $e -eq 1 ];then
-		echo tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "${prefix}/home" \> $o
+		echo tar ${exstring} ${topts} -f "${dest}/home.tar.gz" "${prefix}/home" \> $o
 	else
-		tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "${prefix}/home" > $o
+		tar ${exstring} ${topts} -f "${dest}/home.tar.gz" "${prefix}/home" > $o
 	fi
 	
 }
