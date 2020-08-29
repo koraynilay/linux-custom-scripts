@@ -9,7 +9,7 @@ e=0
 outtar=0
 o='/dev/stdout'
 tob=a
-while getopts xvohf: opt;do
+while getopts xvohzf:p: opt;do
 	case $opt in
 		v)v='-v';;
 		o)outtar=1;;
@@ -17,6 +17,7 @@ while getopts xvohf: opt;do
 		h)	echo -ne "Usage: $0 [opt]\n";
 			echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
 			echo -ne "  -o\t\toutput the tar output to $(eval echo ~$SUDO_USER)/tarbck_{folder_name}\n";
+			echo -ne "  -z\t\tenables tar's -z option\n";
 			echo -ne "  -x\t\toutput only the commands, don't execute them\n";
 			echo -ne "  -p [prefix]\tFolder to use as the root folder (e.g. '/mnt' to backup '/mnt/usr', '/mnt/var', etc...)\n";
 			echo -ne "  -f [a|r|s]\ta = all (all the root filesystem), r = root (like a, but without ${folders[@]}), s = slash (only ${folders[@]}), h = home (only the home folder)\n";
@@ -24,6 +25,7 @@ while getopts xvohf: opt;do
 		x)e=1;;
 		f)tob="$OPTARG";;
 		p)prefix="$OPTARG";;
+		z)topts+="z";;
 		?)exit 2;;
 	esac
 done
