@@ -1,6 +1,7 @@
 #!/bin/bash
-folders=('/usr' '/var' '/opt' '/etc' '/root')
-exfolders=(${folders[@]} '/swpfl.sys')
+prefix=''
+folders=("${prefix}/usr" "${prefix}/var" "${prefix}/opt" "${prefix}/etc" "${prefix}/root")
+exfolders=(${folders[@]} "${prefix}/swpfl.sys")
 dest='/D/linux/tars'
 topts='--one-file-system --acls --xattrs -cp'
 v=''
@@ -17,10 +18,12 @@ while getopts xvohf: opt;do
 			echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
 			echo -ne "  -o\t\toutput the tar output to $(eval echo ~$SUDO_USER)/tarbck_{folder_name}\n";
 			echo -ne "  -x\t\toutput only the commands, don't execute them\n";
-			echo -ne "  -f [a|r|s]\ta = all (all the root filesystem), r = root (like a, but without ${folders[@]}), s = slash (only ${folders[@]})\n";
+			echo -ne "  -p [root folder]\tFolder to use as the root folder (e.g. '/mnt' to backup '/mnt/usr', '/mnt/var', etc...)\n";
+			echo -ne "  -f [a|r|s]\ta = all (all the root filesystem), r = root (like a, but without ${folders[@]}), s = slash (only ${folders[@]}), h = home (only the home folder)\n";
 			exit 0;;
 		x)e=1;;
-		f)tob=$OPTARG;;
+		f)tob="$OPTARG";;
+		p)prefix="$OPTARG";;
 		?)exit 2;;
 	esac
 done
@@ -39,14 +42,15 @@ fi
 fofs() {
 	for ((i=0;i<${#folders[@]};i++)) do
 		cf="${folders[i]}"
+		fn="$(basename "${cf}")"
 		if [ $outtar -eq 1 ];then
-			o="$(eval echo ~$SUDO_USER)/tarbck_out_${cf/\/}"
+			o="$(eval echo ~$SUDO_USER)/tarbck_out_${fn}"
 		fi
 		echo $cf
 		if [ $e -eq 1 ];then
-			echo tar ${topts} ${v} -f "${dest}/${cf/\/}.tar.gz" "${cf}" \> $o
+			echo tar ${topts} ${v} -f "${dest}/${fn}.tar.gz" "${cf}" \> $o
 		else
-			tar ${topts} ${v} -f "${dest}/${cf/\/}.tar.gz" "${cf}" > $o
+			tar ${topts} ${v} -f "${dest}/${fn}.tar.gz" "${cf}" > $o
 		fi
 	done
 }
@@ -60,9 +64,9 @@ fofr() {
 	fi
 	echo '/'
 	if [ $e -eq 1 ];then
-		echo tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "/" \> $o
+		echo tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "${prefix}/" \> $o
 	else
-		tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "/" > $o
+		tar ${exstring} ${topts} ${v} -f "${dest}/r.tar.gz" "${prefix}/" > $o
 	fi
 }
 fofh() {
@@ -71,9 +75,9 @@ fofh() {
 	fi
 	echo '/home'
 	if [ $e -eq 1 ];then
-		echo tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "/home" \> $o
+		echo tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "${prefix}/home" \> $o
 	else
-		tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "/home" > $o
+		tar ${exstring} ${topts} ${v} -f "${dest}/home.tar.gz" "${prefix}/home" > $o
 	fi
 	
 }
