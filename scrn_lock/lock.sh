@@ -1,7 +1,7 @@
 #!/bin/sh
-home="/home/koraynilay"
-light_pic="$home/Pictures/wallpapers/sweet/landscape_sweet_light_blur.png"
-dark_pic="$home/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
+#home="/home/koraynilay"
+light_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_light_blur.png"
+dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
 #light_pic="$home/Pictures/wallpapers/wave/landscape_wave_blur.png"
 #dark_pic="$home/Pictures/wallpapers/wave/landscape_wave_4_blur.png"
 font='Tw Cen MT'
