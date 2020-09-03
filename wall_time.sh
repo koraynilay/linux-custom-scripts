@@ -1,6 +1,6 @@
 #!/bin/sh
-light_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_light_blur.png"
-dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
+light_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_light.png"
+dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark.png"
 swi(){
 	if [ `date +%H` -lt 20 -a `date +%H` -gt 7 ];then
 		feh --bg-fill $light_pic
