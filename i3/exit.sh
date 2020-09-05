@@ -1,7 +1,7 @@
 #!/bin/bash
 efif="/efi/loader/entries"
 main(){
-	entries="terminal\nhtop\nhibernate\nlogout\nrestart to other kernel\nrestart to windows\nrestart\nshutdown"
+	entries="terminal\nhtop\nvirtual keyboard\nhibernate\nlogout\nrestart to other kernel\nrestart to windows\nrestart\nshutdown"
 	msg="Up: $(uptime -p | awk '{print $2"h "$4"m"}')"
 	res=$(echo -e "$entries" | rofi -p "$msg"  -width 10 -xoffset 0 -lines 5 -no-fixed-num-lines -dmenu)
 
@@ -11,6 +11,9 @@ main(){
 			;;
 		htop)
 			termite -e htop
+			;;
+		virtual\ keyboard)
+			onboard
 			;;
 		hibernate)
 			ask
