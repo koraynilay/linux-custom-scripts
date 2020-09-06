@@ -1,6 +1,6 @@
 #!/bin/sh
-vmsfolder='/C/linux/vms'
-#vmsfolder='/I/VitualVMs'
+#vmsfolder='/C/linux/vms'
+vmsfolder='/I/vms'
 vmname="win10"
 cd "$vmsfolder"
 cd "$vmname"

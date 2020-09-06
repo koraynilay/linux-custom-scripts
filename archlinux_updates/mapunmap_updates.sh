@@ -6,7 +6,7 @@ if [ "$1" == "start" ];then
 		xdotool windowkill $dialog_id
 	fi
 	echo start
-	termite -t "archlinux_updates_script" -e updates_dialog_text 2>/dev/null &!
+	nice -n 19 termite -t "archlinux_updates_script" -e updates_dialog_text 2>/dev/null &!
 	rm /tmp/archlinux_updates_script_hidden
 	sleep 0.2
 	mapunmap_updates.sh
