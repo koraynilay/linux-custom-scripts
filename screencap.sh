@@ -62,32 +62,26 @@ case $1 in
 		killall -CONT ffmpeg && dunstify -a screencap.sh "rec resumed" -t 1000 # or -18 code
 	;;
 	toggle_rec)
-		ffmpeg_pid=$(pidof ffmpeg)
-		ffmpeg_state=$(ps -q $ffmpeg_pid -o state --no-headers)
-		case $ffmpeg_state in
-			S)
-				killall -STOP ffmpeg \
-				&& dunstify -a screencap.sh "rec paused" -t 1000
-			;;
-			T)
-				killall -CONT ffmpeg \
-				&& dunstify -a screencap.sh "rec resumed" -t 1000
-			;;
-			*)dunstify -a screencap.sh "unkown state" -t 1000;;
-		esac
-		if [ -s "$lockfile" ];then
-			content_lock="$(cat "$lockfile")"
-			fnl=${content_lock%.mkv}
-			filename="${fnl}.tmp_to_concat.mkv"
-			ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
-			ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
-			dunstify -a screencap.sh "rec started" -t 200
-			ffmpeg $ffmpeg_opts $filename  \
-				; dunstify -a ffmpeg "screencast is $filename" \
-				&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
-			out_temp="${fnl}_concat.mkv"
-			ffmpeg -f concat -safe 0 -i <(echo -e "$content_lock\n$filename") -c copy "$out_temp"
-			mv -vi "$out_temp" "$content_lock"
+		if ! [ -z "$(pgrep $0)" -a -z "$(pidof ffmpeg)" ];then # if both are running
+			killall -INT ffmpeg
+			cp -vf "$lastfile" "$lockfile"
+			rm "$lastfile"
+		else
+			if [ -s "$lockfile" ];then
+				content_lock="$(cat "$lockfile")"
+				fnl=${content_lock%.mkv}
+				filename="${fnl}.tmp_to_concat.mkv"
+				ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
+				ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
+				dunstify -a screencap.sh "rec started" -t 200
+				ffmpeg $ffmpeg_opts $filename  \
+					; dunstify -a ffmpeg "screencast is $filename" \
+					&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
+				out_temp="${fnl}_concat.mkv"
+				ffmpeg -f concat -safe 0 -i <(echo -e "$content_lock\n$filename") -c copy "$out_temp"
+				mv -vi "$out_temp" "$content_lock"
+				rm "$lockfile"
+			fi
 		fi
 	;;
 	*)echo -ne "Usage: $0 [shot|shots|cast|casts|stop_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
