@@ -63,6 +63,7 @@ case $1 in
 	;;
 	toggle_rec)
 		pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg
+		pgrep -P $(pgrep -f "$(basename /home/koraynilay/linux-custom-scripts/screencap.sh).*cast.*") ffmpeg
 		exit
 		if [ -z "$(pgrep -P $(pgrep $(basename $0)) ffmpeg)" ];then # if both are running
 			killall -INT ffmpeg
