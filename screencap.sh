@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%d-%m-%Y_%H-%M-%S)
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
@@ -48,8 +48,33 @@ case $1 in
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 			#--windowid $ID \ #for recordmydesktop
 	;;
-	*)echo -ne "Usage: $0 [shot|shots|cast|casts]\n";exit 1;;
+	kill_rec)
+		killall -INT ffmpeg # or -2 code
+	;;
+	pause_rec)
+		killall -STOP ffmpeg && dunstify -a screencap.sh "rec paused" -t 1000  # or -19 code 
+	;;
+	resume_rec)
+		killall -CONT ffmpeg && dunstify -a screencap.sh "rec resumed" -t 1000 # or -18 code
+	;;
+	toggle_rec)
+		ffmpeg_pid=$(pidof ffmpeg)
+		ffmpeg_state=$(ps -q $ffmpeg_pid -o state --no-headers)
+		case $ffmpeg_state in
+			S)
+				killall -STOP ffmpeg \
+				&& dunstify -a screencap.sh "rec paused" -t 1000
+			;;
+			T)
+				killall -CONT ffmepg \
+				&& dunstify -a screencap.sh "rec resumed" -t 1000
+			;;
+			*)dunstify -a screencap.sh "unkown state" -t 1000;;
+		esac
+	;;
+	*)echo -ne "Usage: $0 [shot|shots|cast|casts|kill_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
 	#*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
 esac
+exit $?
 
 #[1]: from https://github.com/naelstrof/slop/blob/master/README.md#practical-applications
