@@ -4,7 +4,7 @@ date=$(date +%d-%m-%Y_%H-%M-%S)
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
 xclip_gopts=""
 # -filter_complex and -map are from https://trac.ffmpeg.org/wiki/AudioChannelManipulation (Section: Merged audio channel)
-ffmepg_opts="-hwaccel_output_format cuda "
+ffmepg_opts="ffmpeg -hwaccel_output_format cuda "
 ffmepg_opts+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmepg_opts+="-f pulse -i 2 -ac 2 "
 ffmepg_opts+="-f pulse -i 1 -ac 1 "
@@ -28,11 +28,11 @@ case $1 in
 		&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
-		filename=cici.mkv
+		filename=../cici.mkv
 		ffmepg_opts=${ffmepg_opts/size_to_replace/-s $full_res}
 		ffmepg_opts=${ffmepg_opts/offset_to_replace/}
-		ffmpeg $ffmepg_opts \
-			$filename \
+		$ffmepg_opts \
+			$filename
 		#	&& dunstify -a ffmpeg "screencast is $filename" \
 		#	&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 	;;
@@ -49,7 +49,7 @@ case $1 in
 		#	&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 		#	#--windowid $ID \ #for recordmydesktop
 	;;
-	*)printf "Usage: $0 [shot|shots|cast|casts]\n";exit 1;;
+	*)echo -ne "Usage: $0 [shot|shots|cast|casts]\n";exit 1;;
 	#*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
 esac
 
