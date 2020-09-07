@@ -32,7 +32,7 @@ case $1 in
 		ffmepg_opts=${ffmepg_opts/size_to_replace/-s $full_res}
 		ffmepg_opts=${ffmepg_opts/offset_to_replace/}
 		ffmpeg $ffmepg_opts $filename \
-			&& dunstify -a ffmpeg "screencast is $filename" \
+			; dunstify -a ffmpeg "screencast is $filename" \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 	;;
 	casts)
@@ -44,7 +44,7 @@ case $1 in
 		ffmepg_opts=${ffmepg_opts/offset_to_replace/+$X,$Y}
 		echo ffmpeg $ffmepg_opts \
 			$filename \
-			&& dunstify -a ffmpeg "screencast is $filename" \
+			; dunstify -a ffmpeg "screencast is $filename" \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 			#--windowid $ID \ #for recordmydesktop
 	;;
