@@ -31,6 +31,7 @@ case $1 in
 		filename="$HOME/Videos/screencasts/${date}.mkv"
 		ffmepg_opts=${ffmepg_opts/size_to_replace/-s $full_res}
 		ffmepg_opts=${ffmepg_opts/offset_to_replace/}
+		dunstify -a screencap.sh "rec started" -t 200
 		ffmpeg $ffmepg_opts $filename \
 			; dunstify -a ffmpeg "screencast is $filename" \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
@@ -39,9 +40,10 @@ case $1 in
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
 		filename="$HOME/Videos/screencasts/${date}_select.mkv"
 		read -r X Y W H G ID < <(echo $slop) #[1]
-		echo $X $Y $W $H $G $ID
+		#echo $X $Y $W $H $G $ID
 		ffmepg_opts=${ffmepg_opts/size_to_replace/-s ${W}x${H}}
 		ffmepg_opts=${ffmepg_opts/offset_to_replace/+$X,$Y}
+		dunstify -a screencap.sh "rec started" -t 200
 		echo ffmpeg $ffmepg_opts \
 			$filename \
 			; dunstify -a ffmpeg "screencast is $filename" \
