@@ -4,13 +4,12 @@ date=$(date +%d-%m-%Y_%H-%M-%S)
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
 xclip_gopts=""
 # -filter_complex and -map are from https://trac.ffmpeg.org/wiki/AudioChannelManipulation (Section: Merged audio channel)
-fco="[1:a][2:a] amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a]"
 ffmepg_opts="-hwaccel_output_format cuda "
 ffmepg_opts+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmepg_opts+="-f pulse -i 2 -ac 2 "
 ffmepg_opts+="-f pulse -i 1 -ac 1 "
-ffmepg_opts+="-filter_complex $fco "
-ffmepg_opts+="-map 0 -map \"[a]\" -map 1 -map 2 "
+ffmepg_opts+="-filter_complex '[1:a][2:a] amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a]' "
+ffmepg_opts+="-map 0 -map '[a]' -map 1 -map 2 "
 ffmepg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
 ffmepg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
 ffmepg_opts+="-preset fast "
