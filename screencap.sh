@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -v
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%d-%m-%Y_%H-%M-%S)
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
@@ -8,7 +8,7 @@ ffmepg_opts="-hwaccel_output_format cuda "
 ffmepg_opts+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmepg_opts+="-f pulse -i 2 -ac 2 "
 ffmepg_opts+="-f pulse -i 1 -ac 1 "
-ffmepg_opts+="-filter_complex '[1:a][2:a] amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a]' "
+ffmepg_opts+="-filter_complex [1:a][2:a] amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] "
 ffmepg_opts+="-map 0 -map '[a]' -map 1 -map 2 "
 ffmepg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
 ffmepg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
