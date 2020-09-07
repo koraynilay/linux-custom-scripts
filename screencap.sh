@@ -4,15 +4,15 @@ date=$(date +%d-%m-%Y_%H-%M-%S)
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
 xclip_gopts=""
 # -filter_complex and -map are from https://trac.ffmpeg.org/wiki/AudioChannelManipulation (Section: Merged audio channel)
-ffmepg_opts="-hwaccel_output_format cuda "
-ffmepg_opts+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
-ffmepg_opts+="-f pulse -i 2 -ac 2 "
-ffmepg_opts+="-f pulse -i 1 -ac 1 "
-ffmepg_opts+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #...2:a]amer... not really fixed, just a workaround ("no such filter" error) (instead of ...2:a] amer...)
-ffmepg_opts+="-map 0 -map [a] -map 1 -map 2 "
-ffmepg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
-ffmepg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
-ffmepg_opts+="-preset fast "
+ffmpeg_opts="-hwaccel_output_format cuda "
+ffmpeg_opts+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
+ffmpeg_opts+="-f pulse -i 2 -ac 2 "
+ffmpeg_opts+="-f pulse -i 1 -ac 1 "
+ffmpeg_opts+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #...2:a]amer... not really fixed, just a workaround ("no such filter" error) (instead of ...2:a] amer...)
+ffmpeg_opts+="-map 0 -map [a] -map 1 -map 2 "
+ffmpeg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
+ffmpeg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
+ffmpeg_opts+="-preset fast "
 case $1 in
 	shot)
 		filename="$HOME/Pictures/screens/${date}.png"
@@ -29,10 +29,10 @@ case $1 in
 	;;
 	cast)
 		filename="$HOME/Videos/screencasts/${date}.mkv"
-		ffmepg_opts=${ffmepg_opts/size_to_replace/-s $full_res}
-		ffmepg_opts=${ffmepg_opts/offset_to_replace/}
+		ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
+		ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
 		dunstify -a screencap.sh "rec started" -t 200
-		ffmpeg $ffmepg_opts $filename \
+		ffmpeg $ffmpeg_opts $filename  \
 			; dunstify -a ffmpeg "screencast is $filename" \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 	;;
@@ -41,11 +41,10 @@ case $1 in
 		filename="$HOME/Videos/screencasts/${date}_select.mkv"
 		read -r X Y W H G ID < <(echo $slop) #[1]
 		#echo $X $Y $W $H $G $ID
-		ffmepg_opts=${ffmepg_opts/size_to_replace/-s ${W}x${H}}
-		ffmepg_opts=${ffmepg_opts/offset_to_replace/+$X,$Y}
+		ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
+		ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+$X,$Y}
 		dunstify -a screencap.sh "rec started" -t 200
-		echo ffmpeg $ffmepg_opts \
-			$filename \
+		ffmpeg $ffmpeg_opts $filename \
 			; dunstify -a ffmpeg "screencast is $filename" \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 			#--windowid $ID \ #for recordmydesktop
@@ -68,7 +67,7 @@ case $1 in
 				&& dunstify -a screencap.sh "rec paused" -t 1000
 			;;
 			T)
-				killall -CONT ffmepg \
+				killall -CONT ffmpeg \
 				&& dunstify -a screencap.sh "rec resumed" -t 1000
 			;;
 			*)dunstify -a screencap.sh "unkown state" -t 1000;;
