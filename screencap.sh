@@ -10,8 +10,8 @@ ffmpeg_opts+="-f pulse -i 2 -ac 2 "
 ffmpeg_opts+="-f pulse -i 1 -ac 1 "
 ffmpeg_opts+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #...2:a]amer... not really fixed, just a workaround ("no such filter" error) (instead of ...2:a] amer...)
 ffmpeg_opts+="-map 0 -map [a] -map 1 -map 2 "
-ffmpeg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
-ffmpeg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
+ffmpeg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 -vf setpts=N/FR/TB "
+ffmpeg_opts+="-c:a mp3 -r:a 44100 -b:a 320k -af asetpts=N/FR/TB "
 ffmpeg_opts+="-preset fast "
 case $1 in
 	shot)
