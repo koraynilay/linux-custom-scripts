@@ -1,5 +1,6 @@
 #!/bin/bash
 lastfile="$HOME/.screencapsh"
+lockfile="$HOME/.screencapsh.lck"
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%d-%m-%Y_%H-%M-%S)
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
@@ -74,6 +75,20 @@ case $1 in
 			;;
 			*)dunstify -a screencap.sh "unkown state" -t 1000;;
 		esac
+		if [ -s "$lockfile" ];then
+			content_lock="$(cat "$lockfile")"
+			fnl=${content_lock%.mkv}
+			filename="${fnl}.tmp_to_concat.mkv"
+			ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
+			ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
+			dunstify -a screencap.sh "rec started" -t 200
+			ffmpeg $ffmpeg_opts $filename  \
+				; dunstify -a ffmpeg "screencast is $filename" \
+				&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
+			out_temp="${fnl}_concat.mkv"
+			ffmpeg -f concat -safe 0 -i <(echo -e "$content_lock\n$filename") -c copy "$out_temp"
+			mv -vi "$out_temp" "$content_lock"
+		fi
 	;;
 	*)echo -ne "Usage: $0 [shot|shots|cast|casts|stop_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
 	#*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
