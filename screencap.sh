@@ -62,10 +62,10 @@ case $1 in
 		killall -CONT ffmpeg && dunstify -a screencap.sh "rec resumed" -t 1000 # or -18 code
 	;;
 	toggle_rec)
-		pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg
-		exit
-		if [ -z "$(pgrep -P $(pgrep $(basename $0)) ffmpeg)" ];then # if both are running
-			killall -INT ffmpeg
+		#pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg
+		ffmpeg_pid=$(pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg)
+		if [ -n "$ffmpeg_pid" -a $? -eq 0 ];then # if both are running
+			kill -INT $ffmpeg_pid
 			cp -vf "$lastfile" "$lockfile"
 			rm "$lastfile"
 		else
