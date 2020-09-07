@@ -28,13 +28,12 @@ case $1 in
 		&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
-		filename=../cici.mkv
+		filename="$HOME/Videos/screencasts/${date}.mkv"
 		ffmepg_opts=${ffmepg_opts/size_to_replace/-s $full_res}
 		ffmepg_opts=${ffmepg_opts/offset_to_replace/}
-		ffmpeg $ffmepg_opts \
-			$filename
-		#	&& dunstify -a ffmpeg "screencast is $filename" \
-		#	&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
+		ffmpeg $ffmepg_opts $filename \
+			&& dunstify -a ffmpeg "screencast is $filename" \
+			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 	;;
 	casts)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
@@ -45,9 +44,9 @@ case $1 in
 		ffmepg_opts=${ffmepg_opts/offset_to_replace/+$X,$Y}
 		echo ffmpeg $ffmepg_opts \
 			$filename \
-		#	&& dunstify -a ffmpeg "screencast is $filename" \
-		#	&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
-		#	#--windowid $ID \ #for recordmydesktop
+			&& dunstify -a ffmpeg "screencast is $filename" \
+			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
+			#--windowid $ID \ #for recordmydesktop
 	;;
 	*)echo -ne "Usage: $0 [shot|shots|cast|casts]\n";exit 1;;
 	#*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
