@@ -4,7 +4,7 @@ date=$(date +%d-%m-%Y_%H-%M-%S)
 xclip_gopts=""
 # -filter_complex and -map are from https://trac.ffmpeg.org/wiki/AudioChannelManipulation (Section: Merged audio channel)
 ffmepg_opts=" 	-hwaccel_output_format cuda \
-		-f x11grab -i $DISPLAY \
+		-f x11grab -i $DISPLAY size_to_replace \
 		-f pulse -i 2 \
 		-f pulse -i 1 \
 		-filter_complex '[1:a][2:a] amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a]' \
@@ -12,14 +12,6 @@ ffmepg_opts=" 	-hwaccel_output_format cuda \
 		-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 \
 		-c:a mp3 -r:a 44100 -b:a 320k \
 		-preset fast"
-recdesk_multi_opt="	--freq 44100 \
-			--fps 60 \
-			--no-wm-check \
-			--device pulse \
-			--stop-shortcut Control+Delete \
-			--pause-shortcut Control+Insert \
-			--on-the-fly-encoding"
-			# --fps 60 #not working, cause it speeds a lot up the video
 case $1 in
 	shot)
 		filename="$HOME/Pictures/screens/${date}.png"
@@ -36,9 +28,9 @@ case $1 in
 	;;
 	cast)
 		filename="$HOME/Videos/screencasts/${date}.ogv"
-		recordmydesktop $recdesk_multi_opt \
+		ffmpeg ${ffmepg_opts} \
 			-o $filename \
-			&& dunstify -a recordmydesktop "video is $filename" \
+			&& dunstify -a ffmpeg "video is $filename" \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 	;;
 	casts)
@@ -46,7 +38,7 @@ case $1 in
 		filename="$HOME/Videos/screencasts/${date}_select.ogv"
 		read -r X Y W H G ID < <(echo $slop) #[1]
 		echo $X $Y $W $H $G $ID
-		recordmydesktop \
+		ffmpeg $ffmepg_opts \
 			-x $X \
 			-y $Y \
 			--width $W \
