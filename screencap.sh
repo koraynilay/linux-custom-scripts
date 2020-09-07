@@ -48,7 +48,7 @@ case $1 in
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 			#--windowid $ID \ #for recordmydesktop
 	;;
-	kill_rec)
+	stop_rec)
 		killall -INT ffmpeg # or -2 code
 	;;
 	pause_rec)
@@ -72,7 +72,7 @@ case $1 in
 			*)dunstify -a screencap.sh "unkown state" -t 1000;;
 		esac
 	;;
-	*)echo -ne "Usage: $0 [shot|shots|cast|casts|kill_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
+	*)echo -ne "Usage: $0 [shot|shots|cast|casts|stop_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
 	#*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
 esac
 exit $?
