@@ -64,14 +64,16 @@ case $1 in
 	toggle_rec)
 		#pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg
 		ffmpeg_pid=$(pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg)
+		# pause
 		if [ -n "$ffmpeg_pid" -a $? -eq 0 ];then # if both are running
 			kill -INT $ffmpeg_pid
 			cp -vf "$lastfile" "$lockfile"
 			rm "$lastfile"
+		# resume
 		else
 			if [ -s "$lockfile" ];then
 				content_lock="$(cat "$lockfile")"
-				fnl=${content_lock%.mkv}
+				fnl=${content_lock%.mkv} # fnl = file name lock
 				filename="${fnl}.tmp_to_concat.mkv"
 				ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
 				ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
