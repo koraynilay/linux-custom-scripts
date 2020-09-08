@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 lastfile="$HOME/.screencapsh"
 lockfile="$HOME/.screencapsh.lck"
 
@@ -64,6 +64,12 @@ case $1 in
 	;;
 	stop_rec)
 		killall -INT ffmpeg # or -2 code
+		rm "$lastfile"
+	;;
+	cancel_rec)
+		killall -INT ffmpeg # or -2 code
+		rm $(cat $lastfile | head -1)
+		dunstify -a screencap.sh "rec canceled" -t $finished_notif_time
 		rm "$lastfile"
 	;;
 	pause_rec)
