@@ -8,12 +8,12 @@ date=$(date +%d-%m-%Y_%H-%M-%S)
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
 xclip_opts=""
 
-# -filter_complex and -map are from https://trac.ffmpeg.org/wiki/AudioChannelManipulation (Section: Merged audio channel)
+#[3]
 ffmpeg_opts="-hwaccel_output_format cuda "
 ffmpeg_opts+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmpeg_opts+="-f pulse -i 2 -ac 2 "
 ffmpeg_opts+="-f pulse -i 1 -ac 1 "
-ffmpeg_opts+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #...2:a]amer... not really fixed, just a workaround ("no such filter" error) (instead of ...2:a] amer...)
+ffmpeg_opts+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]
 ffmpeg_opts+="-map 0 -map [a] -map 1 -map 2 "
 ffmpeg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
 ffmpeg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
@@ -42,6 +42,7 @@ case $1 in
 		ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
 		ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
 		echo "$filename" > "$lastfile"
+
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename  \
 			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
@@ -51,10 +52,10 @@ case $1 in
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
 		filename="$HOME/Videos/screencasts/${date}_select.mkv"
 		read -r X Y W H G ID < <(echo $slop) #[1]
-		#echo $X $Y $W $H $G $ID
 		ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+$X,$Y}
 		echo -e "$filename\n$X\n$Y\n$W\n$H" > "$lastfile"
+
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename \
 			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
@@ -72,7 +73,6 @@ case $1 in
 		killall -CONT ffmpeg && dunstify -a screencap.sh "rec resumed" -t 1000 # or -18 code
 	;;
 	toggle_rec)
-		#pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg
 		ffmpeg_pid=$(pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg)
 		# pause
 		if [ -n "$ffmpeg_pid" ] && [ $? -eq 0 ];then # if both are running
@@ -112,8 +112,9 @@ case $1 in
 		fi
 	;;
 	*)echo -ne "Usage: $0 [shot|shots|cast|casts|stop_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
-	#*)printf "Usage: $0 [shot(s)|cast(s)]\n";exit 1;;
 esac
 exit $?
 
 #[1]: from https://github.com/naelstrof/slop/blob/master/README.md#practical-applications
+#[2]: ...2:a]amer... not really fixed, just a workaround ("no such filter" error) (instead of ...2:a] amer...)
+#[3]: -filter_complex and -map are from https://trac.ffmpeg.org/wiki/AudioChannelManipulation (Section: Merged audio channel)
