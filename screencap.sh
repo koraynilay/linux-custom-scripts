@@ -45,6 +45,7 @@ case $1 in
 		#echo $X $Y $W $H $G $ID
 		ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+$X,$Y}
+		echo -e "$filename\n$X\n$Y\n$W\n$H" > "$lastfile"
 		dunstify -a screencap.sh "rec started" -t 200
 		ffmpeg $ffmpeg_opts $filename \
 			; dunstify -a ffmpeg "screencast is $filename" \
@@ -73,18 +74,27 @@ case $1 in
 		else
 			if [ -s "$lockfile" ];then
 				content_lock="$(cat "$lockfile")"
+				if [[ "$content_lock" =~ ".*_select.*" ]];then
+					IFS=$'\n'
+					read -r -d'\n' fnl X Y W H
+					#sel
+				else 
+					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
+					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
+				fi
 				fnl=${content_lock%.mkv} # fnl = file name lock
 				filename="${fnl}.tmp_to_concat.mkv"
-				ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
-				ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
 				dunstify -a screencap.sh "rec started" -t 200
-				ffmpeg $ffmpeg_opts $filename  \
-					; dunstify -a ffmpeg "screencast is $filename" \
-					&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
+				ffmpeg $ffmpeg_opts $filename
 				out_temp="${fnl}_concat.mkv"
-				ffmpeg -f concat -safe 0 -i <(echo -e "$content_lock\n$filename") -c copy "$out_temp"
-				mv -vi "$out_temp" "$content_lock"
+				ffmpeg -f concat -safe 0 -i <(echo -e "file '$content_lock'\nfile '$filename'") -c copy "$out_temp"
+				mv -vf "$out_temp" "$content_lock"
+				rm "$filename"
 				rm "$lockfile"
+				dunstify -a ffmpeg "screencast is $content_lock" \
+				&& xclip $xclip_gopts -t video/ogg -selection clipboard "$content_lock"
+			else
+				dunstify -a screencap.sh "no paused screencast present"
 			fi
 		fi
 	;;
