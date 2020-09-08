@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 lastfile="$HOME/.screencapsh"
 lockfile="$HOME/.screencapsh.lck"
 
@@ -46,10 +46,14 @@ case $1 in
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename
 		ffmpeg_exit_code=$?
-		if [ $ffmpeg_exit_code -eq 255 ] && [ $ffmpeg_exit_code -eq 0 ];then
+		echo $ffmpeg_exit_code
+		if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
 			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
 			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
 		fi
+		#else #this is cleaner, but if the exit codes change then the file would be removed
+		#	rm "$filename"
+		#fi
 	;;
 	casts)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
@@ -61,19 +65,20 @@ case $1 in
 
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename
-		if [ $ffmpeg_exit_code -eq 255 ] && [ $ffmpeg_exit_code -eq 0 ];then
+		if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
 			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
 			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
 		fi
-		#--windowid $ID \ #for recordmydesktop
+		#else #this is cleaner, but if the exit codes change then the file would be removed
+		#	rm "$filename"
+		#fi
 	;;
 	stop_rec)
 		killall -INT ffmpeg # or -2 code
 		rm "$lastfile"
 	;;
 	cancel_rec)
-		killall -INT ffmpeg # or -2 code
-		rm $(cat $lastfile | head -1)
+		killall -KILL ffmpeg # or -2 code
 		dunstify -a screencap.sh "rec canceled" -t $finished_notif_time
 		rm "$lastfile"
 	;;
@@ -109,13 +114,19 @@ case $1 in
 				filename="${fnl}.tmp_to_concat.mkv"
 				dunstify -a screencap.sh "rec started" -t $started_notif_time
 				ffmpeg $ffmpeg_opts $filename
-				out_temp="${fnl}_concat.mkv"
-				ffmpeg -f concat -safe 0 -i <(echo -e "file '$fnl'\nfile '$filename'") -c copy "$out_temp"
-				mv -vf "$out_temp" "$fnl"
-				rm "$filename"
-				rm "$lockfile"
-					dunstify -a ffmpeg "screencast is $fnl" -t $finished_notif_time \
-					&& xclip $xclip_opts -t video/ogg -selection clipboard "$fnl"
+				ffmpeg_exit_code=$?
+				echo $ffmpeg_exit_code
+				if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
+					out_temp="${fnl}_concat.mkv"
+					ffmpeg -f concat -safe 0 -i <(echo -e "file '$fnl'\nfile '$filename'") -c copy "$out_temp"
+					mv -vf "$out_temp" "$fnl"
+					rm "$filename"
+					rm "$lockfile"
+					dunstify -a ffmpeg "screencast is $fnl" -t $finished_notif_time
+					xclip $xclip_opts -t video/ogg -selection clipboard "$fnl"
+				else # this is risky, if the exit codes change then $filename would be removed
+					rm "$filename"
+				fi
 			else
 				dunstify -a screencap.sh "no paused screencast present"
 			fi
