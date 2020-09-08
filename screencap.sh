@@ -15,17 +15,21 @@ ffmpeg_opts+="-map 0 -map [a] -map 1 -map 2 "
 ffmpeg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
 ffmpeg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
 ffmpeg_opts+="-preset fast "
+started_notif_time=200
+finished_notif_time=10000
+paused_notif_time=1000
+resumed_notif_time=1000
 case $1 in
 	shot)
 		filename="$HOME/Pictures/screens/${date}.png"
 		maim $filename \
-			&& dunstify -a maim "screenshot is $filename" \
+			&& dunstify -a maim "screenshot is $filename" -t $finished_notif_time \
 			&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
 	;;
 	shots)
 		filename="$HOME/Pictures/screens/${date}.png"
 		maim -s $slop_opts $filename \
-			&& dunstify -a maim "screenshot is $filename" \
+			&& dunstify -a maim "screenshot is $filename" -t $finished_notif_time \
 			&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
@@ -33,9 +37,9 @@ case $1 in
 		ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
 		ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
 		echo "$filename" > "$lastfile"
-		dunstify -a screencap.sh "rec started" -t 200
+		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename  \
-			; dunstify -a ffmpeg "screencast is $filename" \
+			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 	;;
 	casts)
@@ -46,9 +50,9 @@ case $1 in
 		ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+$X,$Y}
 		echo -e "$filename\n$X\n$Y\n$W\n$H" > "$lastfile"
-		dunstify -a screencap.sh "rec started" -t 200
+		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename \
-			; dunstify -a ffmpeg "screencast is $filename" \
+			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
 			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
 			#--windowid $ID \ #for recordmydesktop
 	;;
@@ -88,15 +92,15 @@ case $1 in
 				fi
 				#fnl=${fnl%.mkv} # fnl = file name lock
 				filename="${fnl}.tmp_to_concat.mkv"
-				dunstify -a screencap.sh "rec started" -t 200
+				dunstify -a screencap.sh "rec started" -t $started_notif_time
 				ffmpeg $ffmpeg_opts $filename
 				out_temp="${fnl}_concat.mkv"
 				ffmpeg -f concat -safe 0 -i <(echo -e "file '$fnl'\nfile '$filename'") -c copy "$out_temp"
 				mv -vf "$out_temp" "$fnl"
 				rm "$filename"
 				rm "$lockfile"
-				dunstify -a ffmpeg "screencast is $fnl" \
-				&& xclip $xclip_gopts -t video/ogg -selection clipboard "$fnl"
+					dunstify -a ffmpeg "screencast is $fnl" -t $finished_notif_time \
+					&& xclip $xclip_gopts -t video/ogg -selection clipboard "$fnl"
 			else
 				dunstify -a screencap.sh "no paused screencast present"
 			fi
