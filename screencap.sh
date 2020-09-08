@@ -78,7 +78,8 @@ case $1 in
 				read -r -d'\n' fnl X Y W H < "$lockfile"
 				echo $fnl $X $Y $W $H
 				#echo $content_lock
-				if [[ "$fnl" =~ ".*_select.*" ]];then
+				if [[ "$fnl" =~ .*_select.* ]];then
+					echo ciaociao
 					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
 					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+${X},${Y}}
 				else 
