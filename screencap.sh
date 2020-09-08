@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 lastfile="$HOME/.screencapsh"
 lockfile="$HOME/.screencapsh.lck"
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
@@ -73,26 +73,31 @@ case $1 in
 		# resume
 		else
 			if [ -s "$lockfile" ];then
-				content_lock="$(cat "$lockfile")"
-				if [[ "$content_lock" =~ ".*_select.*" ]];then
-					IFS=$'\n'
-					read -r -d'\n' fnl X Y W H
-					#sel
+				#content_lock="$(cat "$lockfile")"
+				IFS=$'\n'
+				read -r -d'\n' fnl X Y W H < "$lockfile"
+				echo $fnl $X $Y $W $H
+				#echo $content_lock
+				if [[ "$fnl" =~ ".*_select.*" ]];then
+					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
+					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+${X},${Y}}
 				else 
 					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
 					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
 				fi
-				fnl=${content_lock%.mkv} # fnl = file name lock
+				fnl=${fnl%.mkv} # fnl = file name lock
+				echo $fnl
 				filename="${fnl}.tmp_to_concat.mkv"
+				echo $filename
 				dunstify -a screencap.sh "rec started" -t 200
 				ffmpeg $ffmpeg_opts $filename
 				out_temp="${fnl}_concat.mkv"
-				ffmpeg -f concat -safe 0 -i <(echo -e "file '$content_lock'\nfile '$filename'") -c copy "$out_temp"
-				mv -vf "$out_temp" "$content_lock"
+				ffmpeg -f concat -safe 0 -i <(echo -e "file '$fnl'\nfile '$filename'") -c copy "$out_temp"
+				mv -vf "$out_temp" "$fnl"
 				rm "$filename"
 				rm "$lockfile"
-				dunstify -a ffmpeg "screencast is $content_lock" \
-				&& xclip $xclip_gopts -t video/ogg -selection clipboard "$content_lock"
+				dunstify -a ffmpeg "screencast is $fnl" \
+				&& xclip $xclip_gopts -t video/ogg -selection clipboard "$fnl"
 			else
 				dunstify -a screencap.sh "no paused screencast present"
 			fi
