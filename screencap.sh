@@ -95,7 +95,6 @@ case $1 in
 					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
 					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
 				fi
-				#fnl=${fnl%.mkv} # fnl = file name lock
 				filename="${fnl}.tmp_to_concat.mkv"
 				dunstify -a screencap.sh "rec started" -t $started_notif_time
 				ffmpeg $ffmpeg_opts $filename
