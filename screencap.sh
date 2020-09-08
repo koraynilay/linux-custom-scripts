@@ -44,9 +44,12 @@ case $1 in
 		echo "$filename" > "$lastfile"
 
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
-		ffmpeg $ffmpeg_opts $filename  \
-			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
-			&& xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
+		ffmpeg $ffmpeg_opts $filename
+		ffmpeg_exit_code=$?
+		if [ $ffmpeg_exit_code -eq 255 ] && [ $ffmpeg_exit_code -eq 0 ];then
+			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
+			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
+		fi
 	;;
 	casts)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
@@ -57,10 +60,12 @@ case $1 in
 		echo -e "$filename\n$X\n$Y\n$W\n$H" > "$lastfile"
 
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
-		ffmpeg $ffmpeg_opts $filename \
-			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
-			&& xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
-			#--windowid $ID \ #for recordmydesktop
+		ffmpeg $ffmpeg_opts $filename
+		if [ $ffmpeg_exit_code -eq 255 ] && [ $ffmpeg_exit_code -eq 0 ];then
+			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
+			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
+		fi
+		#--windowid $ID \ #for recordmydesktop
 	;;
 	stop_rec)
 		killall -INT ffmpeg # or -2 code
