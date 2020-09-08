@@ -1,10 +1,13 @@
 #!/bin/bash -x
 lastfile="$HOME/.screencapsh"
 lockfile="$HOME/.screencapsh.lck"
+
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%d-%m-%Y_%H-%M-%S)
+
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
-xclip_gopts=""
+xclip_opts=""
+
 # -filter_complex and -map are from https://trac.ffmpeg.org/wiki/AudioChannelManipulation (Section: Merged audio channel)
 ffmpeg_opts="-hwaccel_output_format cuda "
 ffmpeg_opts+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
@@ -15,22 +18,24 @@ ffmpeg_opts+="-map 0 -map [a] -map 1 -map 2 "
 ffmpeg_opts+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
 ffmpeg_opts+="-c:a mp3 -r:a 44100 -b:a 320k "
 ffmpeg_opts+="-preset fast "
+
 started_notif_time=200
 finished_notif_time=10000
 paused_notif_time=1000
 resumed_notif_time=1000
+
 case $1 in
 	shot)
 		filename="$HOME/Pictures/screens/${date}.png"
 		maim $filename \
 			&& dunstify -a maim "screenshot is $filename" -t $finished_notif_time \
-			&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
+			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
 	shots)
 		filename="$HOME/Pictures/screens/${date}.png"
 		maim -s $slop_opts $filename \
 			&& dunstify -a maim "screenshot is $filename" -t $finished_notif_time \
-			&& xclip $xclip_gopts -t image/png -selection clipboard "$filename"
+			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
 		filename="$HOME/Videos/screencasts/${date}.mkv"
@@ -40,7 +45,7 @@ case $1 in
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename  \
 			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
-			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
+			&& xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
 	;;
 	casts)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
@@ -53,7 +58,7 @@ case $1 in
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts $filename \
 			; dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time \
-			&& xclip $xclip_gopts -t video/ogg -selection clipboard "$filename"
+			&& xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
 			#--windowid $ID \ #for recordmydesktop
 	;;
 	stop_rec)
@@ -100,7 +105,7 @@ case $1 in
 				rm "$filename"
 				rm "$lockfile"
 					dunstify -a ffmpeg "screencast is $fnl" -t $finished_notif_time \
-					&& xclip $xclip_gopts -t video/ogg -selection clipboard "$fnl"
+					&& xclip $xclip_opts -t video/ogg -selection clipboard "$fnl"
 			else
 				dunstify -a screencap.sh "no paused screencast present"
 			fi
