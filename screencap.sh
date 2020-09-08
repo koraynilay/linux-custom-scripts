@@ -66,7 +66,7 @@ case $1 in
 		#pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg
 		ffmpeg_pid=$(pgrep -P $(pgrep -f "$(basename $0).*cast.*") ffmpeg)
 		# pause
-		if [ -n "$ffmpeg_pid" -a $? -eq 0 ];then # if both are running
+		if [ -n "$ffmpeg_pid" ] && [ $? -eq 0 ];then # if both are running
 			kill -INT $ffmpeg_pid
 			cp -vf "$lastfile" "$lockfile"
 			rm "$lastfile"
@@ -74,22 +74,20 @@ case $1 in
 		else
 			if [ -s "$lockfile" ];then
 				#content_lock="$(cat "$lockfile")"
+				oifs=$IFS
 				IFS=$'\n'
 				read -r -d'\n' fnl X Y W H < "$lockfile"
 				echo $fnl $X $Y $W $H
-				#echo $content_lock
+				IFS=$oifs
 				if [[ "$fnl" =~ .*_select.* ]];then
-					echo ciaociao
 					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
 					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+${X},${Y}}
 				else 
 					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s $full_res}
 					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/}
 				fi
-				fnl=${fnl%.mkv} # fnl = file name lock
-				echo $fnl
+				#fnl=${fnl%.mkv} # fnl = file name lock
 				filename="${fnl}.tmp_to_concat.mkv"
-				echo $filename
 				dunstify -a screencap.sh "rec started" -t 200
 				ffmpeg $ffmpeg_opts $filename
 				out_temp="${fnl}_concat.mkv"
