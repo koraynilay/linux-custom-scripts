@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 lastfile="$HOME/.screencapsh"
 lockfile="$HOME/.screencapsh.lck"
 
@@ -125,7 +125,7 @@ case $1 in
 					dunstify -a ffmpeg "screencast is $fnl" -t $finished_notif_time
 					xclip $xclip_opts -t video/ogg -selection clipboard "$fnl"
 				else # this is risky, if the exit codes change then $filename would be removed
-					rm "$filename"
+					"$filename"
 				fi
 			else
 				dunstify -a screencap.sh "no paused screencast present"
