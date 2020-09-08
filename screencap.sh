@@ -74,11 +74,11 @@ case $1 in
 		else
 			if [ -s "$lockfile" ];then
 				#content_lock="$(cat "$lockfile")"
-				oifs=$IFS
+				defIFS=$IFS
 				IFS=$'\n'
 				read -r -d'\n' fnl X Y W H < "$lockfile"
 				echo $fnl $X $Y $W $H
-				IFS=$oifs
+				IFS=$defIFS
 				if [[ "$fnl" =~ .*_select.* ]];then
 					ffmpeg_opts=${ffmpeg_opts/size_to_replace/-s ${W}x${H}}
 					ffmpeg_opts=${ffmpeg_opts/offset_to_replace/+${X},${Y}}
