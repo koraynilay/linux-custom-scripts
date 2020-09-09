@@ -1,5 +1,5 @@
 #!/bin/sh
-pkgl() {
+pkg_list() {
 	printf "#" > $HOME/pkglist.txt
 	printf "#" > $HOME/pkglist_aur.txt
 	date >> $HOME/pkglist.txt
@@ -11,10 +11,10 @@ pkgl() {
 }
 
 
-pkgl
+pkg_list
 yadm status
 sleep 3
 yadm add -u
 yadm commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 yadm push
-f=()
+#f=()
