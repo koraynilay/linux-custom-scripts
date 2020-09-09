@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ `date +%H` -lt 20 -a `date +%H` -gt 7 ];then
+if [ $(date +%H) -lt 20 -a `date +%H` -gt 7 ];then
 	rofi_theme=koray.rasi
 else
 	rofi_theme=koray_dark.rasi
@@ -82,6 +82,9 @@ case $1 in
 
 		main
 		# chrome_tabs_keep shut_pc # Use chtb.sh b
+	;;
+	run)
+		rofi -theme "$rofi_theme" -sidebar-mode -show run
 	;;
 	*)
 		rofi -theme "$rofi_theme" $@
