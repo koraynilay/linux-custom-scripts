@@ -69,7 +69,8 @@ int main(int argc, char *argv[]){
 							exit(2);
 						}
 						strcat(ls_opts,"-");
-						strcat(ls_opts,strcat(argv[i+1]," "));
+						strcat(ls_opts,argv[i+1]);
+						strcat(ls_opts," ");
 						i++;
 						break;
 					case 'n':
@@ -105,6 +106,7 @@ int main(int argc, char *argv[]){
 			else{
 				dr = argv[i];
 			}
+			if(debug_high == 1)printf("[%di (args)]%s\n",i,argv[i]);
 		}
 	}
 	if(debug_time == 1){
@@ -205,11 +207,13 @@ int main(int argc, char *argv[]){
 	}else{
 		d=opendir(dr);
 		strcat(dr,"/");
-		strcat(cwd,"/");
 		strcat(cwd,dr);
 	}
+	if(debug_high == 1) printf("dr:%s\n",dr);
 
-	char ff[200000] = "";
+	char *ff=malloc(sizeof(char));
+	strcpy(ff,"");
+	unsigned int ff_size;
 	if(d){ //if not NULL go
 		while((dir = readdir(d)) != NULL){ //get every filename in cwd
 			int concat = 1;
@@ -223,6 +227,8 @@ int main(int argc, char *argv[]){
 			if(has_char(dir->d_name,'/')) escape_char(dir->d_name, '/'); //do not escape '\' otherwise it won't work
 			if(debug_high == 1)printf("%s\n",dir->d_name);
 			if(debug_high == 1)printf("%s\n",dir->d_name);
+			ff_size+=strlen(dir->d_name)*sizeof(dir->d_name);
+			if(debug == 1)printf("%d\n",ff_size);
 			for(int y=0;y<elems;y++){
 				if(argr[y].entries && argr[y].location){
 					if(strcmp(cwd,argr[y].location) == 0){ //if equals
@@ -235,6 +241,7 @@ int main(int argc, char *argv[]){
 				}
 			}
 			if(concat == 1){
+				ff = realloc(ff, ff_size);
 				strcat(ff," ");
 				if(dr)strcat(ff,dr);
 				strcat(ff,dir->d_name);
@@ -251,6 +258,7 @@ int main(int argc, char *argv[]){
 		printf("third: %f\n",(double)(third - start) / CLOCKS_PER_SEC);
 	}
 	//printf("lss:%s\n",ff);
+	//printf("cwd:%s\n",cwd);
 	char ls[200000];
 	strcpy(ls,ls_opts);
 	strcat(ls,ff);
@@ -281,6 +289,7 @@ int main(int argc, char *argv[]){
 		clock_t end = clock();
 		printf("enddd: %f\n",((double)(end - start) / CLOCKS_PER_SEC));
 	}
+	free(ff);
 	return 0;
 }
 
