@@ -15,24 +15,33 @@
 #include <pthread.h>
 #include <X11/extensions/scrnsaver.h>
 #include <X11/Xutil.h>
+#include <ctype.h> //for isspace()
+#include <sysexits.h> //for some exit statuses (see RETURN_CODES.txt)
 
 #define pr(...) (fprintf(stderr,__VA_ARGS__)) //print errors to stderr
 #define ckea(x) (x[0] == '\0' || (x[0] == '-' && (x[1] == 'r' || x[1] == 'l' || x[1] == 'b'))) //check if required options exist
 #define len(x) (sizeof(x)/sizeof(x[0])) //array length
 #define print_array(z,x) for(int y=0;y<z;y++)printf("%d element: %s\n",y,x[y]); //print every array element
 #define pd() (printf("\nciao\n"))
+#define compare_key(x) (!strcmp(k,x))
 #define ACTIVATED "Enabled"
 #define DEACTIVATED "Disabled"
+#define HOME "HOME"
+#define COMMENT_COLON ';'
+#define COMMENT_HASH '#'
 
 void child(void *ptr);
 void slf(void *ptr);
 void svf(char *cmd_saver);
+char *strtrm(char *str);
 int xerrh(Display *d,XErrorEvent *e);
 
 void printUsage(){ 
 		//pr("Usage: scrnsvr -[tearlswncc1c2c3c4c5xdDuU]\n\n");
 		pr("Usage: scrnsvr [OPTIONS]\n\n");
 		pr("--help\t\tShows this help\n\n");
+		pr("--config [file]\tSpecify custom config file (absolute path, default: $HOME/.config/scrnsvr.ini)\n");
+		pr("--copy-config\tCopy a demo config to $HOME/.config/scrnsvr.ini\n");
 		pr("-t [timeout]\tTime in seconds before [saver] gets activated (default: 120)\n");
 		pr("-a [timeout]\tTime in seconds before [locker] gets activated AFTER [saver] has been activated (default: 30)\n");
 		pr("-s [timeout]\tTime in seconds before [blanker] gets activated (default: 180)\n");
@@ -73,10 +82,6 @@ int main(int argc, char *argv[])
 		pr("\nYou should NOT run this program as root. Press Control-C to cancel (10 seconds timeout, then continue running as normal)\n\n");
 		sleep(10);
 	}
-	if(argc < 7){ //are there the required switches?
-		printUsage();
-		exit(1);
-	}
 	char saver[50] = "";
 	char locker[50] = "";
 	char sleeper[50] = ""; //it's called blanker in the switch
@@ -107,30 +112,39 @@ int main(int argc, char *argv[])
 	int can_lock_pa = 1;
 	int can_lock_wm = 1;
 	int exits = 0;
-	char servs[100][53] = {"youtube", "vlc", "mpv", "vimeo", "picture in picture"};
+	char servs[100][101] = {"youtube", "vlc", "mpv", "vimeo", "picture in picture"};
 	int len_servs = len(servs);
 	int get_args = 0;
 	int j = len_servs;
 	j = 5; //number of precompiled services
+	//config file related variables
+	FILE *conf;
+	int config = 1;
+	int print_notice = 1;
+	char home[255] = "";
+	char config_file[255] = "";
+
+	const char *s = getenv(HOME);
+       	strcpy(home,(s!=NULL)? s : "getenv returned NULL");
 
 	for(int i = 0; i < argc; i++){
 		if(argv[i][0] == '-'){
 			switch(argv[i][1]){
 				case 't': //time before screensaver
 					if(argv[i+1])timeout = atoi(argv[i+1])*1000;
-					else {printUsage();exit(2);}
+					else {printUsage();exit(EX_DATAERR+20);}
 					break;
 				case 'a': //time after timeout
 					if(argv[i+1])time_saver = atoi(argv[i+1]);
-					else {printUsage();exit(3);}
+					else {printUsage();exit(EX_DATAERR+21);}
 					break;
 				case 's': //time for blanker
 					if(argv[i+1])time_sleep = atoi(argv[i+1]); //time before screen off
-					else {printUsage();exit(4);}
+					else {printUsage();exit(EX_DATAERR+22);}
 					break;
-				case 'i': //time for blanker
-					if(argv[i+1])borders_pixel = atoi(argv[i+1]); //time before screen off
-					else {printUsage();exit(5);}
+				case 'i': //ignore borders for fullscreen detection
+					if(argv[i+1])borders_pixel = atoi(argv[i+1]);
+					else {printUsage();exit(EX_DATAERR+23);}
 					break;
 				case 'r': //screensaver
 					sprintf(saver, "%s", argv[i+1]);
@@ -199,33 +213,131 @@ int main(int argc, char *argv[])
 				case '-': //double dashes options
 					if(!strcmp(argv[i],"--help")){
 						printUsage();
-						exit(0);
+						exit(EX_OK);
+					}
+					else if(!strcmp(argv[i],"--config")){
+						sprintf(config_file,"%s",argv[i+1]);
+					}
+					else if(!strcmp(argv[i],"--copy-config")){
+						system("cp -vi /usr/share/scrnsvr/scrnsvr.ini.example $HOME/.config/scrnsvr.ini");
+						exit(EX_OK);
 					}
 					break;
 				default: //Uknown option
 					pr("Uknown option: %s. Use only '%s', or the switch '--help', to get a list of options\n",argv[i],argv[0]);
-					exit(7);
+					exit(EX_USAGE);
 			}
 		}
 		else if(get_args == 1){ //get args for -w
-			if(strlen(argv[i])>52){
+			if(strlen(argv[i])>99){
 				pr("Argument '%s' of the -w flag is too long\n",argv[i]);
-				exit(6);
+				exit(EX_DATAERR);
 			}
 			strcpy(servs[j],argv[i]);
 			if(debug_high == 1)printf("%s\n",argv[i]);
 			j++;
 		}
 	}
+	
+	if (strlen(config_file) == 0)
+		strcpy(config_file,strcat(home,"/.config/scrnsvr.ini"));
+
+	conf = fopen(config_file,"r");
+	if(conf == NULL && config == 1){
+		if(print_notice == 1)pr("No valid config file specified (and the default doesn't exist), to turn off this notice specify a valid config file with --config or copy the default config file with --copy-config\n");
+		config = 0;
+		if(argc < 7){ //are there the required switches?
+			printUsage();
+			exit(EX_USAGE);
+		}
+	}
+	if(config == 1){
+	size_t len_k;
+	size_t len_v;
+	size_t len;
+	//rewind(conf);
+	char comment[1];
+	//int y = 0;
+	while(!feof(conf)){
+		char c_fgetc = fgetc(conf);
+		if(c_fgetc == COMMENT_COLON || c_fgetc == COMMENT_HASH){
+			fscanf(conf,"%[^\n]\n",comment); //with NULL it doesn't work
+			continue;
+		}
+		fseek(conf,-1,SEEK_CUR);
+		char *key = NULL;
+		char *value = NULL;
+		len_k = getdelim(&key,&len,'=',conf);
+		len_v = getline(&value,&len,conf); //finishes the line, can also use 'getdelim(&value,&len,'\n',conf);'
+		key[len_k-1] = '\0'; //remove '=' (delim)
+		char *k = strtrm(key); //trim leading and trailing spaces from key
+		char *v = strtrm(value); //trim leading and trailing spaces from value
+		if(len_k <= 1)continue; //if key is null
+		if(!v || len_v < 1){
+			pr("Value for key '%s' is missing\n",k);
+			exit(EX_CONFIG);
+		}
+		if(debug_high == 1) printf("len_k=%lu\nlen_v=%lu\n",len_k,len_v);
+		if(debug == 1) printf("k=%s\nv=%s\n",k,v);
+		if(compare_key("timeout")) //-t
+			timeout = atoi(v)*1000;
+		else if (compare_key("time saver")) //-a
+			time_saver = atoi(v);
+		else if (compare_key("time sleep")) //-s
+			time_sleep = atoi(v);
+		else if (compare_key("borders width")) //-i
+			borders_pixel = atoi(v);
+		else if (compare_key("saver")) //-r
+			sprintf(saver, "%s", v);
+		else if (compare_key("locker")) //-l
+			sprintf(locker, "%s", v);
+		else if (compare_key("blanker")) //-b
+			sprintf(sleeper, "%s", v);
+		else if (compare_key("notifs")){ //-n
+			int vn = atoi(v);
+			notifs = (vn == 0 || vn == 1) ? vn : 1 ;}
+		else if (compare_key("notifier")) //-c
+			sprintf(notifier, "%s", v);
+		else if (compare_key("notifier 1")) //-c1
+			sprintf(notifier_1, "%s", v);
+		else if (compare_key("notifier 2")) //-c2
+			sprintf(notifier_2, "%s", v);
+		else if (compare_key("notifier 3")) //-c3
+			sprintf(notifier_3, "%s", v);
+		else if (compare_key("notifier 4")) //-c4
+			sprintf(notifier_4, "%s", v);
+		else if (compare_key("notifier 5")) //-c5
+			sprintf(notifier_5, "%s", v);
+		else if (compare_key("check fullscreen")){ //-f
+			int vn = atoi(v);
+			check_fullscreen = (vn == 0 || vn == 1) ? vn : 1 ;}
+		else if (compare_key("services")){ //-w
+			const char del[] = ",";
+			char *tok;
+			tok = strtok(v,del);
+			for (int cs = j; tok != NULL; cs++){
+				strcpy(servs[cs],strtrm(tok));
+				tok = strtok (NULL,del);
+				if(debug_high == 1)printf("servs[%dcs]%s\n",cs,servs[cs]);
+				if(strlen(servs[cs])>99){
+					pr("Value '%s' of the servs key is too long (it's > 99)\n",servs[cs]);
+					exit(EX_DATAERR);
+				}
+			}}
+		else{
+			pr("Unkown key '%s' with value '%s'\n",k,v);
+			exit(EX_CONFIG);}
+	}fclose(conf);}
 	if(debug_ultra_high == 1)print_array(len(servs),servs);
 	
 	//check if required parameters are valid
-	if(ckea(saver)){printUsage();exit(10);}
-	if(ckea(locker)){printUsage();exit(11);}
-	if(ckea(sleeper)){printUsage();exit(12);}
+	if(ckea(saver)){printUsage();exit(EX_DATAERR+24);}
+	if(ckea(locker)){printUsage();exit(EX_DATAERR+25);}
+	if(ckea(sleeper)){printUsage();exit(EX_DATAERR+26);}
 	
 	//-v
 	if(print_opts == 1){
+		printf("Config (--config): %s\n",config_file);
 		printf("Before [Screensaver] from now (-t): %d s\n",timeout/1000);
 		printf("Before [Locker] from [Screensaver] (-a): %d s\n",time_saver);
 		printf("Before [Blanker] from now (-s): %d s\n",time_sleep);
@@ -320,7 +432,7 @@ int main(int argc, char *argv[])
 	char cmd_parun[] = "pactl list short | grep RUNNING >/dev/null"; //if I put it at the start, it could get overwritten by servs[] (idk why, but ok)
 	if(debug_high == 1)printf("%s\n",cmd_parun);
 
-	if(exits == 1)exit(0); //if -x is specified exit
+	if(exits == 1)exit(EX_OK); //if -x is specified exit
 	//loop
 	XSetErrorHandler(xerrh);
 	while(my_display){
@@ -336,7 +448,7 @@ int main(int argc, char *argv[])
 		//get current focused window
 		Window focused = 0; // Window {aka long unsigned int}
 		int revto;
-		int ciao = XGetInputFocus(my_display, &focused, &revto);
+		/*int ciao =*/ XGetInputFocus(my_display, &focused, &revto);
 		//printf("%d:%d:%ld\n",ciao,revto,focused);
 		if(focused != 0){
 			//check if focused window is fullscreen
@@ -517,4 +629,23 @@ int xerrh(Display *d,XErrorEvent *e){
 	XGetErrorText(d,e->error_code,txt,sizeof(txt));
 	pr("Error: %d (%s). Maj: %d. Min: %d. Serial: %ld",e->error_code,txt,e->request_code,e->minor_code,e->serial);
 	return 0;
+}
+char *strtrm(char *str) //from https://stackoverflow.com/a/122721/12206923 (first solution)
+{
+	char *end;
+
+	// Trim leading space
+	while(isspace((unsigned char)*str)) str++;
+
+	if(*str == 0)  // All spaces?
+	  return str;
+
+	// Trim trailing space
+	end = str + strlen(str) - 1;
+	while(end > str && isspace((unsigned char)*end)) end--;
+
+	// Write new null terminator character
+	end[1] = '\0';
+
+	return str;
 }
