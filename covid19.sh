@@ -2,6 +2,7 @@
 cd $HOME/COVID-19/dati-andamento-nazionale
 git pull 2>/dev/null >&2
 date="$(date +%Y%m%d)"
+#date="$(($(date +%Y%m%d)-1))"
 datey="$((${date}-1))"
 tests=$(tail -qn 1 *${date}.csv *${datey}.csv | rev | cut -d',' -f 3 | rev)
 newcases=$(tail -qn 1 *${date}.csv | rev | cut -d',' -f 9 | rev)

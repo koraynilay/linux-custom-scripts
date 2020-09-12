@@ -54,7 +54,8 @@ i3lock -n -k \
 	--lockfailedtext="" \
 	--layout-font="$font" \
 	--verif-font="$font" \
-	--wrong-font="$font"
+	--wrong-font="$font" #\
+#	--debug	2> $HOME/i3lock.log
 xset -dpms
 
 #	--timestr='%l %M %S %p' \
