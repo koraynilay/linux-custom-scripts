@@ -1,5 +1,5 @@
 #!/bin/sh
-git config --global credential.helper 'cache --timeout=240'
+#git config --global credential.helper 'cache --timeout=240'
 for a in $(ls | grep file | sed 's/ /*/g'); do
 	cd "$a"
 #	git init
@@ -7,8 +7,8 @@ for a in $(ls | grep file | sed 's/ /*/g'); do
 #	git commit -m first
 #	git push -u origin master
 #	cp ~/linux-custom-scripts/push.sh .
-	#./push.sh
-	git remote set-url origin `gh repo view | awk '/name/ {print "git@github.com:"$NF}'`
+	./push.sh
+#	git remote set-url origin `gh repo view | awk '/name/ {print "git@github.com:"$NF}'`
 	echo $a
 	cd /I/Raccolte/various_files
 done
