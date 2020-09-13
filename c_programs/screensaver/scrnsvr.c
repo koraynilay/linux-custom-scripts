@@ -82,21 +82,21 @@ int main(int argc, char *argv[])
 		pr("\nYou should NOT run this program as root. Press Control-C to cancel (10 seconds timeout, then continue running as normal)\n\n");
 		sleep(10);
 	}
-	char saver[50] = "";
-	char locker[50] = "";
-	char sleeper[50] = ""; //it's called blanker in the switch
-	char cmd_saver[60] = "";
-	char cmd_lock[60] = "";
-	char cmd_sleep[60] = "";
-	char pgrep_lock[80] = "";
-	char pgrep_sleep[80] = "";
-	char notifier[50] = "";
-	char notifier_1[50] = "";
-	char notifier_2[50] = "";
-	char notifier_3[50] = "";
-	char notifier_4[50] = "";
-	char notifier_5[50] = "";
-	int timeout = 120*1000;
+	char saver[60] = "";
+	char locker[60] = "";
+	char sleeper[60] = ""; //it's called blanker in the switch
+	char cmd_saver[70] = "";
+	char cmd_lock[70] = "";
+	char cmd_sleep[70] = "";
+	char pgrep_lock[90] = "";
+	char pgrep_sleep[90] = "";
+	char notifier[60] = "";
+	char notifier_1[60] = "";
+	char notifier_2[60] = "";
+	char notifier_3[60] = "";
+	char notifier_4[60] = "";
+	char notifier_5[60] = "";
+	int timeout = 120*1000; //120 seconds, *1000 cuz it uses useconds (microseconds) (the other *1000 is after the custom value gets set)
 	int time_saver = 30;
 	int time_sleep = 180;
 	int notifs = 1;
@@ -256,15 +256,17 @@ int main(int argc, char *argv[])
 	size_t len_v;
 	size_t len;
 	//rewind(conf);
-	char comment[1];
+	//char comment[1];
 	//int y = 0;
 	while(!feof(conf)){
 		char c_fgetc = fgetc(conf);
 		if(c_fgetc == COMMENT_COLON || c_fgetc == COMMENT_HASH){
-			fscanf(conf,"%[^\n]\n",comment); //with NULL it doesn't work
+			fscanf(conf,"%*[^\n]\n"); //with NULL it doesn't work
 			continue;
 		}
 		fseek(conf,-1,SEEK_CUR);
+		//char key_string[50];
+		//char value_string[100];
 		char *key = NULL;
 		char *value = NULL;
 		len_k = getdelim(&key,&len,'=',conf);

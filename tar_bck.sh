@@ -1,6 +1,6 @@
 #!/bin/bash
 prefix=''
-folders=("${prefix}/usr" "${prefix}/var" "${prefix}/opt" "${prefix}/etc" "${prefix}/root")
+folders=("${prefix}/etc" "${prefix}/var" "${prefix}/root" "${prefix}/opt" "${prefix}/usr")
 exfolders=(${folders[@]} "${prefix}/swpfl.sys")
 dest='/D/linux/tars'
 topts='--one-file-system --acls --xattrs -cp'
