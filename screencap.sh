@@ -9,13 +9,13 @@ full_res=$(xrandr -q | awk '/\*/ {print $1}')
 xclip_opts=""
 
 #[3]
-ffmpeg_opts_video=""
+ffmpeg_opts_video="-hwaccel_output_format cuda "
 ffmpeg_opts_video+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmpeg_opts_video+="-f pulse -i 2 -ac 2 "
 ffmpeg_opts_video+="-f pulse -i 1 -ac 1 "
 ffmpeg_opts_video+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]
 ffmpeg_opts_video+="-map 0 -map [a] -map 1 -map 2 "
-ffmpeg_opts_video+="-c:v h264 -r:v 60 -b:v 10m -crf 0 "
+ffmpeg_opts_video+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
 ffmpeg_opts_video+="-c:a mp3 -r:a 44100 -b:a 320k "
 ffmpeg_opts_video+="-preset fast "
 
