@@ -2,7 +2,7 @@
 lastfile="$HOME/.screencapsh"
 lockfile="$HOME/.screencapsh.lck"
 
-video_ext="mkv"
+video_ext="mp4"
 image_ext="png"
 
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
