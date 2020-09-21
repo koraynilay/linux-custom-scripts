@@ -13,7 +13,7 @@ pkg_list() {
 
 pkg_list
 yadm status
-sleep 3
+sleep 1
 yadm add -u
 yadm commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 yadm push
