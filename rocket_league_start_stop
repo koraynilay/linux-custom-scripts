@@ -1,0 +1,12 @@
+#!/bin/sh
+case opt in $1
+	start)
+		sleep 15
+		xdotool search --name "^Rocket League" set_window --name "Rocket League"
+		dunstify 'changed'
+		;;
+	stop)
+		dunstify 'stopped'
+		pkill -9 -f -i '(wine|Processid|\.exe)'
+		;;
+esac
