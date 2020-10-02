@@ -17,4 +17,8 @@ sleep 1
 yadm add -u
 yadm commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 yadm push
+read -p "copyq? [y/n]:" ans
+if [ "$ans" = "y" ];then
+	./linux-custom-scripts/copyq_push.sh
+fi
 #f=()
