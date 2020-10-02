@@ -78,6 +78,8 @@ case $1 in
 
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
 		ffmpeg $ffmpeg_opts_video $filename
+		ffmpeg_exit_code=$?
+		echo $ffmpeg_exit_code
 		if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
 			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
 			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
