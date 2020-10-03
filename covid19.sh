@@ -17,7 +17,7 @@ echo -e "nuovi tamponi: $newtests"
 echo -e "nuovi casi: $newcases"
 perc=$(calc -d -p "$newcases/$newtests*100")
 echo -e "perc (full): $perc%"
-percs=${perc:0:9}%
+percs=${perc:0:9}
 echo -e "perc: $percs%"
 end="$newcases nuovi casi, $percs dei tamponi"
 echo -e $end
