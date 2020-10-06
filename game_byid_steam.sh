@@ -5,7 +5,7 @@ while getopts hvd:f: opt;do
 	case $opt in
 		f)folder=$OPTARG;f=1;;
 		v)v=1;;
-		h)echo -e "-h help\n-v verbose (show id)\n-f subfolders of this folder are steam ids\n-d with -f, add id";exit 1;;
+		h)echo -e "-h help\n-v verbose (show id)\n-f subfolders of this folder are steam ids\n-d with -f, add id";;
 		d)id=$OPTARG;;
 	esac
 done
