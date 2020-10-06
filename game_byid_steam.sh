@@ -23,7 +23,7 @@ if [ $# -gt 3 ];then
 else
 	if [ $v -eq 1 ];then
 		id=$2
-		echo -e $id: $(curl -s "https://store.steampowered.com/app/$id" | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)')
+		echo $id: $(curl -s "https://store.steampowered.com/app/$id" | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)')
 	else
 		id=$1
 		curl -s "https://store.steampowered.com/app/$id" | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)'
