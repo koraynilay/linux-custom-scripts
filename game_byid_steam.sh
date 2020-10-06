@@ -12,7 +12,12 @@ done
 if [ $# -gt 3 ];then
 	if [ $f -eq 1 ];then
 		for iid in $folder/*;do 
-			curl -s https://store.steampowered.com/app/$(basename $iid) | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)'
+			id=$(basename $iid)
+			if [ $v -eq 1 ];then
+				echo $id: $(curl -s https://store.steampowered.com/app/$id | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)')
+			else
+				curl -s https://store.steampowered.com/app/$id | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)'
+			fi
 			#echo "curl -s https://store.steampowered.com/app/$(basename $iid) | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)'"
 		done
 	fi
