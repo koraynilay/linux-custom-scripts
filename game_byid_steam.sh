@@ -9,7 +9,7 @@ while getopts hvd:f: opt;do
 		d)id=$OPTARG;;
 	esac
 done
-if [ $# -gt 2 ];then
+if [ $# -ge 2 ];then
 	if [ $f -eq 1 ];then
 		for current in $folder/*;do 
 			id=$(basename $current)
