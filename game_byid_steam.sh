@@ -1,15 +1,15 @@
 #!/bin/sh
 v=0
 f=0
-if [ $# -gt 2 ];then
-	while getopts hvdf: opt;do
-		case $opt in
-			f)folder=$OPTARG;f=1;;
-			v)v=1;;
-			h)echo -e "Error";exit 1;;
-			d)id=$OPTARG;;
-		esac
-	done
+while getopts hvdf: opt;do
+	case $opt in
+		f)folder=$OPTARG;f=1;;
+		v)v=1;;
+		h)echo -e "Error";exit 1;;
+		d)id=$OPTARG;;
+	esac
+done
+if [ $# -gt 3 ];then
 	if [ $f -eq 1 ];then
 		for iid in $folder/*;do 
 			curl -s https://store.steampowered.com/app/$(basename $iid) | grep -Po '(?<=<div class="apphub_AppName">).*(?=</div>)'
