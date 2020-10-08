@@ -1,6 +1,6 @@
 #!/bin/sh
 file="$HOME/.config/copyq/copyq_tab_JmNsaXBib2FyZA==.dat"
-folder="/I/Raccolte/linux/koraynilay/copyq_backup"
+folder="/I/Raccolte/linux/koraynilay/copyq_dat_file"
 cd "$folder"
 cp -v "$file" .
 git status
