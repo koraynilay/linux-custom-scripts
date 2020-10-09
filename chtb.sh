@@ -61,14 +61,17 @@ case $act in
 		fi
 		for ((i=0;i<${#folders[@]};i++));do
 			it="${folders[i]}"
-			if [ ! -d "$bn" ];then
-				continue
-			fi
 			if [ $copy_folder_whole -eq 1 ];then
-				bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f2 | rev)
-				cp -vr "${bn}" "${it}/"
+				bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f-2 | rev)
+				if [ ! -d "$bn" ];then
+					continue
+				fi
+				cp -Tvir "${bn}" "${it}/"
 			else
 				bn=${bck_folder}/$(basename "$it")
+				if [ ! -d "$bn" ];then
+					continue
+				fi
 				cp -iv "${bn}/Current Tabs" "${bn}/Current Session" "${it}/"
 			fi
 		done
