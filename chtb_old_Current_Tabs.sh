@@ -1,7 +1,6 @@
 #!/bin/bash
 folders=("$HOME/.config/chromium/Default" "$HOME/.config/chromium/Profile 1")
 bck_folder="$HOME/.chtb"
-#filenames=""
 lvl=0
 usage() {
 	echo -e "Usage: $0 [options] action"
