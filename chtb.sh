@@ -47,7 +47,7 @@ case $act in
 				mkdir -p "$bn"
 			fi
 			if [ $copy_folder_whole -eq 1 ];then
-				j
+				cp -vr "${it}" "${bn}/"
 			fi
 			cp -v "${it}/Current Tabs" "${it}/Current Session" "${bn}/"
 		done
