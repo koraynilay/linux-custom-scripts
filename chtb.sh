@@ -48,8 +48,9 @@ case $act in
 			fi
 			if [ $copy_folder_whole -eq 1 ];then
 				cp -vr "${it}" "${bn}/"
+			else
+				cp -v "${it}/Current Tabs" "${it}/Current Session" "${bn}/"
 			fi
-			cp -v "${it}/Current Tabs" "${it}/Current Session" "${bn}/"
 		done
 		;;
 	r|restore)
@@ -59,11 +60,15 @@ case $act in
 		fi
 		for ((i=0;i<${#folders[@]};i++));do
 			it="${folders[i]}"
-			bn=${bck_folder}/$(basename "$it")
+			bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f-$folder_basename_level | rev)
 			if [ ! -d "$bn" ];then
 				continue
 			fi
-			cp -iv "${bn}/Current Tabs" "${bn}/Current Session" "${it}/"
+			if [ $copy_folder_whole -eq 1 ];then
+				cp -vr "${bn}" "${it}/"
+			else
+				cp -iv "${bn}/Current Tabs" "${bn}/Current Session" "${it}/"
+			fi
 		done
 		;;
 	*)
