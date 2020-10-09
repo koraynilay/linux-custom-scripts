@@ -2,6 +2,7 @@
 folders=("$HOME/.config/chromium/Default/Sessions" "$HOME/.config/chromium/Profile 1/Sessions")
 bck_folder="$HOME/.chtb"
 copy_folder_whole=1
+folder_basename_level=2 # to pass to cut, these are the last n fields
 #filenames=""
 lvl=0
 usage() {
@@ -41,7 +42,7 @@ case $act in
 			#echo ${folders[i]}
 			#echo cp $@ \"${folders[i]}/Current Tabs\" \"${folders[i]}/Current Session\" \"${bck_folder}/$(basename "${folders[i]}")/
 			it="${folders[i]}"
-			bn=${bck_folder}/$(echo "$it" | cut -d'/' -f2-)
+			bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f-$folder_basename_level | rev)
 			if [ ! -d "$bn" ];then
 				mkdir -p "$bn"
 			fi
