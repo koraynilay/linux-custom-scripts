@@ -1,6 +1,7 @@
 #!/bin/bash
-folders=("$HOME/.config/chromium/Default" "$HOME/.config/chromium/Profile 1")
+folders=("$HOME/.config/chromium/Default/Sessions" "$HOME/.config/chromium/Profile 1/Sessions")
 bck_folder="$HOME/.chtb"
+copy_folder_whole=1
 #filenames=""
 lvl=0
 usage() {
@@ -40,9 +41,12 @@ case $act in
 			#echo ${folders[i]}
 			#echo cp $@ \"${folders[i]}/Current Tabs\" \"${folders[i]}/Current Session\" \"${bck_folder}/$(basename "${folders[i]}")/
 			it="${folders[i]}"
-			bn=${bck_folder}/$(basename "$it")
+			bn=${bck_folder}/$(echo "$it" | cut -d'/' -f2-)
 			if [ ! -d "$bn" ];then
 				mkdir -p "$bn"
+			fi
+			if [ $copy_folder_whole -eq 1 ];then
+				j
 			fi
 			cp -v "${it}/Current Tabs" "${it}/Current Session" "${bn}/"
 		done
