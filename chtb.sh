@@ -42,13 +42,14 @@ case $act in
 			#echo ${folders[i]}
 			#echo cp $@ \"${folders[i]}/Current Tabs\" \"${folders[i]}/Current Session\" \"${bck_folder}/$(basename "${folders[i]}")/
 			it="${folders[i]}"
-			bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f-$folder_basename_level | rev)
-			if [ ! -d "$bn" ];then
-				mkdir -p "$bn"
-			fi
 			if [ $copy_folder_whole -eq 1 ];then
+				bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f2 | rev)
 				cp -vr "${it}" "${bn}/"
 			else
+				bn=${bck_folder}/$(basename "$it")
+				if [ ! -d "$bn" ];then
+					mkdir -p "$bn"
+				fi
 				cp -v "${it}/Current Tabs" "${it}/Current Session" "${bn}/"
 			fi
 		done
@@ -60,13 +61,14 @@ case $act in
 		fi
 		for ((i=0;i<${#folders[@]};i++));do
 			it="${folders[i]}"
-			bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f-$folder_basename_level | rev)
 			if [ ! -d "$bn" ];then
 				continue
 			fi
 			if [ $copy_folder_whole -eq 1 ];then
+				bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f2 | rev)
 				cp -vr "${bn}" "${it}/"
 			else
+				bn=${bck_folder}/$(basename "$it")
 				cp -iv "${bn}/Current Tabs" "${bn}/Current Session" "${it}/"
 			fi
 		done
