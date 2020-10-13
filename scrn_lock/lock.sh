@@ -5,7 +5,7 @@ dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
 #light_pic="$home/Pictures/wallpapers/wave/landscape_wave_blur.png"
 #dark_pic="$home/Pictures/wallpapers/wave/landscape_wave_4_blur.png"
 font='Tw Cen MT'
-if [ `date +%H` -lt 20 -a `date +%H` -gt 8 ];then
+if [ `date +%H` -lt 20 -a `date +%H` -ge 8 ];then
 	pic=$light_pic
 else
 	pic=$dark_pic
