@@ -44,7 +44,7 @@ case $act in
 			it="${folders[i]}"
 			if [ $copy_folder_whole -eq 1 ];then
 				bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f2 | rev)
-				rm -v "${bn}/"*
+				echo rm -v "${bn}/"*
 				cp -vr "${it}" "${bn}/"
 			else
 				bn=${bck_folder}/$(basename "$it")
