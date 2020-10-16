@@ -44,7 +44,9 @@ case $act in
 			it="${folders[i]}"
 			if [ $copy_folder_whole -eq 1 ];then
 				bn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f2 | rev)
-				echo rm -v "${bn}/"*
+				rn=${bck_folder}/$(echo "$it" | rev | cut -d'/' -f-2 | rev)
+				rm -rv "${rn}/"
+				#rm -rIv "${rn}/"
 				cp -vr "${it}" "${bn}/"
 			else
 				bn=${bck_folder}/$(basename "$it")
@@ -82,6 +84,7 @@ case $act in
 		exit 3
 		;;
 esac
+yadm add --verbose "$bck_folder" #or -v
 if [ $lvl -eq 1 ];then
 	cp -rv "$bck_folder" "${bck_folder}$(date +%d%m%Y%H%M%S)" # ddmmYYYYHHMMSS (dd = day, mm = month, YYYY = year, HH = hour, MM = minute)
 fi
