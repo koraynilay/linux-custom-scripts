@@ -1,7 +1,7 @@
 #!/bin/bash
 cd $HOME/COVID-19/dati-andamento-nazionale
 git pull 2>&1 | tail -1
-[[ $? -ne 0 ]] && exit $?
+#[[ $? -ne 0 ]] && exit $?
 date="$(date +%Y%m%d)"
 #date="$(($(date +%Y%m%d)-1))"
 datey="$(date +%Y%m%d --date="-1 day")"
