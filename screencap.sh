@@ -6,7 +6,8 @@ video_ext="mp4"
 image_ext="png"
 
 slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
-date=$(date +%d-%m-%Y_%H-%M-%S)
+#date=$(date +%d-%m-%Y_%H-%M-%S)
+date=$(date +%Y-%m-%d_%H-%M-%S)
 
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
 xclip_opts=""

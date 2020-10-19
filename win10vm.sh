@@ -1,6 +1,6 @@
 #!/bin/sh
 #vmsfolder='/C/linux/vms'
-vmsfolder='/I/vms'
+vmsfolder='/I/vms/qemu'
 vmname="win10"
 cd "$vmsfolder"
 cd "$vmname"
