@@ -1,0 +1,4 @@
+#!/bin/sh
+out_name=`xrandr -q | awk '/connected primary/ {print $1}'`
+current_res=`xrandr -q | awk '/\*/ {print $1}'`
+xrandr --output $out_name --mode $current_res
