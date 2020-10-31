@@ -15,8 +15,8 @@ xclip_opts=""
 #[3]
 ffmpeg_opts_video="-hwaccel_output_format cuda "
 ffmpeg_opts_video+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
-ffmpeg_opts_video+="-f pulse -i 2 -ac 2 "
-ffmpeg_opts_video+="-f pulse -i 1 -ac 1 "
+ffmpeg_opts_video+="-f pulse -i 4 -ac 2 " #pulseffects_apps # audio
+ffmpeg_opts_video+="-f pulse -i 5 -ac 1 " #pulseffects_mic  # microphone
 ffmpeg_opts_video+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]
 ffmpeg_opts_video+="-map 0 -map [a] -map 1 -map 2 "
 ffmpeg_opts_video+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
@@ -40,6 +40,7 @@ case $1 in
 		ffmpeg $ffmpeg_opts_image $filename \
 			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
+			#&& echo $filename | xclip -selection clipboard
 	;;
 	shots)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
@@ -52,7 +53,8 @@ case $1 in
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
-		filename="$HOME/Videos/screencasts/${date}.${video_ext}"
+		#filename="$HOME/Videos/screencasts/${date}.${video_ext}"
+		filename="$HOME/ciciciaoicoai.mp4"
 		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s $full_res}
 		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/}
 		echo "$filename" > "$lastfile"
