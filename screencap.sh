@@ -53,8 +53,8 @@ case $1 in
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
-		#filename="$HOME/Videos/screencasts/${date}.${video_ext}"
-		filename="$HOME/ciciciaoicoai.mp4"
+		filename="$HOME/Videos/screencasts/${date}.${video_ext}"
+		#filename="$HOME/ciciciaoicoai.mp4"
 		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s $full_res}
 		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/}
 		echo "$filename" > "$lastfile"
