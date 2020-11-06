@@ -54,6 +54,8 @@ fofs() {
 			echo tar ${topts} -f "${dest}/${fn}.tar.gz" "${cf}" \> $o
 		else
 			tar ${topts} -f "${dest}/${fn}.tar.gz" "${cf}" > $o
+			echo Sleeping 10 secs...
+			sleep 10
 		fi
 	done
 }
@@ -70,6 +72,8 @@ fofr() {
 		echo tar ${exstring} ${topts} -f "${dest}/r.tar.gz" "${prefix}/" \> $o
 	else
 		tar ${exstring} ${topts} -f "${dest}/r.tar.gz" "${prefix}/" > $o
+		echo Sleeping 10 secs...
+		sleep 10
 	fi
 }
 fofh() {
@@ -81,6 +85,8 @@ fofh() {
 		echo tar ${exstring} ${topts} -f "${dest}/home.tar.gz" "${prefix}/home" \> $o
 	else
 		tar ${exstring} ${topts} -f "${dest}/home.tar.gz" "${prefix}/home" > $o
+		echo Sleeping 10 secs...
+		sleep 10
 	fi
 	
 }
