@@ -9,9 +9,9 @@ def print_convs(x,b):
 
 if sys.argv[1].startswith("0x"):
     print_convs(sys.argv[1],16)
-elif sys.argv[1].startswith("0"):
-    print_convs(sys.argv[1],8)
 elif sys.argv[1].startswith("0b"):
     print_convs(sys.argv[1],2)
+elif sys.argv[1].startswith("0"):
+    print_convs(sys.argv[1],8)
 else:
     print_convs(sys.argv[1],10)
