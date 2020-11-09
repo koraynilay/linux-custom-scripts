@@ -220,6 +220,7 @@ int main(int argc, char *argv[]){
 		while((dir = readdir(d)) != NULL){ //get every filename in cwd
 			int concat = 1;
 			if(dir->d_name[0] == '.' && all == 0) continue;
+			if(has_char(dir->d_name,' ')) escape_char(dir->d_name, '\'');
 			//if(has_char(dir->d_name,' ')) escape_char(dir->d_name, ' ');
 			//if(has_char(dir->d_name,'(')) escape_char(dir->d_name, '(');
 			//if(has_char(dir->d_name,')')) escape_char(dir->d_name, ')');
