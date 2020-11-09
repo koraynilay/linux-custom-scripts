@@ -1,7 +1,17 @@
 #!/bin/python
 import sys
-i=int(sys.argv[1],16)
-print(i)
-print(bin(i))
-print(hex(i))
-print(oct(i))
+def print_convs(x,b):
+    i=int(x,b)
+    print(i)
+    print(bin(i))
+    print(hex(i))
+    print(oct(i))
+
+if sys.argv[1].startswith("0x"):
+    print_convs(sys.argv[1],16)
+elif sys.argv[1].startswith("0"):
+    print_convs(sys.argv[1],8)
+elif sys.argv[1].startswith("0b"):
+    print_convs(sys.argv[1],2)
+else:
+    print_convs(sys.argv[1],10)
