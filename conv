@@ -7,6 +7,8 @@ def print_convs(x,b):
     print(hex(i))
     print(oct(i))
 
+if len(sys.argv) == 1:
+    exit(1)
 if sys.argv[1].startswith("0x"):
     print_convs(sys.argv[1],16)
 elif sys.argv[1].startswith("0b"):
