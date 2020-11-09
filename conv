@@ -1,10 +1,7 @@
 #!/bin/python
 import sys
-def print_convs(x):
-    i=int(x,16)
-    print(i)
-    print(bin(i))
-    print(hex(i))
-    print(oct(i))
-
-print_convs(sys.argv[1])
+i=int(sys.argv[1],16)
+print(i)
+print(bin(i))
+print(hex(i))
+print(oct(i))
