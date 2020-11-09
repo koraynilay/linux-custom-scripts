@@ -7,11 +7,4 @@ def print_convs(x):
     print(hex(i))
     print(oct(i))
 
-if sys.argv[1].startswith("0x"):
-    print_convs(sys.argv[1])
-if sys.argv[1].startswith("0x"):
-    print_convs(sys.argv[1])
-if sys.argv[1].startswith("0x"):
-    print_convs(sys.argv[1])
-if sys.argv[1].startswith("0x"):
-    print_convs(sys.argv[1])
+print_convs(sys.argv[1])
