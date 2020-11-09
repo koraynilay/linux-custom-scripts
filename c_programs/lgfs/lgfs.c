@@ -32,6 +32,8 @@ void printUsage(){
 		pr("--help\t\tShows this help\n\n");
 		pr("-o [options]\tOptions of -l\n");
 		pr("-n\t\tTurns off the notice if a config file doesn't exist\n");
+		pr("-a\t\tShow everything (also . and ..)\n");
+		pr("-n\t\tTurns off the notice if a config file doesn't exist\n");
 		//pr("-l\t\tExecutable to list the files (Default: 'ls')\n");
 		//pr("-p\t\tPrints config file, if it exists, then exits\n");
 		pr("-d\t\tShows debug info (Use -D for more levels of debugging)\n");
@@ -218,13 +220,13 @@ int main(int argc, char *argv[]){
 		while((dir = readdir(d)) != NULL){ //get every filename in cwd
 			int concat = 1;
 			if(dir->d_name[0] == '.' && all == 0) continue;
-			if(has_char(dir->d_name,' ')) escape_char(dir->d_name, ' ');
-			if(has_char(dir->d_name,'(')) escape_char(dir->d_name, '(');
-			if(has_char(dir->d_name,')')) escape_char(dir->d_name, ')');
-			if(has_char(dir->d_name,'#')) escape_char(dir->d_name, '#');
-			if(has_char(dir->d_name,'*')) escape_char(dir->d_name, '*');
-			if(has_char(dir->d_name,'$')) escape_char(dir->d_name, '$');
-			if(has_char(dir->d_name,'/')) escape_char(dir->d_name, '/'); //do not escape '\' otherwise it won't work
+			//if(has_char(dir->d_name,' ')) escape_char(dir->d_name, ' ');
+			//if(has_char(dir->d_name,'(')) escape_char(dir->d_name, '(');
+			//if(has_char(dir->d_name,')')) escape_char(dir->d_name, ')');
+			//if(has_char(dir->d_name,'#')) escape_char(dir->d_name, '#');
+			//if(has_char(dir->d_name,'*')) escape_char(dir->d_name, '*');
+			//if(has_char(dir->d_name,'$')) escape_char(dir->d_name, '$');
+			//if(has_char(dir->d_name,'/')) escape_char(dir->d_name, '/'); //do not escape '\' otherwise it won't work
 			if(debug_high == 1)printf("%s\n",dir->d_name);
 			if(debug_high == 1)printf("%s\n",dir->d_name);
 			ff_size+=strlen(dir->d_name)*sizeof(dir->d_name);
@@ -242,9 +244,10 @@ int main(int argc, char *argv[]){
 			}
 			if(concat == 1){
 				ff = realloc(ff, ff_size);
-				strcat(ff," ");
+				strcat(ff," '");
 				if(dr)strcat(ff,dr);
 				strcat(ff,dir->d_name);
+				strcat(ff,"'");
 			}
 		}
 	}
@@ -259,7 +262,8 @@ int main(int argc, char *argv[]){
 	}
 	//printf("lss:%s\n",ff);
 	//printf("cwd:%s\n",cwd);
-	char ls[200000];
+	int opt_size = sizeof(ls_opts);
+	char *ls = malloc(opt_size + ff_size);
 	strcpy(ls,ls_opts);
 	strcat(ls,ff);
 	if(debug == 1)printf("ls: %s\n",ls);
@@ -271,7 +275,7 @@ int main(int argc, char *argv[]){
 				if(debug == 1)printf("location: %s\n",argr[i].location);
 				if(debug == 1)printf("entries: %s\n\n",argr[i].entries);
 				if(!strcmp(cwd,argr[i].location)){
-					char lg[200000];
+					char *lg = malloc(opt_size + sizeof(argr[i].entries));
 
 					strcpy(lg,ls_opts);
 					strcat(lg,argr[i].entries);
@@ -290,6 +294,7 @@ int main(int argc, char *argv[]){
 		printf("enddd: %f\n",((double)(end - start) / CLOCKS_PER_SEC));
 	}
 	free(ff);
+	free(ls);
 	return 0;
 }
 
