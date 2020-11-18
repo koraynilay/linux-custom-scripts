@@ -22,3 +22,5 @@ echo -e "perc: $percs"
 end="$newcases nuovi casi, $percs dei $newtests nuovi tamponi"
 echo -e $end
 echo -ne $end | xclip -selection clipboard
+
+#https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-andamento-nazionale/dpc-covid19-ita-andamento-nazionale-20201117.csv
