@@ -40,8 +40,8 @@ resumed_notif_time=1000
 case $1 in
 	shot)
 		filename="$HOME/Pictures/screens/${date}.${image_ext}"
-		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s $full_res}
-		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/}
+		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${w}x${h}}
+		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${ox},${oy}}
 		ffmpeg $ffmpeg_opts_image $filename \
 			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
