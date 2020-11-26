@@ -35,7 +35,7 @@ done
 IFS=$tmp_ifs
 echo $size_to_replace $offset_to_replace
 ffmpeg_opts_video="-hwaccel_output_format cuda "
-ffmpeg_opts_video+="-f x11grab $size_to_replace -i :${DISPLAY}$offset_to_replace "
+ffmpeg_opts_video+="-f x11grab $size_to_replace -i ${DISPLAY#:}$offset_to_replace "
 ffmpeg_opts_video+="-f pulse -i PulseEffects_apps.monitor -ac 2 " #pulseffects_apps # audio
 ffmpeg_opts_video+="-f pulse -i PulseEffects_mic.monitor -ac 1 " #pulseffects_mic  # microphone
 ffmpeg_opts_video+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]
@@ -44,7 +44,7 @@ ffmpeg_opts_video+="-c:v h264_nvenc -r:v 60 -b:v 10m -crf 0 "
 ffmpeg_opts_video+="-c:a mp3 -r:a 44100 -b:a 320k "
 ffmpeg_opts_video+="-preset fast "
 
-ffmpeg_opts_image="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
+ffmpeg_opts_image="-f x11grab $size_to_replace -i ${DISPLAY#:}$offset_to_replace "
 ffmpeg_opts_image+="-vframes 1 -pix_fmt rgba "
 ffmpeg_opts_image+="-preset fast "
 
@@ -56,8 +56,6 @@ resumed_notif_time=1000
 case $1 in
 	shot)
 		filename="$HOME/Pictures/screens/${date}.${image_ext}"
-		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${w}x${h}}
-		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${ox},${oy}}
 		ffmpeg $ffmpeg_opts_image $filename \
 			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
