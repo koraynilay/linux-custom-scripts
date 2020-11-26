@@ -5,8 +5,8 @@ eval $(xdotool getmouselocation --shell)
 for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
 	IFS=' '
 	read -r w h ox oy < <(echo $i)
-	echo w:$w h:$h ox:$ox oy:$oy
-	echo X:$X Y:$Y
+#	echo w:$w h:$h ox:$ox oy:$oy
+#	echo X:$X Y:$Y
 	if [[ $X -ge $ox && $X -lt $(($w+$ox)) ]];then
 		echo in questo:${w}x$h $DISPLAY+$ox,$oy
 	fi
