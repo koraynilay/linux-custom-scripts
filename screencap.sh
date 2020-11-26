@@ -27,12 +27,15 @@ for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
 #	echo X:$X Y:$Y
 	if [[ $X -ge $ox && $X -lt $(($w+$ox)) ]];then
 		echo ${w}x$h $DISPLAY+$ox,$oy
+		size_to_replace="${w}x${h}"
+		offset_to_replace="+$ox,$oy"
 	fi
 	IFS=$'\n'
 done
 IFS=$tmp_ifs
+echo $size_to_replace $offset_to_replace
 ffmpeg_opts_video="-hwaccel_output_format cuda "
-ffmpeg_opts_video+="-f x11grab size_to_replace -i :${DISPLAY}offset_to_replace "
+ffmpeg_opts_video+="-f x11grab $size_to_replace -i :${DISPLAY}$offset_to_replace "
 ffmpeg_opts_video+="-f pulse -i PulseEffects_apps.monitor -ac 2 " #pulseffects_apps # audio
 ffmpeg_opts_video+="-f pulse -i PulseEffects_mic.monitor -ac 1 " #pulseffects_mic  # microphone
 ffmpeg_opts_video+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]
