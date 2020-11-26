@@ -35,7 +35,7 @@ done
 IFS=$tmp_ifs
 echo $size_to_replace $offset_to_replace
 ffmpeg_opts_video="-hwaccel_output_format cuda "
-ffmpeg_opts_video+="-f x11grab size_to_replace -i :${DISPLAY}offset_to_replace "
+ffmpeg_opts_video+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmpeg_opts_video+="-f pulse -i PulseEffects_apps.monitor -ac 2 " #pulseffects_apps # audio
 ffmpeg_opts_video+="-f pulse -i PulseEffects_mic.monitor -ac 1 " #pulseffects_mic  # microphone
 ffmpeg_opts_video+="-filter_complex [1:a][2:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]
@@ -76,8 +76,8 @@ case $1 in
 	cast)
 		filename="$HOME/Videos/screencasts/${date}.${video_ext}"
 		#filename="$HOME/ciciciaoicoai.mp4"
-		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s $full_res}
-		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/}
+		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s $size_to_replace}
+		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/$offset_to_replace}
 		echo "$filename" > "$lastfile"
 
 		dunstify -a screencap.sh "rec started" -t $started_notif_time
