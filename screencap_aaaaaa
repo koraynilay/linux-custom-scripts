@@ -1,0 +1,5 @@
+#!/bin/bash
+n=$(xrandr -q | grep \\sconnected | wc -l)
+for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
+	read -r w h ox oy < <(echo $i)
+done

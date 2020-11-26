@@ -10,6 +10,10 @@ slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
 date=$(date +%Y-%m-%d_%H-%M-%S)
 
 full_res=$(xrandr -q | awk '/\*/ {print $1}')
+primary_monitor_res=$(xrandr -q | awk '/\sconnected\sprimary/ {print $4}')
+secondary_monitor_res=$(xrandr -q | awk '/\sconnected\s[^primary]/ {print $3}')
+primary_monitor_res=${primary_monitor_res%[0-9]+x[0-9]+}
+secondary_monitor_res=$(xrandr -q | awk '/\sconnected\s[^primary]/ {print $3}')
 xclip_opts=""
 
 #[3]
