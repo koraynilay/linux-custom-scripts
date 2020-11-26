@@ -17,7 +17,20 @@ secondary_monitor_res=$(xrandr -q | awk '/\sconnected\s[^primary]/ {print $3}')
 xclip_opts=""
 
 #[3]
+tmp_ifs=$IFS
+IFS=$'\n'
 eval $(xdotool getmouselocation --shell)
+for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
+	IFS=' '
+	read -r w h ox oy < <(echo $i)
+#	echo w:$w h:$h ox:$ox oy:$oy
+#	echo X:$X Y:$Y
+	if [[ $X -ge $ox && $X -lt $(($w+$ox)) ]];then
+		echo ${w}x$h $DISPLAY+$ox,$oy
+	fi
+	IFS=$'\n'
+done
+IFS=$tmp_ifs
 ffmpeg_opts_video="-hwaccel_output_format cuda "
 ffmpeg_opts_video+="-f x11grab size_to_replace -i :${DISPLAY}offset_to_replace "
 ffmpeg_opts_video+="-f pulse -i PulseEffects_apps.monitor -ac 2 " #pulseffects_apps # audio
