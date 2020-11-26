@@ -7,12 +7,8 @@ for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
 	read -r w h ox oy < <(echo $i)
 	echo w:$w h:$h ox:$ox oy:$oy
 	echo X:$X Y:$Y
-	if [[ $X -ge $ox ]];then
-		if [[ $X -lt $(($X-$w)) ]];then
-			echo in questo:${w}x$h $DISPLAY+$ox,$oy
-		elif [[ $X -lt $w ]];then
-			echo iin questo:${w}x$h $DISPLAY+$ox,$oy
-		fi
+	if [[ $X -ge $ox && $ox -ne 0 ]];then
+		echo in questo:${w}x$h $DISPLAY+$ox,$oy
 	fi
 	IFS=$'\n'
 done
