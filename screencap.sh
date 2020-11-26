@@ -26,7 +26,7 @@ for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
 #	echo w:$w h:$h ox:$ox oy:$oy
 #	echo X:$X Y:$Y
 	if [[ $X -ge $ox && $X -lt $(($w+$ox)) ]];then
-		echo ${w}x$h $DISPLAY+$ox,$oy
+#		echo ${w}x$h $DISPLAY+$ox,$oy
 		size_to_replace="${w}x${h}"
 		offset_to_replace="+$ox,$oy"
 	fi
