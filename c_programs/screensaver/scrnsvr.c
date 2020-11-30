@@ -1,10 +1,10 @@
 /*
  * compile with:
- * gcc [options] scrnsvr.c -o scrnsvr -lXss -lX11 -lpthread
+ * gcc [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lXinerama -lXrandr
  *
  * OR for full RELRO (more info: https://www.redhat.com/en/blog/hardening-elf-binaries-using-relocation-read-only-relro)
  *
- * gcc -g -O0 -Wl,-z,relro,-z,now [options] scrnsvr.c -o scrnsvr -lXss -lX11 -lpthread
+ * gcc -Wl,-z,relro,-z,now [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lXinerama -lXrandr
 */
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -14,6 +14,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <X11/extensions/scrnsaver.h>
+#include <X11/extensions/Xrandr.h>
+#include <X11/extensions/Xinerama.h>
 #include <X11/Xutil.h>
 #include <ctype.h> //for isspace()
 #include <sysexits.h> //for some exit statuses (see RETURN_CODES.txt)
@@ -457,21 +459,66 @@ int main(int argc, char *argv[])
 			if(check_fullscreen == 1){
 				XWindowAttributes attribs;
 				XGetWindowAttributes(my_display, focused, &attribs);
+
+				// not used now, but could be useful in the future
+				//
+				// //kinda borrowed from https://github.com/jordansissel/xdotool/blob/master/xdo.c#L195
+				// int focused_x, focused_y;
+				// Window parent, root, *children, dummy;
+				// unsigned int nchildren;
+				// XQueryTree(my_display, focused, &root, &parent, &children, &nchildren);
+				// if (children != NULL) XFree(children);
+				// if (parent == attribs.root) {
+				// 	focused_x = attribs.x;
+				// 	focused_y = attribs.y;
+				// }
+				// else XTranslateCoordinates(my_display, focused, attribs.root, 0, 0, &focused_x, &focused_y, &dummy);
+				// if(debug_ultra_high == 1) printf("Focused x y:%d %d\n",focused_x,focused_y);
+				//
+
 				if(attribs.width && attribs.height){
 					int focused_height = attribs.height;
 					int focused_width = attribs.width;
+					int nsizes = 0;
+					int event_base_return;
+					int error_base_return;
 					if(debug_high == 1)printf("Focused window geom: %dx%d\n",focused_width,focused_height);
 					if(debug_ultra_mega_high == 1)printf("%d ",display_height == focused_height);
 					if(debug_ultra_mega_high == 1)printf("%d\n",display_width == focused_width);
-					if(display_height == focused_height || display_height == (focused_height - borders_pixel)){
-						if(display_width == focused_width || display_width == (focused_width - borders_pixel)){
+
+					if((display_height == focused_height || display_height == (focused_height - borders_pixel)) &&
+					   (display_width  == focused_width  || display_width  == (focused_width  - borders_pixel))){
 							is_fullscreen_geom = 1;
+					}
+					else if(XineramaIsActive(my_display) == 1){
+						XineramaScreenInfo *xinfo = XineramaQueryScreens(my_display, &nsizes);
+						for(int i=0;i<nsizes;i++){
+							if(debug_high == 1) printf("Xinerama Screen %d Geometry:%dx%d\n",xinfo[i].screen_number,xinfo[i].width,xinfo[i].height);
+							display_height = xinfo[i].height;
+							display_width = xinfo[i].width;
+							if((display_height == focused_height || display_height == (focused_height - borders_pixel)) &&
+							   (display_width  == focused_width  || display_width  == (focused_width  - borders_pixel))){
+									is_fullscreen_geom = 1;
+									break;
+							}else is_fullscreen_geom = 0;
 						}
-						else{is_fullscreen_geom = 0;}
+						XFree(xinfo);
 					}
-					else{
-						is_fullscreen_geom = 0;
+					else if(XRRQueryExtension(my_display, &event_base_return, &error_base_return) == 1){
+						XRRMonitorInfo *xinfo = XRRGetMonitors(my_display, RootWindow(my_display, DefaultScreen(my_display)), True, &nsizes);
+						for(int i=0;i<nsizes;i++){
+							if(debug_high == 1) printf("Xrandr Screen %d Geometry:%dx%d\n",i,xinfo[i].width,xinfo[i].height);
+							display_height = xinfo[i].height;
+							display_width = xinfo[i].width;
+							if((display_height == focused_height || display_height == (focused_height - borders_pixel)) &&
+							   (display_width  == focused_width  || display_width  == (focused_width  - borders_pixel))){
+									is_fullscreen_geom = 1;
+									break;
+							}else is_fullscreen_geom = 0;
+						}
+						XFree(xinfo);
 					}
+					else is_fullscreen_geom = 0;
 				}
 				
 				Atom prop_state = XInternAtom(my_display, "_NET_WM_STATE",False);
