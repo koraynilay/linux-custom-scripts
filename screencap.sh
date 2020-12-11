@@ -207,7 +207,7 @@ case $1 in
 			fi
 		fi
 	;;
-	*)echo -ne "Usage: $0 [shot|shots|cast|casts|stop_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
+	*)echo -ne "Usage: $0 [shot|shots|shotw|cast|casts|castw|stop_rec|pause_rec|resume_rec|toggle_rec]\n";exit 1;;
 esac
 exit $?
 
