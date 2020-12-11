@@ -128,6 +128,26 @@ case $1 in
 		#	rm "$filename"
 		#fi
 	;;
+	castw)
+		slop=$(xwininfo -id $(xdotool getactivewindow) | awk 'BEGIN{res=""} /Absolute upper|Width|Height/ {res=res$NF" "}END{print res}') || exit 1 #[1]
+		filename="$HOME/Videos/screencasts/${date}_select.${video_ext}"
+		read -r X Y W H < <(echo $slop) #[1]
+		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s ${W}x${H}}
+		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/+${X},${Y}}
+		echo -e "$filename\n$X\n$Y\n$W\n$H" > "$lastfile"
+
+		dunstify -a screencap.sh "rec started" -t $started_notif_time
+		ffmpeg $ffmpeg_opts_video $filename
+		ffmpeg_exit_code=$?
+		echo $ffmpeg_exit_code
+		if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
+			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
+			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
+		fi
+		#else #this is cleaner, but if the exit codes change then the file would be removed
+		#	rm "$filename"
+		#fi
+	;;
 	stop_rec)
 		killall -INT ffmpeg # or -2 code
 		rm "$lastfile"
