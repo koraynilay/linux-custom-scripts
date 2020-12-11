@@ -1,3 +1,4 @@
 #!/bin/sh
 target=${1:-$(pacman -Qq)}
-expac "%m %n" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n
+expac "%m %n" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n # no version displayed
+#expac "%m %n %v" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n # version displayed
