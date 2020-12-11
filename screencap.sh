@@ -1,11 +1,16 @@
 #!/bin/bash 
+
+# Ctrl	- Video Recording modifier
+# Shift	- Selection modifier
+# Alt	- Focused window modifier
+
 lastfile="$HOME/.screencapsh"
 lockfile="$HOME/.screencapsh.lck"
 
 video_ext="mp4"
 image_ext="png"
 
-slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k" # -D"
+slop_opts="-l -c 0.2,0,0.15,0.3 -b 1.5 -k --nodecorations" # -D"
 #date=$(date +%d-%m-%Y_%H-%M-%S)
 date=$(date +%Y-%m-%d_%H-%M-%S)
 
@@ -67,6 +72,17 @@ case $1 in
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
 		filename="$HOME/Pictures/screens/${date}.${image_ext}"
 		read -r X Y W H G ID < <(echo $slop) #[1]
+		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
+		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
+		ffmpeg $ffmpeg_opts_image $filename \
+			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
+			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
+	;;
+	shotw)
+		eval $(xdotool getactivewindow getwindowgeometry --shell) || exit 1 #[1]
+		filename="$HOME/Pictures/screens/${date}.${image_ext}"
+		W=$WIDTH
+		H=$HEIGHT
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
 		ffmpeg $ffmpeg_opts_image $filename \
