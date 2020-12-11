@@ -74,7 +74,7 @@ case $1 in
 		read -r X Y W H G ID < <(echo $slop) #[1]
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
-		echo ffmpeg $ffmpeg_opts_image $filename \
+		ffmpeg $ffmpeg_opts_image $filename \
 			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
@@ -85,7 +85,7 @@ case $1 in
 		read -r X Y W H < <(echo $slop) #[1]
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
-		echo ffmpeg $ffmpeg_opts_image $filename \
+		ffmpeg $ffmpeg_opts_image $filename \
 			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
