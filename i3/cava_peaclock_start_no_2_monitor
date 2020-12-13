@@ -1,33 +1,24 @@
 #!/bin/sh
 deskcat='cava_desktop'
 deskpct='peaclock_desktop'
-_2deskpct='_2peaclock_desktop'
 geomcava='370 260' #width height
 geompeaclock='470 260' #width height
 poscava='1550 800' #absolute x y (from top_left of monitor)
 pospeaclock='10 440' #absolute x y (from top_left of monitor)
-_2pospeaclock='1930 380' #absolute x y (from top_left of monitor)
 cava_id=$(xdotool search --name "^$deskcat\$")
 peaclock_id=$(xdotool search --name "^$deskpct\$")
-_2peaclock_id=$(xdotool search --name "^$_2deskpct\$")
 if [ -n $cava_id ];then
 	xdotool windowkill $cava_id
 fi
 if [ -n $peaclock_id ];then
 	xdotool windowkill $peaclock_id
 fi
-if [ -n $_2peaclock_id ];then
-	xdotool windowkill $_2peaclock_id
-fi
 nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskcat -e 'cava' >/dev/null 2>&1 &!
 nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskpct -e 'peaclock' >/dev/null 2>&1 &!
-nice -n 19 termite -c ~/.config/termite/config_desktop -t $_2deskpct -e 'peaclock' >/dev/null 2>&1 &!
 sleep 0.5
 cava_id=$(xdotool search --name "^$deskcat\$")
 peaclock_id=$(xdotool search --name "^$deskpct\$")
-_2peaclock_id=$(xdotool search --name "^$_2deskpct\$")
 sleep 0.5
-# overrideredirect 1
 xdotool windowunmap --sync $cava_id
 xdotool set_window --overrideredirect 1 $cava_id
 xdotool windowmap --sync $cava_id
@@ -36,23 +27,13 @@ xdotool windowunmap --sync $peaclock_id
 xdotool set_window --overrideredirect 1 $peaclock_id
 xdotool windowmap --sync $peaclock_id
 
-xdotool windowunmap --sync $_2peaclock_id
-xdotool set_window --overrideredirect 1 $_2peaclock_id
-xdotool windowmap --sync $_2peaclock_id
-
-# sizes
 xdotool windowsize --sync $cava_id $geomcava
 xdotool windowsize --sync $peaclock_id $geompeaclock
-xdotool windowsize --sync $_2peaclock_id $geompeaclock
-# positions
 xdotool windowmove --sync $cava_id $poscava
 xdotool windowmove --sync $peaclock_id $pospeaclock
-xdotool windowmove --sync $_2peaclock_id $pospeaclock
 
-# lowers
 xdo lower $cava_id
 xdo lower $peaclock_id
-xdo lower $_2peaclock_id
 
 sleep 0.2
 exit 0
