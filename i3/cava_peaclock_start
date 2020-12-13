@@ -4,6 +4,7 @@ deskpct='peaclock_desktop'
 _2deskpct='_2peaclock_desktop'
 geomcava='370 260' #width height
 geompeaclock='470 260' #width height
+_2geompeaclock='470 260' #width height
 poscava='1550 800' #absolute x y (from top_left of monitor)
 pospeaclock='10 440' #absolute x y (from top_left of monitor)
 _2pospeaclock='1930 380' #absolute x y (from top_left of monitor)
@@ -43,11 +44,11 @@ xdotool windowmap --sync $_2peaclock_id
 # sizes
 xdotool windowsize --sync $cava_id $geomcava
 xdotool windowsize --sync $peaclock_id $geompeaclock
-xdotool windowsize --sync $_2peaclock_id $geompeaclock
+xdotool windowsize --sync $_2peaclock_id $_2geompeaclock
 # positions
 xdotool windowmove --sync $cava_id $poscava
 xdotool windowmove --sync $peaclock_id $pospeaclock
-xdotool windowmove --sync $_2peaclock_id $pospeaclock
+xdotool windowmove --sync $_2peaclock_id $_2pospeaclock
 
 # lowers
 xdo lower $cava_id
