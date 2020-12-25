@@ -1,4 +1,5 @@
 #!/bin/sh
+#dark_pic="$HOME/android_walls/whitelines/live_timw_linkin.png"
 #home="/home/koraynilay"
 light_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_light_blur.png"
 dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
