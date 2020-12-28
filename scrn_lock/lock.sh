@@ -1,6 +1,6 @@
 #!/bin/sh
-light_pic="$HOME/android_walls/new_lock.png"
-dark_pic="$HOME/android_walls/new_lock.png"
+light_pic="$HOME/android_walls/new_linkin_lock.png"
+ dark_pic="$HOME/android_walls/new_linkin_lock.png"
 #light_pic="$HOME/android_walls/new.png"
 #dark_pic="$HOME/android_walls/new.png"
 
