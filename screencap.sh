@@ -64,7 +64,7 @@ case $1 in
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s $size_to_replace}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/$offset_to_replace}
 		ffmpeg $ffmpeg_opts_image $filename \
-			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
+			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time -I "$filename" \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 			#&& echo $filename | xclip -selection clipboard
 	;;
@@ -75,7 +75,7 @@ case $1 in
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
 		ffmpeg $ffmpeg_opts_image $filename \
-			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
+			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time -I "$filename" \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
 	shotw)
@@ -86,7 +86,7 @@ case $1 in
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
 		ffmpeg $ffmpeg_opts_image $filename \
-			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time \
+			&& dunstify -a ffmpeg "screenshot is $filename" -t $finished_notif_time -I "$filename" \
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
