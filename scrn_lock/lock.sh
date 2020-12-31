@@ -1,12 +1,12 @@
 #!/bin/sh
-light_pic="$HOME/android_walls/new_linkin_fade_lock.png"
- dark_pic="$HOME/android_walls/new_linkin_fade_lock.png"
+#light_pic="$HOME/android_walls/new_linkin_fade_lock.png"
+# dark_pic="$HOME/android_walls/new_linkin_fade_lock.png"
 #light_pic="$HOME/android_walls/new.png"
 #dark_pic="$HOME/android_walls/new.png"
 
 #home="/home/koraynilay"
-#light_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_light_blur.png"
-#dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
+light_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_light_blur.png"
+dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
 #light_pic="$home/Pictures/wallpapers/wave/landscape_wave_blur.png"
 #dark_pic="$home/Pictures/wallpapers/wave/landscape_wave_4_blur.png"
 font='Tw Cen MT'
