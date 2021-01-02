@@ -37,17 +37,20 @@ case $1 in
 				restart\ to\ windows)
 					ask
 					mpc pause
+					killall -9 conky
 					systemctl reboot --boot-loader-entry=auto-windows
 					#dunstify ciao
 					;;
 				restart)
 					ask
 					mpc pause
+					killall -9 conky
 					systemctl reboot
 					;;
 				shutdown)
 					ask
 					mpc pause
+					killall -9 conky
 					systemctl poweroff
 					;;
 			esac
@@ -68,6 +71,7 @@ case $1 in
 			for ((i=0;i<${#array[@]};i++)) do
 				if [ "${array[i+1]}" = "$res" ];then
 					ask
+					killall -9 conky
 					systemctl reboot --boot-loader-entry="${array[i]}"
 				fi
 			done
