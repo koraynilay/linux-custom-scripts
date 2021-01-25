@@ -155,6 +155,7 @@ case $1 in
 	cancel_rec)
 		killall -KILL ffmpeg # or -2 code
 		dunstify -a screencap.sh "rec canceled" -t $finished_notif_time
+		rm -v $(cat "$lastfile")
 		rm "$lastfile"
 	;;
 	pause_rec)
