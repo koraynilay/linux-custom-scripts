@@ -29,6 +29,7 @@ yadm status
 sleep 1
 yadm add -u
 yadm add -v ~/.lyrics
+yadm status
 yadm commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 yadm push
 read -p "copyq? [y/n]:" ans
