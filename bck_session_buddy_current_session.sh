@@ -7,7 +7,7 @@ xdotool mousemove $SESSION_BUDDY_ICON_X $SESSION_BUDDY_ICON_Y\
 	click 1\
 	mousemove restore\
 	mousemove $SESSION_BUDDY_SAVE_X $SESSION_BUDDY_SAVE_Y\
-	sleep 1.5\
+	sleep 5\
 	click 1\
 	mousemove restore
 #	key Ctrl+W
