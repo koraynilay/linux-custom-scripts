@@ -1,5 +1,8 @@
 #!/bin/bash
-folders=("$HOME/.config/chromium/Default/Sessions" "$HOME/.config/chromium/Profile 1/Sessions")
+#browser_folder="chromium"
+browser_folder="google-chrome"
+#browser_folder="BraveSoftware/Brave-Browser"
+folders=("$HOME/.config/$browser_folder/Default/Sessions" "$HOME/.config/$browser_folder/Profile 1/Sessions")
 bck_folder="$HOME/.chtb"
 copy_folder_whole=1
 folder_basename_level=2 # to pass to cut, these are the last n fields
