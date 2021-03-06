@@ -22,9 +22,15 @@ pkg_list_ver() {
 	pacman -Qen >> $HOME/${pkglistver}.txt
 	pacman -Qem >> $HOME/${pkglistver}_aur.txt
 }
+list_films_animes() {
+	cd /F/free_ck/films
+	alias lsdt="paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U)"
+	lsdt > ~/filmsanimes_list_zips.txt
+}
 
 pkg_list
 pkg_list_ver
+list_films_animes
 yadm status
 sleep 1
 yadm add -u
