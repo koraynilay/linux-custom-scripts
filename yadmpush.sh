@@ -24,8 +24,9 @@ pkg_list_ver() {
 }
 list_films_animes() {
 	cd /F/free_ck/films
-	alias lsdt="paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U)"
-	lsdt > ~/filmsanimes_list_zips.txt
+	paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U) > ~/filmsanimes_list_zips.txt
+	#alias lsdt="paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U)"
+	#lsdt > ~/filmsanimes_list_zips.txt
 }
 
 pkg_list
@@ -35,6 +36,8 @@ yadm status
 sleep 1
 yadm add -u
 yadm add -v ~/.lyrics
+yadm add -v ~/.mpd/playlists/
+yadm add -v ~/.mpd/database
 yadm status
 yadm commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 yadm push
