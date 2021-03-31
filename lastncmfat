@@ -5,28 +5,52 @@ md='/I/Raccolte/Musica'
 arg=$1
 IFS=$'\n'
 
-cd "$md"
-for a in `find .`;do
-	gr=$(grep -F "$a" "$mf")
-	#echo $gr
-	if [ -n "$gr" ];then
-		continue
-	else
-		echo "adding $a to $mf"
-		data=$(date -d @`getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'` +%Y-%m-%d_%H-%M-%S)
-		echo "$data \"$a\"" >> $mf
-	fi
+resume=0
+update=0
+while getopts uh opt;do #r #per -r (resume)
+	case $opt in
+		#r)resume=1;;
+		u)update=1;;
+		h)	echo -ne "Usage: $0 [opt]\n";
+			#echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
+			#echo -ne "  -r \tresume after populating playlist\n";
+			echo -ne "  -u \tupdate '$mf'\n";
+			exit 0;;
+		?)exit 2;;
+	esac
 done
+#if [ "$arg" = "play" ];then
+#	update=1
+#fi
+
+
+cd "$md"
+if [ $update -eq 1 ];then
+	for a in `find .`;do
+		gr=$(grep -F "$a" "$mf")
+		#echo $gr
+		if [ -n "$gr" ];then
+			continue
+		else
+			echo "adding $a to $mf"
+			data=$(date -d @`getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'` +%Y-%m-%d_%H-%M-%S)
+			echo "$data \"$a\"" >> $mf
+		fi
+	done
+fi
+
 printf "csong\n"
 echo $arg
 if [ "$arg" = "add" ];then
-	for csong in `cat $mf | sort -nr | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+	n=0
+	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 		#echo $csong
 		is_there=`mpc -f '%file%' playlist | grep -F "$csong"`
 		#echo $is_there
 		if [ -z "$is_there" ];then
 			mpc add "$csong"
-			mpc move `mpc status | perl -ne 'print "$1\n" if /#[0-9]+\/([0-9]+)/'` 1
+			let n++
+			mpc move `mpc status | perl -ne 'print "$1\n" if /#[0-9]+\/([0-9]+)/'` $n
 			printf "added: $csong\n"
 		fi
 	done
@@ -38,7 +62,7 @@ if [ "$arg" = "play" ];then
 	mpc clear >/dev/null
 	pwd
 	n=0
-	for csong in `cat $mf | sort -nr | awk '!/^#[0-9]{4}/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 		#echo $csong
 		mpc add "$csong"
 		let n++
