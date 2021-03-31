@@ -38,7 +38,7 @@ if [ "$arg" = "play" ];then
 	mpc clear >/dev/null
 	pwd
 	n=0
-	for csong in `cat $mf | sort -nr | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+	for csong in `cat $mf | sort -nr | awk '!/^#[0-9]{4}/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 		#echo $csong
 		mpc add "$csong"
 		let n++
