@@ -24,6 +24,10 @@ done
 #fi
 
 
+data_cmd=0
+if [ "$(lsblk -o FSTYPE $(df -T "$md" | awk '/\/dev\//{print $2}') | tail -1)" == "ntfs" ];then
+	data_cmd=1
+fi
 cd "$md"
 if [ $update -eq 1 ];then
 	for a in `find .`;do
@@ -33,7 +37,11 @@ if [ $update -eq 1 ];then
 			continue
 		else
 			echo "adding $a to $mf"
-			data=$(date -d @`getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600'` +%Y-%m-%d_%H-%M-%S)
+			if [ $data_cmd -eq 1 ];then
+				data=$(date -d @$(getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600') +%Y-%m-%d_%H-%M-%S)
+			else
+				data=$(date -d "$(stat "$a" | nl | awk '$1 == 8 {print $3,$4}')" +%Y-%m-%d_%H-%M-%S)
+			fi
 			echo "$data \"$a\"" >> $mf
 		fi
 	done
