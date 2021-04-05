@@ -38,7 +38,7 @@ for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
 	IFS=$'\n'
 done
 IFS=$tmp_ifs
-echo $size_to_replace $offset_to_replace
+#echo $size_to_replace $offset_to_replace
 ffmpeg_opts_video="-hwaccel_output_format cuda "
 ffmpeg_opts_video+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmpeg_opts_video+="-f pulse -i PulseEffects_apps.monitor -ac 2 " #pulseffects_apps # audio
@@ -58,9 +58,28 @@ finished_notif_time=10000
 paused_notif_time=1000
 resumed_notif_time=1000
 
-case $1 in
+folder_img="$HOME/Pictures/screens"
+folder_video="$HOME/Videos/screencasts"
+
+while getopts i:v:f:h opt;do
+	case $opt in
+		i)folder_img="$OPTARG";;
+		v)folder_video="$OPTARG";;
+		f)filename="$OPTARG";;
+		h)	echo -ne "Usage: $0 [opt]\n";
+			#echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
+			echo -ne "  -v [path]\tfolder for screencasts\n";
+			echo -ne "  -i [path]\tfolder for screenshots\n";
+			echo -ne "  -f [name]\tfilename\n";
+			exit 0;;
+		?)echo -e "'$opt' Uknown option. Exiting"; exit 2;;
+	esac
+done
+
+args=($@)
+case ${args[$(($OPTIND-1))]} in
 	shot)
-		filename="$HOME/Pictures/screens/${date}.${image_ext}"
+		filename="${folder_img}/${filename:="${date}"}.${image_ext}"
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s $size_to_replace}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/$offset_to_replace}
 		ffmpeg $ffmpeg_opts_image $filename \
@@ -70,7 +89,7 @@ case $1 in
 	;;
 	shots)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
-		filename="$HOME/Pictures/screens/${date}.${image_ext}"
+		filename="${folder_img}/${filename:=${date}}.${image_ext}"
 		read -r X Y W H G ID < <(echo $slop) #[1]
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
@@ -81,7 +100,7 @@ case $1 in
 	shotw)
 		slop=$(xwininfo -id $(xdotool getactivewindow) | awk 'BEGIN{res=""} /Absolute upper|Width|Height/ {res=res$NF" "}END{print res}') || exit 1 #[1]
 		# slop=$(xwininfo -id $(xdotool getactivewindow) | grep -oP --no-ignore-case '(?<=Absolute.{13}:|Width:|Height:)\s+[0-9]+' | sed 's/\s*//g') || exit 1 #[1]
-		filename="$HOME/Pictures/screens/${date}.${image_ext}"
+		filename="${folder_img}/${filename:="${date}"}.${image_ext}"
 		read -r X Y W H < <(echo $slop) #[1]
 		ffmpeg_opts_image=${ffmpeg_opts_image/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_image=${ffmpeg_opts_image/offset_to_replace/+${X},${Y}}
@@ -90,8 +109,7 @@ case $1 in
 			&& xclip $xclip_opts -t image/png -selection clipboard "$filename"
 	;;
 	cast)
-		filename="$HOME/Videos/screencasts/${date}.${video_ext}"
-		#filename="$HOME/ciciciaoicoai.mp4"
+		filename="${folder_video}/${filename:="${date}"}.${video_ext}"
 		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s $size_to_replace}
 		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/$offset_to_replace}
 		echo "$filename" > "$lastfile"
@@ -110,7 +128,7 @@ case $1 in
 	;;
 	casts)
 		slop=$(slop $slop_opts -f "%x %y %w %h %g %i") || exit 1 #[1]
-		filename="$HOME/Videos/screencasts/${date}_select.${video_ext}"
+		filename="${folder_video}/${filename:="${date}"}.${video_ext}"
 		read -r X Y W H G ID < <(echo $slop) #[1]
 		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/+${X},${Y}}
@@ -130,7 +148,7 @@ case $1 in
 	;;
 	castw)
 		slop=$(xwininfo -id $(xdotool getactivewindow) | awk 'BEGIN{res=""} /Absolute upper|Width|Height/ {res=res$NF" "}END{print res}') || exit 1 #[1]
-		filename="$HOME/Videos/screencasts/${date}_select.${video_ext}"
+		filename="${folder_video}/${filename:="${date}"}.${video_ext}"
 		read -r X Y W H < <(echo $slop) #[1]
 		ffmpeg_opts_video=${ffmpeg_opts_video/size_to_replace/-s ${W}x${H}}
 		ffmpeg_opts_video=${ffmpeg_opts_video/offset_to_replace/+${X},${Y}}

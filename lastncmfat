@@ -2,7 +2,7 @@
 #old name: "last_added_ncmpcpp_getfattr"
 mf='/I/Raccolte/music_files.txt'
 md='/I/Raccolte/Musica'
-arg=$1
+arg=$2
 IFS=$'\n'
 
 resume=0
@@ -25,7 +25,7 @@ done
 
 
 data_cmd=0
-if [ "$(lsblk -o FSTYPE $(df -T "$md" | awk '/\/dev\//{print $2}') | tail -1)" == "ntfs" ];then
+if [ "$(lsblk -o FSTYPE $(df -T "$md" | awk '/\/dev\//{print $1}') | tail -1)" == "ntfs" ];then
 	data_cmd=1
 fi
 cd "$md"
