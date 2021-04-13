@@ -1,5 +1,5 @@
 #!/bin/sh
-uplay_folder="$HOME/Games/uplay"
+uplay_folder="$HOME/Games/ubisoft-connect"
 bck_folder="$HOME/bck_savegames"
 uplaybck_folder="${bck_folder}/uplay"
 cd "$uplay_folder"
