@@ -5,7 +5,7 @@ read res
 if [ "$res" == "yes" ]; then
 	echo=0;
 fi
-foldername="`basename $PWD`_degoo";
+foldername="`basename "$PWD"`_degoo";
 if [ $echo -eq 1 ];then
 	echo="echo";
 else
