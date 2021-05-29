@@ -20,43 +20,43 @@ i3lock -n -k \
 	-C \
 	-c 000000 \
 	\
-	--timepos='x+30:h-200' \
-	--timesize='100' \
-	--timecolor=ffffffff \
+	--time-pos='x+30:h-200' \
+	--time-size='100' \
+	--time-color=ffffffff \
 	--time-align 1 \
 	--time-font="$font" \
-	--timestr='%k %M %S' \
+	--time-str='%k %M %S' \
 	\
-	--datepos='x+30:h-125' \
-	--datesize='40' \
-	--datecolor=ffffffff \
+	--date-pos='x+30:h-125' \
+	--date-size='40' \
+	--date-color=ffffffff \
 	--date-align 1 \
 	--date-font="$font" \
-	--datestr='%A %_d %B %Y' \
+	--date-str='%A %_d %B %Y' \
 	\
-	--insidevercolor=00000000 \
-	--insidewrongcolor=ff000000 \
-	--insidecolor=00000000 \
+	--insidever-color=00000000 \
+	--insidewrong-color=ff000000 \
+	--inside-color=00000000 \
 	\
 	--pass-media-keys \
 	--pass-screen-keys \
 	\
-	--indpos='x+1870:h-50' \
-	--keyhlcolor=ffffffff \
-	--bshlcolor=ff0000ff \
-	--separatorcolor=00000000 \
+	--ind-pos='x+1870:h-50' \
+	--keyhl-color=ffffffff \
+	--bshl-color=ff0000ff \
+	--separator-color=00000000 \
 	--radius=30 \
-	--linecolor=ff000050 \
-	--ringcolor=ff000000 \
-	--ringvercolor=00000050 \
-	--ringwrongcolor=ff000050 \
-	--verifcolor=ffffffff \
-	--wrongcolor=ff0000ff \
-	--veriftext="." \
-	--wrongtext="." \
-	--noinputtext="" \
-	--locktext="" \
-	--lockfailedtext="" \
+	--line-color=ff000050 \
+	--ring-color=ff000000 \
+	--ringver-color=00000050 \
+	--ringwrong-color=ff000050 \
+	--verif-color=ffffffff \
+	--wrong-color=ff0000ff \
+	--verif-text="." \
+	--wrong-text="." \
+	--noinput-text="" \
+	--lock-text="" \
+	--lockfailed-text="" \
 	--layout-font="$font" \
 	--verif-font="$font" \
 	--wrong-font="$font" #\
