@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 #old name: "last_added_ncmpcpp_getfattr"
 mf='/I/Raccolte/music_files.txt'
 md='/I/Raccolte/Musica'
@@ -22,10 +22,22 @@ done
 #if [ "$arg" = "play" ];then
 #	update=1
 #fi
+reorder_ost(){
+	s=0 # could also use bash substitions, but I prefer this
+	s=$(mpc playlist | nl | grep $1 | tail -1 | cut -f1 | sed 's/\s//g')
+	s1=$(mpc playlist | nl | grep $1 | head -1 | cut -f1 | sed 's/\s//g')
+	if [ $s -eq 0 ];then
+		echo "error, needs the position"
+	else
+		for a in {$((s-$((s-s1))))..$s};do
+			mpc move --verbose $s $a # ma --verbose non va
+		done
+	fi
 
+}
 
 data_cmd=0
-if [ "$(lsblk -o FSTYPE $(df -T "$md" | awk '/\/dev\//{print $1}') | tail -1)" == "ntfs" ];then
+if [[ "$(lsblk -o FSTYPE $(df -T "$md" | awk '/\/dev\//{print $1}') | tail -1)" == "ntfs" ]];then
 	data_cmd=1
 fi
 cd "$md"
@@ -79,5 +91,8 @@ if [ "$arg" = "play" ];then
 			mpc play
 		fi
 	done
+	reorder_ost Caparezza
+	reorder_ost "Yuki Hayashi"
+	reorder_ost "Kōtarō Nakagawa"
 	exit 0
 fi
