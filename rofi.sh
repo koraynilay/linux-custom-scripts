@@ -23,32 +23,32 @@ case $1 in
 					onboard
 					;;
 				hibernate)
-					ask
+					ask "hibernate"
 					mpc pause
 					systemctl hibernate
 					;;
 				logout)
-					ask
+					ask "logout"
 					i3-msg exit
 					;;
 				restart\ to\ other\ kernel)
 					kerns
 					;;
 				restart\ to\ windows)
-					ask
+					ask "restart to windows"
 					mpc pause
 					killall -9 conky
 					systemctl reboot --boot-loader-entry=auto-windows
 					#dunstify ciao
 					;;
 				restart)
-					ask
+					ask "restart"
 					mpc pause
 					killall -9 conky
 					systemctl reboot
 					;;
 				shutdown)
-					ask
+					ask "shutdown"
 					mpc pause
 					killall -9 conky
 					systemctl poweroff
@@ -70,14 +70,14 @@ case $1 in
 			res=$(echo -e "${entriesk%\\n}" | rofi -theme "$rofi_theme" -p "$msg"  -width 10 -xoffset 0 -no-fixed-num-lines -dmenu)
 			for ((i=0;i<${#array[@]};i++)) do
 				if [ "${array[i+1]}" = "$res" ];then
-					ask
+					ask "restart ot other kernel: $(awk '/title/ {$1="";print $0}' "$efif/${array[i]}")"
 					killall -9 conky
 					systemctl reboot --boot-loader-entry="${array[i]}"
 				fi
 			done
 		}
 		ask(){
-			res=$(echo -e "Yes\nNo" | rofi -theme "$rofi_theme" -p "Are you sure?"  -width 10 -xoffset 0 -lines 2 -no-fixed-num-lines -dmenu)
+			res=$(echo -e "Yes\nNo" | rofi -theme "$rofi_theme" -p "Are you sure you want to $@?"  -width 10 -xoffset 0 -lines 2 -no-fixed-num-lines -dmenu)
 			#echo $res
 			if [ ! "$res" = "Yes" ];then
 				exit 1
