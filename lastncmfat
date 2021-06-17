@@ -22,10 +22,10 @@ done
 #if [ "$arg" = "play" ];then
 #	update=1
 #fi
-reorder_ost(){
+reorder_album(){
 	s=0 # could also use bash substitions, but I prefer this
-	s=$(mpc playlist | nl | grep $1 | tail -1 | cut -f1 | sed 's/\s//g')
-	s1=$(mpc playlist | nl | grep $1 | head -1 | cut -f1 | sed 's/\s//g')
+	s=$(mpc playlist -f "%album% - %title% - %artist%" | nl | grep $@ | tail -1 | cut -f1 | sed 's/\s//g')
+	s1=$(mpc playlist -f "%album% - %title% - %artist%" | nl | grep $@ | head -1 | cut -f1 | sed 's/\s//g')
 	if [ $s -eq 0 ];then
 		echo "error, needs the position"
 	else
@@ -91,8 +91,9 @@ if [ "$arg" = "play" ];then
 			mpc play
 		fi
 	done
-	reorder_ost Caparezza
-	reorder_ost "Yuki Hayashi"
-	reorder_ost "Kōtarō Nakagawa"
+	reorder_album Caparezza
+	reorder_album "Death Parade"
+	reorder_album "Kōtarō Nakagawa"
+	reorder_album Kiznaiver
 	exit 0
 fi
