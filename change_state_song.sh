@@ -6,8 +6,9 @@ check_dir(){
 		exit 1
 	fi
 }
-next(){
+ch(){
 	check_dir
+	i=0
 	IFS=$'\n'
 	filename="${lyrdir}/$(mpc current).txt"
 	if [ -f "$filename" ];then
@@ -20,33 +21,33 @@ next(){
 			timef=$(echo $line | awk '{print $1}')
 			#echo $mc $sc
 			#echo $timef
+			#echo $lasttc
 			mf=$(echo $timef | awk -F: '{s=$NF;m=$(NF-1);if($(NF-2) != $0)m+=($(NF-2)*60);print m}')
 			sf=$(echo $timef | awk -F: '{s=$NF;m=$(NF-1);if($(NF-2) != $0)m+=($(NF-2)*60);print s}')
-			echo $mf $sf
+			#echo $mf $sf
 			mc=$((10#$mc))
 			sc=$((10#$sc))
 			mf=$((10#$mf))
 			sf=$((10#$sf))
 			if [[ $mc -lt $mf ]];then
-				echo ciao $timef
-				mpc seek $timef
+				if [ "$1" == "prev" ];then
+					echo seek ${lasttc[i-2]}
+					mpc  seek ${lasttc[i-2]}
+				elif [ "$1" == "next" ];then
+					echo seek $timef
+					mpc  seek $timef
+				fi
 				songstate_change_notif
 				exit
-			#elif [[ $mc -eq $mf ]];then
-			#	if [[ $sc -le $sf ]];then
-			#		echo ciao $timef
-			#		mpc seek $timef
-			#		songstate_change_notif
-			#		exit
-			#	fi
 			fi
-			lasttc=$timef #time start, for prev
+			lasttc[i]=$timef #time start, for prev
+			let i++
 		done
 	fi
 }
 
 case $1 in
-	next) next;;
-	prev) prev;;
+	next) ch next;;
+	prev) ch prev;;
 	*)mpc $1;;
 esac
