@@ -16,9 +16,10 @@ ch(){
 		lend=$(($(grep -n Endtr "${filename}" | cut -f1 -d:)-1))
 		for line in $(sed -n -e "${lstart},${lend}p" "${filename}");do
 			timec=$(mpc status | sed -n -e '2p' | awk '{gsub(/\/.*/,"",$3);print $3}')
-			mc=$(echo $timec | awk -F: '{print $(NF-1)}')
-			sc=$(echo $timec | awk -F: '{print $(NF-0)}')
-			timef=$(echo $line | awk '{print $1}')
+			mc=$(echo $timec | awk -F':' '{print $(NF-1)}')
+			sc=$(echo $timec | awk -F':' '{print $(NF-0)}')
+			timef=$(echo $line | awk -F'=' '{gsub(/[ \t]+$/, "", $1);print $1}')
+			title=$(echo $line | awk -F'=' '{gsub(/[ \t]+$/, "", $2);print $2}')
 			#echo $mc $sc
 			#echo $timef
 			#echo $lasttc
@@ -37,7 +38,7 @@ ch(){
 					echo seek $timef
 					mpc  seek $timef
 				fi
-				songstate_change_notif
+				songstate_change_notif " - $title"
 				exit
 			fi
 			lasttc[i]=$timef #time start, for prev
@@ -49,5 +50,5 @@ ch(){
 case $1 in
 	next) ch next;;
 	prev) ch prev;;
-	*)mpc $1;;
+	*)mpc $@;;
 esac
