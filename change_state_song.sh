@@ -20,12 +20,12 @@ next(){
 		lend=$(($(grep -n Endtr "${filename}" | cut -f1 -d:)-1))
 		for line in $(sed -n -e "${lstart},${lend}p" "${filename}");do
 			timec=$(mpc status | sed -n -e '2p' | awk '{gsub(/\/.*/,"",$3);print $3}')
-			mc=$(echo $timec | cut -f-2 -d:)
-			sc=$(echo $timec | cut -f-1 -d:)
+			mc=$(echo $timec | awk 'BEGIN{FS=":"}{print $(NF-1)}')
+			sc=$(echo $timec | awk 'BEGIN{FS=":"}{print $(NF-0)}')
 			timef=$(echo $line | awk '{print $1}')
 			#echo $timef
-			mf=$(echo $timef | cut -f-2 -d:)
-			sf=$(echo $timef | cut -f-1 -d:)
+			mf=$(echo $timef | awk 'BEGIN{FS=":"}{print $(NF-1)}')
+			sf=$(echo $timef | awk 'BEGIN{FS=":"}{print $(NF-0)}')
 			#echo $mf $sf
 			if [[ $s -le  ]];then
 
