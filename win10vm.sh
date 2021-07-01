@@ -2,6 +2,8 @@
 #vmsfolder='/C/linux/vms'
 vmsfolder='/I/vms/qemu'
 vmname="win10"
+share="$HOME/share_win"
+#share="/D/The.Fruit.of.Grisaia.Unrated.Version"
 cd "$vmsfolder"
 cd "$vmname"
 qemu-system-x86_64 \
@@ -17,7 +19,7 @@ qemu-system-x86_64 \
 	-monitor unix:/tmp/monitor.sock,server,nowait \
 	\
 	-net nic,model=virtio \
-	-net user,smb=$HOME/share_win \
+	-net user,smb="$share" \
 	-net tap,ifname=tap0,script=no,downscript=no \
 	\
 	-drive file=win10.qcow2,if=virtio,cache=none,aio=native,cache.direct=on \
