@@ -32,6 +32,7 @@ list_films_animes() {
 pkg_list
 pkg_list_ver
 list_films_animes
+cp -v /I/Raccolte/music_files.txt ~/ 
 yadm status
 sleep 1
 yadm add -u
