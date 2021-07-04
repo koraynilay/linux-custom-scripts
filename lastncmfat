@@ -98,5 +98,8 @@ if [ "$arg" = "play" ];then
 	reorder_album Kiznaiver
 	reorder_album "Bakemonogatari OST"
 	#reorder_album "Bakemonogatari OST [0-9]" #for only the ost and not op/ed
+	reorder_album "Vivy: Fluorite Eye's Song OST [0-9]"
+	reorder_album "The Millionaire Detective - Balance: UNLIMITED \(Fugou Keiji: Balance:Unlimited\) OST"
+	reorder_album "Akudama Drive OST"
 	exit 0
 fi
