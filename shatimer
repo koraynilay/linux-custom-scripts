@@ -8,7 +8,7 @@ else
 fi
 sleep $tsleep
 for reee in `eval echo {1..$reap}`;do
-	mpv ~/shalarm/data/ring.wav >/dev/null 2>&1
+	mpv /usr/share/shalarm/ring.wav >/dev/null 2>&1
 	## same as
 	# mpv ~/shalarm/data/ring.wav >/dev/null 2>/dev/null
 	# mpv ~/shalarm/data/ring.wav 2>/dev/null>/dev/null
