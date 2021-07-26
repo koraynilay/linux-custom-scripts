@@ -1,0 +1,12 @@
+#!/bin/sh
+/bin/google-chrome-stable --profile-directory=Default --app-id=dhdagjlgajnmgafjlabfekbiimkbipfb
+
+##!/usr/bin/env xdg-open
+#[Desktop Entry]
+#Version=1.0
+#Terminal=false
+#Type=Application
+#Name=Ebook Reader
+#Exec=/bin/google-chrome-stable --profile-directory=Default --app-id=dhdagjlgajnmgafjlabfekbiimkbipfb
+#Icon=chrome-dhdagjlgajnmgafjlabfekbiimkbipfb-Default
+#StartupWMClass=crx_dhdagjlgajnmgafjlabfekbiimkbipfb
