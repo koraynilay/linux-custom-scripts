@@ -13,8 +13,9 @@ if [ "$1" == "start" ];then
 	exit 0
 else
 	echo mapunmap
-	id=`xdotool search --name "^archlinux_updates_script$"`
-	pid=`ps x | awk '/\/bin\/sh \/usr\/bin\/updates_dialog_text/ {print $1}'`
+	id=`comm -12 <(xdotool search -name "^archlinux_updates_script$" | sort) <(xdotool search -class "termite" | sort)`
+	#id=`xdotool search --name "^archlinux_updates_script$"`
+	#pid=`ps x | awk '/\/bin\/sh \/usr\/bin\/updates_dialog_text/ {print $1}'`
 	if cat /tmp/archlinux_updates_script_hidden>/dev/null;then
 		xdotool windowmap $id
 		rm /tmp/archlinux_updates_script_hidden
