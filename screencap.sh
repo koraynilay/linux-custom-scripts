@@ -59,8 +59,8 @@ finished_notif_time=10000
 paused_notif_time=1000
 resumed_notif_time=1000
 
-folder_img="$HOME/Pictures/screens"
-folder_video="$HOME/Videos/screencasts"
+folder_img="$HOME/Pictures_tmp"
+folder_video="$HOME/Videos_tmp"
 
 while getopts i:v:f:h opt;do
 	case $opt in

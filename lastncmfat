@@ -1,12 +1,17 @@
 #!/bin/zsh
 #old name: "last_added_ncmpcpp_getfattr"
-mf='/I/Raccolte/music_files.txt'
-md='/I/Raccolte/Musica'
-arg=$2
+mf='/Iext3/Raccolte/music_files.txt'
+md='/Iext3/Raccolte/Musica'
 IFS=$'\n'
 
 resume=0
 update=0
+for ar in $@;do
+	if [[ ! $ar =~ ^-.* ]];then
+		arg=$ar
+		break
+	fi
+done
 while getopts uh opt;do #r #per -r (resume)
 	case $opt in
 		#r)resume=1;;

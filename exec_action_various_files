@@ -8,6 +8,8 @@ for a in $(ls | grep file | sed 's/ /*/g'); do
 #	git push -u origin master
 #	cp ~/linux-custom-scripts/push.sh .
 	./push.sh
+	git status -uall --ignored=matching
+	#git remote get-url origin | tr '\n' ';'
 	# git gc --prune=now
 #	git remote set-url origin `gh repo view | awk '/name/ {print "git@github.com:"$NF}'`
 	echo $a
