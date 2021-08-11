@@ -63,10 +63,28 @@ yadm_function() {
 	yadm commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 	yadm push
 }
-yadm_function
-read -p "copyq? [y/n]:" ans
-if [ "$ans" = "y" ];then
-	~/linux-custom-scripts/copyq_push.sh
+copyq_function(){
+	if [ -n $1 ];then
+		read -p "copyq? [y/n]:" ans
+		if [ "$ans" = "y" ];then
+			$echo ~/linux-custom-scripts/copyq_push.sh
+		fi
+	else
+		$echo ~/linux-custom-scripts/copyq_push.sh
+	fi
+}
+echo='echo'
+echo=''
+if [ -z $1 ];then
+	$echo yadm_function
+	$echo copyq_function ask
+	$echo m_function
+else
+	case $1 in
+		yadm|y) $echo yadm_function;;
+		dotmin|m) $echo m_function;;
+		copyq|cq) $echo copyq_function;;
+		*) echo -e "Usage: $0 [arg]\narg:\n  yadm, y\tyadm funtion\n  dotmin, m\tdotfiles-minimal funtion\n  copyq, cq\texecute $l/copyq_push.sh"
+	esac
 fi
-m_function
 #f=()
