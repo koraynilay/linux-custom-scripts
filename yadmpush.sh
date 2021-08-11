@@ -1,4 +1,6 @@
 #!/bin/sh
+orig_dir="$PWD"
+echo pwd:$orig_dir
 pkglist="pkglist"
 pkglistver="pkglist_ver"
 pkg_list() {
@@ -25,9 +27,11 @@ pkg_list_ver() {
 list_films_animes() {
 	cd /F/free_ck/films
 	paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U) > ~/filmsanimes_list.txt
+	cd "$orig_dir"
 	cd /F/free_ck/anime
 	echo >> ~/filmsanimes_list.txt
 	paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U) >> ~/filmsanimes_list.txt
+	cd "$orig_dir"
 	#alias lsdt="paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U)"
 	#lsdt > ~/filmsanimes_list.txt
 }
