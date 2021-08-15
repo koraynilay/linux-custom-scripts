@@ -35,7 +35,12 @@ list_films_animes() {
 	#alias lsdt="paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U)"
 	#lsdt > ~/filmsanimes_list.txt
 }
-
+f_add=(
+	"~/.lyrics"
+	"~/.mpd/playlists"
+	"~/.mpd/database"
+       	"~/.config/lutris"
+)
 m_function() {
 	m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
 	pkg_list
@@ -45,27 +50,28 @@ m_function() {
 	$m status
 	sleep 1
 	$m add -u
-	$m add -v ~/.lyrics
-	$m add -v ~/.mpd/playlists/
-	$m add -v ~/.mpd/database
+	for folder_to_add in $f_add;do
+		$m add -v "$folder_to_add"
+	done
 	$m status
 	$m commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 	$m push
 }
 yadm_function() {
+	ycmd="yadm"
 	pkg_list
 	pkg_list_ver
 	list_films_animes
 	cp -v /I/Raccolte/music_files.txt ~/ 
-	yadm status
+	$ycmd status
 	sleep 1
-	yadm add -u
-	yadm add -v ~/.lyrics
-	yadm add -v ~/.mpd/playlists/
-	yadm add -v ~/.mpd/database
-	yadm status
-	yadm commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
-	yadm push
+	$ycmd add -u
+	for folder_to_add in $f_add;do
+		$ycmd add -v "$folder_to_add"
+	done
+	$ycmd status
+	$ycmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+	$ycmd push
 }
 copyq_function(){
 	if [ -n $1 ];then
