@@ -1,8 +1,4 @@
 #!/bin/sh
-orig_dir="$PWD"
-echo pwd:$orig_dir
-pkglist="pkglist"
-pkglistver="pkglist_ver"
 pkg_list() {
 	printf "#" > $HOME/${pkglist}.txt
 	printf "#" > $HOME/${pkglist}_aur.txt
@@ -35,44 +31,6 @@ list_films_animes() {
 	#alias lsdt="paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U)"
 	#lsdt > ~/filmsanimes_list.txt
 }
-f_add=(
-	"~/.lyrics"
-	"~/.mpd/playlists"
-	"~/.mpd/database"
-       	"~/.config/lutris"
-)
-m_function() {
-	m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
-	pkg_list
-	pkg_list_ver
-	list_films_animes
-	cp -v /I/Raccolte/music_files.txt ~/ 
-	$m status
-	sleep 1
-	$m add -u
-	for folder_to_add in $f_add;do
-		$m add -v "$folder_to_add"
-	done
-	$m status
-	$m commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
-	$m push
-}
-yadm_function() {
-	ycmd="yadm"
-	pkg_list
-	pkg_list_ver
-	list_films_animes
-	cp -v /I/Raccolte/music_files.txt ~/ 
-	$ycmd status
-	sleep 1
-	$ycmd add -u
-	for folder_to_add in $f_add;do
-		$ycmd add -v "$folder_to_add"
-	done
-	$ycmd status
-	$ycmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
-	$ycmd push
-}
 dostuff_function() {
 	cmd="$1"
 	echo cmd:$cmd
@@ -100,8 +58,21 @@ copyq_function(){
 		$echo ~/linux-custom-scripts/copyq_push.sh
 	fi
 }
+
+orig_dir="$PWD"
+echo pwd:$orig_dir
 echo='echo'
 echo=''
+
+pkglist="pkglist"
+pkglistver="pkglist_ver"
+f_add=(
+	"~/.lyrics"
+	"~/.mpd/playlists"
+	"~/.mpd/database"
+       	"~/.config/lutris"
+)
+
 m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
 ycmd="yadm"
 if [ -z $1 ];then
@@ -116,4 +87,39 @@ else
 		*) echo -e "Usage: $0 [arg]\narg:\n  yadm, y\tyadm funtion\n  dotmin, m\tdotfiles-minimal funtion\n  copyq, cq\texecute $l/copyq_push.sh"
 	esac
 fi
+
 #f=()
+
+# deprecated
+#m_function() {
+#	m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
+#	pkg_list
+#	pkg_list_ver
+#	list_films_animes
+#	cp -v /I/Raccolte/music_files.txt ~/ 
+#	$m status
+#	sleep 1
+#	$m add -u
+#	for folder_to_add in $f_add;do
+#		$m add -v "$folder_to_add"
+#	done
+#	$m status
+#	$m commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+#	$m push
+#}
+#yadm_function() {
+#	ycmd="yadm"
+#	pkg_list
+#	pkg_list_ver
+#	list_films_animes
+#	cp -v /I/Raccolte/music_files.txt ~/ 
+#	$ycmd status
+#	sleep 1
+#	$ycmd add -u
+#	for folder_to_add in $f_add;do
+#		$ycmd add -v "$folder_to_add"
+#	done
+#	$ycmd status
+#	$ycmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+#	$ycmd push
+#}
