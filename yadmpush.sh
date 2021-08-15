@@ -73,8 +73,25 @@ yadm_function() {
 	$ycmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 	$ycmd push
 }
+dostuff_function() {
+	cmd="$1"
+	echo cmd:$cmd
+	pkg_list
+	pkg_list_ver
+	list_films_animes
+	cp -v /I/Raccolte/music_files.txt ~/ 
+	$cmd status
+	sleep 1
+	$cmd add -u
+	for folder_to_add in $f_add;do
+		$cmd add -v "$folder_to_add"
+	done
+	$cmd status
+	$cmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+	$cmd push
+}
 copyq_function(){
-	if [ -n $1 ];then
+	if ! [ "$1" = "" ];then
 		read -p "copyq? [y/n]:" ans
 		if [ "$ans" = "y" ];then
 			$echo ~/linux-custom-scripts/copyq_push.sh
@@ -85,14 +102,16 @@ copyq_function(){
 }
 echo='echo'
 echo=''
+m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
+ycmd="yadm"
 if [ -z $1 ];then
-	$echo yadm_function
+	$echo dostuff_function "$ycmd"
 	$echo copyq_function ask
-	$echo m_function
+	$echo dostuff_function "$m"
 else
 	case $1 in
-		yadm|y) $echo yadm_function;;
-		dotmin|m) $echo m_function;;
+		yadm|y) $echo dostuff_function "$ycmd";;
+		dotmin|m) $echo dostuff_function "$m";;
 		copyq|cq) $echo copyq_function;;
 		*) echo -e "Usage: $0 [arg]\narg:\n  yadm, y\tyadm funtion\n  dotmin, m\tdotfiles-minimal funtion\n  copyq, cq\texecute $l/copyq_push.sh"
 	esac
