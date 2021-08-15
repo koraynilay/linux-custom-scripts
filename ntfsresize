@@ -1,0 +1,7 @@
+#!/bin/sh
+# from http://gparted-forum.surf4.info/viewtopic.php?pid=34819#p34819
+
+OUT="ntfsresize.out"
+echo "Args: $*" >> $OUT
+/bin/ntfsresize.orig --bad-sectors $* >> $OUT 2>&1
+echo "Done" >> $OUT
