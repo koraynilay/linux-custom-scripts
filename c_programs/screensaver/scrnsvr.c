@@ -1,10 +1,11 @@
 /*
  * compile with:
- * gcc [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lXinerama -lXrandr
+gcc [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lXinerama -lXrandr
  *
  * OR for full RELRO (more info: https://www.redhat.com/en/blog/hardening-elf-binaries-using-relocation-read-only-relro)
  *
- * gcc -Wl,-z,relro,-z,now [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lXinerama -lXrandr
+gcc -Wl,-z,relro,-z,now [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lXinerama -lXrandr
+ *
 */
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -13,6 +14,7 @@
 #include <signal.h>
 #include <string.h>
 #include <pthread.h>
+#include <pcre.h>
 #include <X11/extensions/scrnsaver.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/extensions/Xinerama.h>
@@ -39,11 +41,12 @@ char *strtrm(char *str);
 int xerrh(Display *d,XErrorEvent *e);
 
 void printUsage(){ 
-		//pr("Usage: scrnsvr -[tearlswncc1c2c3c4c5xdDuU]\n\n");
+		//pr("Usage: scrnsvr -[tearlswnkcc1c2c3c4c5xdDuU]\n\n");
 		pr("Usage: scrnsvr [OPTIONS]\n\n");
 		pr("--help\t\tShows this help\n\n");
 		pr("--config [file]\tSpecify custom config file (absolute path, default: $HOME/.config/scrnsvr.ini)\n");
 		pr("--copy-config\tCopy a demo config to $HOME/.config/scrnsvr.ini\n");
+		pr("-k\tIgnore config file\n");
 		pr("-t [timeout]\tTime in seconds before [saver] gets activated (default: 120)\n");
 		pr("-a [timeout]\tTime in seconds before [locker] gets activated AFTER [saver] has been activated (default: 30)\n");
 		pr("-s [timeout]\tTime in seconds before [blanker] gets activated (default: 180)\n");
@@ -84,6 +87,7 @@ int main(int argc, char *argv[])
 		pr("\nYou should NOT run this program as root. Press Control-C to cancel (10 seconds timeout, then continue running as normal)\n\n");
 		sleep(10);
 	}
+	// string config options
 	char saver[60] = "";
 	char locker[60] = "";
 	char sleeper[60] = ""; //it's called blanker in the switch
@@ -98,15 +102,19 @@ int main(int argc, char *argv[])
 	char notifier_3[60] = "";
 	char notifier_4[60] = "";
 	char notifier_5[60] = "";
+	// number config options
 	int timeout = 120*1000; //120 seconds, *1000 cuz it uses useconds (microseconds) (the other *1000 is after the custom value gets set)
 	int time_saver = 30;
 	int time_sleep = 180;
 	int notifs = 1;
+
+	//debug command line options
 	int print_opts = 0;
 	int debug = 0;
 	int debug_high = 0;
 	int debug_ultra_high = 0;
 	int debug_ultra_mega_high = 0;
+	// window checks
 	int is_fullscreen = 0;
 	int is_fullscreen_geom = 0;
 	int borders_pixel = 0;
@@ -114,14 +122,20 @@ int main(int argc, char *argv[])
 	int can_lock_pa = 1;
 	int can_lock_wm = 1;
 	int exits = 0;
+
+	int get_args = 0;
+	// window titles to exclude
 	char servs[100][101] = {"youtube", "vlc", "mpv", "vimeo", "picture in picture"};
 	int len_servs = len(servs);
-	int get_args = 0;
 	int j = len_servs;
 	j = 5; //number of precompiled services
 	//config file related variables
+	int rc, pcre_error_offset;
+	const char *pcre_error;
+
 	FILE *conf;
 	int config = 1;
+	int ignore_conf = 0;
 	int print_notice = 1;
 	char home[255] = "";
 	char config_file[255] = "";
@@ -181,6 +195,9 @@ int main(int argc, char *argv[])
 							sprintf(notifier, "%s", argv[i+1]);
 							break;
 					}
+					break;
+				case 'k': //ignores config even if a valid config file exists
+					ignore_conf = 1;
 					break;
 				case 'x': //exits right before loop
 					exits = 1;
@@ -245,6 +262,7 @@ int main(int argc, char *argv[])
 		strcpy(config_file,strcat(home,"/.config/scrnsvr.ini"));
 
 	conf = fopen(config_file,"r");
+	if(ignore_conf == 1) config = 0;
 	if(conf == NULL && config == 1){
 		if(print_notice == 1)pr("No valid config file specified (and the default doesn't exist), to turn off this notice specify a valid config file with --config or copy the default config file with --copy-config\n");
 		config = 0;
@@ -546,13 +564,18 @@ int main(int argc, char *argv[])
 
 			if(fst){
 				for(int i=0;i<len_servs;i++){
-					if(debug_ultra_high == 1)printf("%s\n",servs[i]);
-					if(debug_ultra_mega_high == 1)printf("%d\n",i);
-					if(debug_ultra_mega_high == 1)printf("%s\n",fname.value);
-					char *pl=strcasestr((const char *)fname.value,servs[i]);
-					if(servs[i][0] && pl != NULL){
-						can_lock_wm = 0;
-						break;
+					if(servs[i][0]){
+						if(debug_ultra_high == 1)printf("%s\n",servs[i]);
+						if(debug_ultra_mega_high == 1)printf("%d\n",i);
+						if(debug_ultra_mega_high == 1)printf("%s\n",fname.value);
+						pcre *re = pcre_compile(servs[i], 0, &pcre_error, &pcre_error_offset, NULL);
+						if(re == NULL) printf("%s: failed to compile PCRE at %d: %s\n", servs[i], pcre_error_offset, pcre_error);
+						else rc = pcre_exec(re, NULL, (const char *)fname.value, strlen((const char *)fname.value), 0, 0, NULL, 0);
+						pcre_free(re);
+						if(rc >= 0){ //match successful
+							can_lock_wm = 0;
+							break;
+						}
 					}else can_lock_wm = 1;
 				}
 			}
