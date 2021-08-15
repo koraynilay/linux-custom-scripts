@@ -1,7 +1,7 @@
 #!/bin/zsh
 #old name: "last_added_ncmpcpp_getfattr"
-mf='/Iext3/Raccolte/music_files.txt'
-md='/Iext3/Raccolte/Musica'
+mf='/I/Raccolte/music_files.txt'
+md='/I/Raccolte/Musica'
 IFS=$'\n'
 
 resume=0
