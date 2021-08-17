@@ -67,10 +67,10 @@ echo=''
 pkglist="pkglist"
 pkglistver="pkglist_ver"
 f_add=(
-	"~/.lyrics"
-	"~/.mpd/playlists"
-	"~/.mpd/database"
-       	"~/.config/lutris"
+	"$HOME/.lyrics"
+	"$HOME/.mpd/playlists"
+	"$HOME/.mpd/database"
+       	"$HOME/.config/lutris"
 )
 
 m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
