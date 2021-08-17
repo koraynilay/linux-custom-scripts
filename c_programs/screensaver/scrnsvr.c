@@ -15,6 +15,7 @@ gcc -Wl,-z,relro,-z,now [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lX
 #include <string.h>
 #include <pthread.h>
 #include <pcre.h>
+#include <sys/time.h>
 #include <X11/extensions/scrnsaver.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/extensions/Xinerama.h>
@@ -125,7 +126,7 @@ int main(int argc, char *argv[])
 
 	int get_args = 0;
 	// window titles to exclude
-	char servs[100][101] = {"youtube", "vlc", "mpv", "vimeo", "picture in picture"};
+	char servs[100][101] = {"(?i)youtube", "(?i)vlc", "(?i)mpv", "(?i)vimeo", "(?i)picture in picture"};
 	int len_servs = len(servs);
 	int j = len_servs;
 	j = 5; //number of precompiled services
@@ -409,13 +410,13 @@ int main(int argc, char *argv[])
 	}
 
 	int dunstify = 0;
-	int noti=system("dunstify --help > /dev/null 2>&1")/256;
+	int noti=WEXITSTATUS(system("dunstify --help > /dev/null 2>&1"));
 	if(noti == 0){//if dunstify is present use it
 		dunstify = 1;
 		if(debug_ultra_high == 1)printf("noti = %d\n",noti);
 	}
 	else{
-		noti=system("notify-send --help > /dev/null 2>&1")/256;
+		noti=WEXITSTATUS(system("notify-send --help > /dev/null 2>&1"));
 		if(noti == 0){
 			dunstify = 2;
 		}else if(notifier[0] == '\0' && notifier_1[0] == '\0' && notifier_2[0] == '\0' && notifier_3[0] == '\0' && notifier_4[0] == '\0' && notifier_5[0] == '\0'){
@@ -451,14 +452,19 @@ int main(int argc, char *argv[])
 	args_slf.time_sleep = time_sleep;
 	args_slf.cmd_sleep = cmd_sleep;
 	
-	char cmd_parun[] = "pactl list short | grep RUNNING >/dev/null"; //if I put it at the start, it could get overwritten by servs[] (idk why, but ok)
+	char cmd_parun[] = "python -c 'import dbus; bus = dbus.SessionBus(); [exit(1 if dbus.SessionBus().get_object(service, \"/org/mpris/MediaPlayer2\").Get(\"org.mpris.MediaPlayer2.Player\", \"PlaybackStatus\", dbus_interface=\"org.freedesktop.DBus.Properties\") == \"Playing\" else 0) for service in bus.list_names() if service.startswith(\"org.mpris.MediaPlayer2.\")]'"; //if I put it at the start, it could get overwritten by servs[] (idk why, but ok)
 	if(debug_high == 1)printf("%s\n",cmd_parun);
 
 	if(exits == 1)exit(EX_OK); //if -x is specified exit
 	//loop
 	XSetErrorHandler(xerrh);
+	struct timespec start, end;
+	long int delta_time = 0;
 	while(my_display){
-		usleep(useconds); //pause for useconds micro-seconds
+		usleep(useconds - ((delta_time <= useconds) ? delta_time : useconds)); //pause for useconds micro-seconds
+		//printf("%ld\n",useconds - ((delta_time <= useconds) ? delta_time : useconds));
+		clock_gettime(CLOCK_REALTIME,&start);
+
 		Display *my_display = XOpenDisplay(NULL); //get display
 		XScreenSaverInfo *info = XScreenSaverAllocInfo(); //assing display info
 		XScreenSaverQueryInfo(my_display, DefaultRootWindow(my_display), info); //get display info
@@ -581,8 +587,8 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		can_lock_pa=system(cmd_parun)/256; //audio playing?
-		sys=system(pgrep_lock)/256; //is the locker running?
+		can_lock_pa=!WEXITSTATUS(system(cmd_parun)); //audio playing? 1 = yes; other = no
+		sys=WEXITSTATUS(system(pgrep_lock)); //is the locker running?
 		if(debug == 1)printf("can_lock_pa = %d\n",can_lock_pa);
 		if(debug == 1)printf("can_lock_wm = %d\n",can_lock_wm);
 		if(debug == 1)printf("is_fullscreen = %d\n",is_fullscreen);
@@ -592,7 +598,7 @@ int main(int argc, char *argv[])
 		//   focused tab hasn't servs then lock
 		//   app is not fullscreen then lock
 
-		//if((can_lock_pa == 1 || can_lock_wm == 1) && !is_fullscreen){ //wasn't sure about the logic lol
+		//if((can_lock_pa == 1 || can_lock_wm == 1) && !is_fullscreen) //wasn't sure about the logic lol
 		if(!((can_lock_pa != 1 && can_lock_wm != 1) || (is_fullscreen || is_fullscreen_geom)) || sys != 1){
 			if(info->idle >= timeout && info->idle <= timeout+180){ //has timeout passed?
 				if(debug_high == 1)printf("sys = %d\n",sys);
@@ -610,7 +616,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			else if(info->idle < timeout){ //is the timeout almost passed?
-				sys=system(pgrep_lock)/256; //is the locker running?
+				sys=WEXITSTATUS(system(pgrep_lock)); //is the locker running?
 				if(debug_high == 1)printf("sys = %d\n",sys);
 				if(sys == 1){ //if no then
 					if(notifs == 1){ //are the notifications enabled?
@@ -676,6 +682,12 @@ int main(int argc, char *argv[])
 		printf("%lu\n", info->idle); //printf idle time in milliseconds
 		//printf("%lu\n", (*info).idle); //just another form of the line before this one
 		XCloseDisplay(my_display); //close diplay, it'll be reopened at the start of the loop
+
+		clock_gettime(CLOCK_REALTIME,&end);
+		delta_time = ((end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0)*1000*1000;
+		if(debug_high == 1)printf("start.tv_usec = %lf\n",start.tv_sec + start.tv_nsec/1000000000.0);
+		if(debug_high == 1)printf("end.tv_usec = %lf\n",end.tv_sec + end.tv_nsec/1000000000.0);
+		if(debug_high == 1)printf("delta_time = %ld\n",delta_time);
 	}
 	return 0;
 }
