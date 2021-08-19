@@ -387,6 +387,21 @@ int main(int argc, char *argv[]) {
 					exit(EX_DATAERR);
 				}
 			}}
+		else if (compare_key("shell")){
+			if(!strcmp(v,"true")){
+					shell_saver = 1;
+					shell_locker = 1;
+					shell_sleeper = 1;
+			}}
+		else if (compare_key("shell saver")){
+			if(!strcmp(v,"true"))
+					shell_saver = 1;}
+		else if (compare_key("shell locker")){
+			if(!strcmp(v,"true"))
+					shell_locker = 1;}
+		else if (compare_key("shell blanker")){
+			if(!strcmp(v,"true"))
+					shell_sleeper = 1;}
 		else{
 			pr("Unkown key '%s' with value '%s'\n",k,v);
 			exit(EX_CONFIG);}
@@ -659,7 +674,7 @@ int main(int argc, char *argv[]) {
 
 		//if((can_lock_pa == 1 || can_lock_wm == 1) && !is_fullscreen) //wasn't sure about the logic
 		if(!((can_lock_pa != 1 && can_lock_wm != 1) || (is_fullscreen || is_fullscreen_geom)) || sys != 1){
-			if(info->idle >= timeout && info->idle <= timeout+99){ //has timeout passed?
+			if(info->idle >= timeout && info->idle <= timeout+120){ //has timeout passed?
 				if(debug_high == 1)printf("sys = %d\n",sys);
 				if(sys == 1){ //if locker not running then
 					pthread_cancel_pid(sle, &spid, PID_PTHREAD_DEF_VALUE, 0);
