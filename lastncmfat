@@ -1,7 +1,10 @@
 #!/bin/zsh
 #old name: "last_added_ncmpcpp_getfattr"
-mf='/I/Raccolte/music_files.txt'
-md='/I/Raccolte/Musica'
+mf="/I/Raccolte/music_files.txt"
+md="/I/Raccolte/Musica"
+plf="$HOME/.mpd/playlists/lastctime.m3u"
+plf_tmp="/tmp/plf_toadd.m3u"
+plf_tmp2="/tmp/plf.m3u"
 IFS=$'\n'
 
 resume=0
@@ -91,12 +94,29 @@ if [ "$arg" = "play" ];then
 	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 		#echo $csong
 		mpc add "$csong"
+		#grep -F "$csong" "$plf" --color=always
+		if [ -z "$(grep -F "$csong" "$plf")" ];then
+			echo ${csong} added to "$plf"
+			echo "$csong" >> "$plf_tmp"
+			echo "echo '$csong' >> '$plf_tmp'"
+		fi
 		let n++
 		if [ $n -eq 100 ];then
 			mpc random off
 			mpc play
 		fi
+		#printf "\r$n"
 	done
+	if [ -f "$plf_tmp" ];then
+		tac "$plf" > "$plf_tmp2"
+		echo "tac '$plf' > '$plf_tmp2'"
+		tac "$plf_tmp" >> "$plf_tmp2"
+		echo "tac '$plf_tmp' >> '$plf_tmp2'"
+		tac "$plf_tmp2" > "$plf"
+		echo "tac '$plf_tmp2' > '$plf'"
+		rm "$plf_tmp" "$plf_tmp2"
+	fi
+
 	reorder_album Caparezza
 	reorder_album "Death Parade"
 	reorder_album "Kōtarō Nakagawa"
@@ -107,5 +127,11 @@ if [ "$arg" = "play" ];then
 	reorder_album "The Millionaire Detective - Balance: UNLIMITED \(Fugou Keiji: Balance:Unlimited\) OST"
 	reorder_album "Akudama Drive OST"
 	reorder_album "Saya no Uta Original Soundtrack"
+	#mpc rm "${plf%.*}"
+	#mpc save "${plf%.*}"
+	printf "\n"
+	mpc clear >/dev/null
+	mpc load "$(basename "${plf%.*}")"
+	mpc play >/dev/null
 	exit 0
 fi
