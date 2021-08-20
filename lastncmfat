@@ -52,6 +52,7 @@ if [[ "$(lsblk -o FSTYPE $(df -T "$md" | awk '/\/dev\//{print $1}') | tail -1)" 
 fi
 cd "$md"
 if [ $update -eq 1 ];then
+	echo update
 	for a in `find .`;do
 		gr=$(grep -F "$a" "$mf")
 		#echo $gr
@@ -88,8 +89,8 @@ if [ "$arg" = "add" ];then
 fi
 
 if [ "$arg" = "play" ];then
-	printf "play\n"
-	if [ $dry -eq 1 ];then
+	#printf "play\n"
+	if [ $dry -eq 0 ];then
 		mpc update >/dev/null
 		mpc clear >/dev/null
 	fi
@@ -97,8 +98,8 @@ if [ "$arg" = "play" ];then
 	n=0
 	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 		#echo $csong
-		if [ $dry -eq 1 ];then
-			mpc add "$csong"
+		if [ $dry -eq 0 ];then
+			mpc add "$csong" >/dev/null
 		fi
 		#grep -F "$csong" "$plf" --color=always
 		if [ -z "$(grep -F "$csong" "$plf")" ];then
@@ -107,15 +108,15 @@ if [ "$arg" = "play" ];then
 			echo "echo '$csong' >> '$plf_tmp'"
 		fi
 		let n++
-		if [ $dry -eq 1 ];then
+		if [ $dry -eq 0 ];then
 			if [ $n -eq 100 ];then
-				mpc random off
-				mpc play
+				mpc random off >/dev/null
+				mpc play >/dev/null
 			fi
 		fi
 		printf "\r$n"
 	done
-	if [ $dry -eq 1 ];then
+	if [ $dry -eq 0 ];then
 		if [ -f "$plf_tmp" ];then
 			tac "$plf" > "$plf_tmp2"
 			echo "tac '$plf' > '$plf_tmp2'"
@@ -140,7 +141,7 @@ if [ "$arg" = "play" ];then
 	#mpc rm "${plf%.*}"
 	#mpc save "${plf%.*}"
 	printf "\n"
-	if [ $dry -eq 1 ];then
+	if [ $dry -eq 0 ];then
 		mpc clear >/dev/null
 		mpc load "$(basename "${plf%.*}")"
 		mpc play >/dev/null
