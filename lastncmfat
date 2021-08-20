@@ -9,16 +9,18 @@ IFS=$'\n'
 
 resume=0
 update=0
+dry=0
 for ar in $@;do
 	if [[ ! $ar =~ ^-.* ]];then
 		arg=$ar
 		break
 	fi
 done
-while getopts uh opt;do #r #per -r (resume)
+while getopts uhn opt;do #r #per -r (resume)
 	case $opt in
 		#r)resume=1;;
 		u)update=1;;
+		n)dry=1;;
 		h)	echo -ne "Usage: $0 [opt]\n";
 			#echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
 			#echo -ne "  -r \tresume after populating playlist\n";
@@ -87,13 +89,17 @@ fi
 
 if [ "$arg" = "play" ];then
 	printf "play\n"
-	mpc update >/dev/null
-	mpc clear >/dev/null
+	if [ $dry -eq 1 ];then
+		mpc update >/dev/null
+		mpc clear >/dev/null
+	fi
 	pwd
 	n=0
 	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 		#echo $csong
-		mpc add "$csong"
+		if [ $dry -eq 1 ];then
+			mpc add "$csong"
+		fi
 		#grep -F "$csong" "$plf" --color=always
 		if [ -z "$(grep -F "$csong" "$plf")" ];then
 			echo ${csong} added to "$plf"
@@ -101,20 +107,24 @@ if [ "$arg" = "play" ];then
 			echo "echo '$csong' >> '$plf_tmp'"
 		fi
 		let n++
-		if [ $n -eq 100 ];then
-			mpc random off
-			mpc play
+		if [ $dry -eq 1 ];then
+			if [ $n -eq 100 ];then
+				mpc random off
+				mpc play
+			fi
 		fi
-		#printf "\r$n"
+		printf "\r$n"
 	done
-	if [ -f "$plf_tmp" ];then
-		tac "$plf" > "$plf_tmp2"
-		echo "tac '$plf' > '$plf_tmp2'"
-		tac "$plf_tmp" >> "$plf_tmp2"
-		echo "tac '$plf_tmp' >> '$plf_tmp2'"
-		tac "$plf_tmp2" > "$plf"
-		echo "tac '$plf_tmp2' > '$plf'"
-		rm "$plf_tmp" "$plf_tmp2"
+	if [ $dry -eq 1 ];then
+		if [ -f "$plf_tmp" ];then
+			tac "$plf" > "$plf_tmp2"
+			echo "tac '$plf' > '$plf_tmp2'"
+			tac "$plf_tmp" >> "$plf_tmp2"
+			echo "tac '$plf_tmp' >> '$plf_tmp2'"
+			tac "$plf_tmp2" > "$plf"
+			echo "tac '$plf_tmp2' > '$plf'"
+			rm "$plf_tmp" "$plf_tmp2"
+		fi
 	fi
 
 	reorder_album Caparezza
@@ -130,8 +140,10 @@ if [ "$arg" = "play" ];then
 	#mpc rm "${plf%.*}"
 	#mpc save "${plf%.*}"
 	printf "\n"
-	mpc clear >/dev/null
-	mpc load "$(basename "${plf%.*}")"
-	mpc play >/dev/null
+	if [ $dry -eq 1 ];then
+		mpc clear >/dev/null
+		mpc load "$(basename "${plf%.*}")"
+		mpc play >/dev/null
+	fi
 	exit 0
 fi
