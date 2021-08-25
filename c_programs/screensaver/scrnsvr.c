@@ -656,7 +656,10 @@ int main(int argc, char *argv[]) {
 		if((pid = fork()) == 0){
 			//TODO integrate this DBus check in C
 			//check if there is a mpris.MediaPlayer2.something instance in dbus; adapted from https://askubuntu.com/a/1298711/1179015
-			execlp("python", "python", "-c", "import dbus; bus = dbus.SessionBus(); [exit(1 if dbus.SessionBus().get_object(service, \"/org/mpris/MediaPlayer2\").Get(\"org.mpris.MediaPlayer2.Player\", \"PlaybackStatus\", dbus_interface=\"org.freedesktop.DBus.Properties\") == \"Playing\" else 0) for service in bus.list_names() if service.startswith(\"org.mpris.MediaPlayer2.\")]", (char *) NULL);
+			execlp("python", "python", "-c",
+				"exec(\"\"\"\nimport dbus\nbus = dbus.SessionBus()\nes = 0\nfor service in bus.list_names():\n    if service.startswith(\"org.mpris.MediaPlayer2.\"):\n        if dbus.SessionBus().get_object(service, \"/org/mpris/MediaPlayer2\").Get(\"org.mpris.MediaPlayer2.Player\", \"PlaybackStatus\", dbus_interface=\"org.freedesktop.DBus.Properties\") == \"Playing\":\n            es = 1\nexit(es)\n\"\"\")"
+				, (char *) NULL
+			);
 		}else{
 			int status;
 			waitpid(pid, &status, 0);

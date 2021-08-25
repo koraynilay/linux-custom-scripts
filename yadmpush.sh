@@ -1,4 +1,19 @@
 #!/bin/sh
+# vars
+orig_dir="$PWD"
+echo pwd:$orig_dir
+echo='echo'
+echo=''
+
+pkglist="pkglist"
+pkglistver="pkglist_ver"
+f_add=(
+	"$HOME/.lyrics"
+	"$HOME/.mpd/playlists"
+	"$HOME/.mpd/database"
+       	"$HOME/.config/lutris"
+)
+# functions
 pkg_list() {
 	printf "#" > $HOME/${pkglist}.txt
 	printf "#" > $HOME/${pkglist}_aur.txt
@@ -41,8 +56,8 @@ dostuff_function() {
 	$cmd status
 	sleep 1
 	$cmd add -u
-	for folder_to_add in $f_add;do
-		$cmd add -v "$folder_to_add"
+	for folder_to_add in ${f_add[@]};do
+		echo $cmd add -v "$folder_to_add"
 	done
 	$cmd status
 	$cmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
@@ -59,20 +74,7 @@ copyq_function(){
 	fi
 }
 
-orig_dir="$PWD"
-echo pwd:$orig_dir
-echo='echo'
-echo=''
-
-pkglist="pkglist"
-pkglistver="pkglist_ver"
-f_add=(
-	"$HOME/.lyrics"
-	"$HOME/.mpd/playlists"
-	"$HOME/.mpd/database"
-       	"$HOME/.config/lutris"
-)
-
+# main
 m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
 ycmd="yadm"
 if [ -z $1 ];then
