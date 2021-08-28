@@ -12,6 +12,9 @@ f_add=(
 	"$HOME/.mpd/playlists"
 	"$HOME/.mpd/database"
        	"$HOME/.config/lutris"
+       	"$HOME/.config/rpcs3/GuiConfigs"
+       	"$HOME/.config/rpcs3/InputConfigs"
+       	"$HOME/.config/rpcs3/dev_hdd0/home"
 )
 # functions
 pkg_list() {
