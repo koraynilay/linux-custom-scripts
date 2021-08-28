@@ -17,7 +17,7 @@ if [ `date +%H` -lt 20 -a `date +%H` -ge 8 ];then
 else
 	pic=$dark_pic
 fi
-multilockscreen -l -u $pic -- -n -k \
+i3lock -n -k \
 	-i "$pic" \
 	-C \
 	-c 000000 \
