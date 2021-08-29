@@ -1,18 +1,18 @@
 #!/bin/sh
-ns=99999 # null sink
-lm=99999 # loopback mic
-la=99999 # loopback apps/audio
+ns=/tmp/dsstream-null-sink # null sink
+lm=/tmp/dsstream-loopback-mic # loopback mic
+la=/tmp/dsstream-loopback-apps # loopback apps/audio
 case $1 in
 	on|start)dsstreamon;;
 	off|stop)dsstreamoff;;
 esac
 dsstream(){
-	ns=$(pactl load-module module-null-sink sink_name=dsstream sink_properties=device.description=dsstream)
-	lm=$(pactl load-module module-loopback source=PulseEffects_mic.monitor sink=dsstream)
-	la=$(pactl load-module module-loopback source=PulseEffects_apps.monitor sink=dsstream)
+	pactl load-module module-null-sink sink_name=dsstream sink_properties=device.description=dsstream > "$ns"
+	pactl load-module module-loopback source=PulseEffects_mic.monitor sink=dsstream > "$lm"
+	pactl load-module module-loopback source=PulseEffects_apps.monitor sink=dsstream > "$la"
 }
 dsstream(){
-	pactl unload-module $ns
-	pactl unload-module $lm
-	pactl unload-module $la
+	pactl unload-module $(cat "$ns")
+	pactl unload-module $(cat "$lm")
+	pactl unload-module $(cat "$la")
 }
