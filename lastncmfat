@@ -138,6 +138,7 @@ if [ "$arg" = "play" ];then
 	reorder_album "The Millionaire Detective - Balance: UNLIMITED \(Fugou Keiji: Balance:Unlimited\) OST"
 	reorder_album "Akudama Drive OST"
 	reorder_album "Saya no Uta Original Soundtrack"
+	reorder_album "Wonderful Everyday \(Subarashiki Hibi\) OST"
 	#mpc rm "${plf%.*}"
 	#mpc save "${plf%.*}"
 	printf "\n"

@@ -90,6 +90,9 @@ case $1 in
 	run)
 		rofi -theme "$rofi_theme" -sidebar-mode -show run
 	;;
+	show)
+		rofi -theme "$rofi_theme" -sidebar-mode -show window
+	;;
 	*)
 		rofi -theme "$rofi_theme" $@
 	;;
