@@ -47,6 +47,8 @@ tesseract "$IMAGE_FILE" "${TEXT_FILE//\.txt/}" -l jpn
 LINES=$(wc -l < $TEXT_FILE)
 if [ "$LINES" -eq 0 ]; then
     notify-send "ocr" "no text was detected"
+    rm -v "$TEXT_FILE"
+    rm -v "$IMAGE_FILE"
     exit 1
 fi
 
@@ -62,5 +64,5 @@ notify-send "ocr" "$(cat $TEXT_FILE)"
 # Clean up
 # "Always leave the area better than you found it" 
 #                       - My first grade teacher
-rm "$TEXT_FILE"
-rm "$IMAGE_FILE"
+rm -v "$TEXT_FILE"
+rm -v "$IMAGE_FILE"
