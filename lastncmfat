@@ -3,6 +3,8 @@
 mf="/I/Raccolte/music_files.txt"
 md="/I/Raccolte/Musica"
 plf="$HOME/.mpd/playlists/lastctime.m3u"
+plf_nn=$(basename $plf)
+plf_name=${plf_nn%.*}
 plf_tmp="/tmp/plf_toadd.m3u"
 plf_tmp2="/tmp/plf.m3u"
 IFS=$'\n'
@@ -32,6 +34,9 @@ done
 #if [ "$arg" = "play" ];then
 #	update=1
 #fi
+
+mpc update >/dev/null
+
 reorder_album(){
 	s=0 # could also use bash substitions, but I prefer this
 	s=$(mpc playlist -f "%album% - %title% - %artist%" | nl | grep -P $@ | tail -1 | cut -f1 | sed 's/\s//g')
@@ -89,9 +94,15 @@ if [ "$arg" = "add" ];then
 fi
 
 if [ "$arg" = "play" ];then
+	if [ $update -eq 0 ];then
+		mpc clear >/dev/null
+		mpc load "$plf_name"
+		echo "playing"
+		mpc play >/dev/null
+		exit 0
+	fi
 	#printf "play\n"
 	if [ $dry -eq 0 ];then
-		mpc update >/dev/null
 		mpc clear >/dev/null
 	fi
 	pwd
@@ -128,18 +139,18 @@ if [ "$arg" = "play" ];then
 		fi
 	fi
 
-	reorder_album Caparezza
-	reorder_album "Death Parade"
-	reorder_album "Kōtarō Nakagawa"
-	reorder_album Kiznaiver
-	reorder_album "Bakemonogatari OST"
+	#reorder_album Caparezza
+	#reorder_album "Death Parade"
+	#reorder_album "Kōtarō Nakagawa"
+	#reorder_album Kiznaiver
+	#reorder_album "Bakemonogatari OST"
 	#reorder_album "Bakemonogatari OST [0-9]" #for only the ost and not op/ed
-	reorder_album "Vivy: Fluorite Eye's Song OST [0-9]"
-	reorder_album "The Millionaire Detective - Balance: UNLIMITED \(Fugou Keiji: Balance:Unlimited\) OST"
-	reorder_album "Akudama Drive OST"
-	reorder_album "Saya no Uta Original Soundtrack"
+	#reorder_album "Vivy: Fluorite Eye's Song OST [0-9]"
+	#reorder_album "The Millionaire Detective - Balance: UNLIMITED \(Fugou Keiji: Balance:Unlimited\) OST"
+	#reorder_album "Akudama Drive OST"
+	#reorder_album "Saya no Uta Original Soundtrack"
 	#reorder_album "Wonderful Everyday \(Subarashiki Hibi\) OST"
-	reorder_album "Euphoria OST"
+	#reorder_album "Euphoria OST"
 	#mpc rm "${plf%.*}"
 	#mpc save "${plf%.*}"
 	printf "\n"
