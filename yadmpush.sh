@@ -7,6 +7,11 @@ echo=''
 
 pkglist="pkglist"
 pkglistver="pkglist_ver"
+fm_add=(
+	"$HOME/.lyrics"
+	"$HOME/.mpd/playlists"
+	"$HOME/.mpd/database"
+)
 f_add=(
 	"$HOME/.lyrics"
 	"$HOME/.mpd/playlists"
@@ -52,19 +57,25 @@ list_films_animes() {
 dostuff_function() {
 	cmd="$1"
 	echo cmd:$cmd
-	pkg_list
-	pkg_list_ver
-	list_films_animes
-	cp -v /I/Raccolte/music_files.txt ~/ 
-	$cmd status
-	sleep 1
-	$cmd add -u
-	for folder_to_add in ${f_add[@]};do
-		echo $cmd add -v "$folder_to_add"
-	done
-	$cmd status
-	$cmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
-	$cmd push
+	$echo pkg_list
+	$echo pkg_list_ver
+	$echo list_films_animes
+	$echo cp -v /I/Raccolte/music_files.txt ~/ 
+	$echo $cmd status
+	$echo sleep 1
+	$echo $cmd add -u
+	if [ "$cmd" = "$m" ];then
+		for folder_to_add in ${fm_add[@]};do
+			$echo $cmd add -v "$folder_to_add"
+		done
+	else
+		for folder_to_add in ${f_add[@]};do
+			$echo $cmd add -v "$folder_to_add"
+		done
+	fi
+	$echo $cmd status
+	$echo $cmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+	$echo $cmd push
 }
 copyq_function(){
 	if ! [ "$1" = "" ];then
@@ -81,50 +92,14 @@ copyq_function(){
 m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
 ycmd="yadm"
 if [ -z $1 ];then
-	$echo dostuff_function "$ycmd"
-	$echo copyq_function ask
-	$echo dostuff_function "$m"
+	dostuff_function "$ycmd"
+	copyq_function ask
+	dostuff_function "$m"
 else
 	case $1 in
-		yadm|y) $echo dostuff_function "$ycmd";;
-		dotmin|m) $echo dostuff_function "$m";;
-		copyq|cq) $echo copyq_function;;
+		yadm|y)   dostuff_function "$ycmd";;
+		dotmin|m) dostuff_function "$m";;
+		copyq|cq) copyq_function;;
 		*) echo -e "Usage: $0 [arg]\narg:\n  yadm, y\tyadm funtion\n  dotmin, m\tdotfiles-minimal funtion\n  copyq, cq\texecute $l/copyq_push.sh"
 	esac
 fi
-
-#f=()
-
-# deprecated
-#m_function() {
-#	m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
-#	pkg_list
-#	pkg_list_ver
-#	list_films_animes
-#	cp -v /I/Raccolte/music_files.txt ~/ 
-#	$m status
-#	sleep 1
-#	$m add -u
-#	for folder_to_add in $f_add;do
-#		$m add -v "$folder_to_add"
-#	done
-#	$m status
-#	$m commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
-#	$m push
-#}
-#yadm_function() {
-#	ycmd="yadm"
-#	pkg_list
-#	pkg_list_ver
-#	list_films_animes
-#	cp -v /I/Raccolte/music_files.txt ~/ 
-#	$ycmd status
-#	sleep 1
-#	$ycmd add -u
-#	for folder_to_add in $f_add;do
-#		$ycmd add -v "$folder_to_add"
-#	done
-#	$ycmd status
-#	$ycmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
-#	$ycmd push
-#}
