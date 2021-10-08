@@ -1,6 +1,6 @@
 #!/bin/sh
 git status
-git add .
+git add . -v
 git status
 #sleep 1
 git commit -m "$(date +%Y-%m-%d_%H:%M:%S)"
