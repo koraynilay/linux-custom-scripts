@@ -40,9 +40,30 @@ gcc -Wl,-z,relro,-z,now [options] scrnsvr.c -o scrnsvr -lpthread -lXss -lX11 -lX
 #define COMMENT_COLON ';'
 #define COMMENT_HASH '#'
 #define PID_PTHREAD_DEF_VALUE 69420
+#define PID_FILE "/tmp/scrnsvr.pid" //file where the pid of the main process is stored
+
+struct svr_struct { //struct for thread locker arguments
+	char *cmd;
+	int shell;
+};
+struct lck_struct { //struct for thread locker arguments
+	//int vpid;
+	int time_saver;
+	char *cmd;
+	//pthread_t svr;
+	bool locked;
+	int shell;
+};
+struct slf_struct { //struct for thread sleeper arguments
+	int time_sleep;
+	char *cmd;
+	int shell;
+};
+void *p;
 
 void *svf(void *ptr); //function for saver pthread
 void *lck(void *ptr); //function for locker pthread
+void *start_lck(); //function to run the lock
 void *slf(void *ptr); //function for sleeper pthread
 char *strtrm(char *str); //trim spaces at start and end of strings
 bool can_run_command(const char *cmd); //check if command is executable (and exists) in the system
@@ -57,14 +78,26 @@ int pthread_cancel_pid(pthread_t thread, int *pid, int check_value, int debug){
 	}
 	return 1;
 }
-
+//signal functions
+void lock_now(int sig){ //function called when SIGUSR1 received
+	pthread_t ll;
+	if(sig == SIGUSR1){
+		pthread_create(&ll,NULL,start_lck,NULL); //create thread otherwise the whole process waits for the locker to finish
+	}
+} //function invoked when using the "lock" argument (to lock now)
+void exit_from_signal(int sig){
+	if(remove(PID_FILE)) printf("Could not find or delete %s. Please delete it manually if it still exists.\n",PID_FILE);
+	else printf("Deleted %s. Exiting...\n",PID_FILE);
+	exit(EX_OK);
+}
+//help usage function
 void printUsage(){ 
 		//pr("Usage: scrnsvr -[tearlswhnkcc1c2c3c4c5xdDuU]\n\n"); //not yet supported
 		pr("Usage: scrnsvr [OPTIONS]\n\n");
 		pr(" --help\t\tShow this help\n\n");
 
-		pr(" --config [file] Specify custom config file (absolute path, default: $HOME/.config/scrnsvr.ini)\n");
-		pr(" --copy-config\t Copy a demo config to $HOME/.config/scrnsvr.ini\n");
+		pr(" --config [file] Specify custom config file (absolute path, default: $%s/.config/scrnsvr.ini)\n",HOME);
+		pr(" --copy-config\t Copy a demo config to $%s/.config/scrnsvr.ini\n",HOME);
 		pr(" --shell-saver\t Invokes the shell to run [saver] (use if it needs argument(s))\n");
 		pr(" --shell-locker\t Invokes the shell to run [locker] (use if it needs argument(s))\n");
 		pr(" --shell-blanker Invokes the shell to run [blanker] (use if it needs argument(s))\n");
@@ -91,29 +124,33 @@ void printUsage(){
 		pr(" -d\t\t Shows debug info (Use -D,-u or -U for more information)\n");
 }
 
-struct svr_struct { //struct for thread locker arguments
-	char *cmd;
-	int shell;
-};
-struct lck_struct { //struct for thread locker arguments
-	int vpid;
-	int time_saver;
-	char *cmd;
-	pthread_t svr;
-	bool locked;
-	int shell;
-};
-struct slf_struct { //struct for thread sleeper arguments
-	int time_sleep;
-	char *cmd;
-	int shell;
-};
-
 int main(int argc, char *argv[]) {
 	if(getuid() == 0){ //check if root
 		pr("\nYou should NOT run this program as root. Press Control-C to cancel (10 seconds timeout, then continue running as normal)\n\n");
 		sleep(10);
 	}
+
+	FILE *fpid;
+	if(argv[1]) //if there is an argument
+		if(argv[1][0] == 'l'){ //if the user called 'lock' send SIGUSR1 to the already running scrnsvr process
+			pid_t ppid; //parent pid (p=parent;pid)
+			fpid=fopen(PID_FILE,"r");
+			if(!fpid){
+				pr("Cannot find %s. Are you sure it exists?\n",PID_FILE);
+				exit(EX_NOINPUT);
+			}
+			fscanf(fpid,"%d",&ppid);
+			fclose(fpid);
+			if(!kill(ppid, SIGUSR1)) printf("sent SIGUSR1 to scrnsvr (%d)\n",ppid);
+			/*TODO: use errno*/
+			else printf("sent SIGUSR1 to scrnsvr (%d)\n",ppid);
+			exit(EX_OK);
+		}
+	if(!access(PID_FILE,F_OK)){ //check if PID_FILE already exists, if yes exit, otherwise PID_FILE will be overwritten by the new process
+		pr("%s already exists, stop the already running scrnsvr process before starting a new one.\n",PID_FILE);
+		exit(EX_IOERR+20);
+	}
+
 	// string config options
 	char saver[60] = "";
 	char locker[60] = "";
@@ -270,6 +307,7 @@ int main(int argc, char *argv[]) {
 					}
 					else if(!strcmp(argv[i],"--copy-config")){
 						system("cp -vi /usr/share/scrnsvr/scrnsvr.ini.example $HOME/.config/scrnsvr.ini");
+						//TODO: system("cp -vi /usr/share/scrnsvr/scrnsvr.ini.example $%s/.config/scrnsvr.ini",HOME);
 						exit(EX_OK);
 					}else if(!strcmp(argv[i],"--shell-saver")){ //use shell to run screensaver
 						shell_saver = 1;
@@ -494,8 +532,8 @@ int main(int argc, char *argv[]) {
 	args_svr.cmd = cmd_saver;
 	args_svr.shell = shell_saver;
 
-	args_lck.vpid = vpid;
-	args_lck.svr = svr;
+	//args_lck.vpid = vpid;
+	//args_lck.svr = svr;
 	args_lck.time_saver = time_saver;
 	args_lck.cmd = cmd_lock;
 	args_lck.locked = false;
@@ -504,6 +542,7 @@ int main(int argc, char *argv[]) {
 	args_slf.time_sleep = time_sleep;
 	args_slf.cmd = cmd_sleep;
 	args_slf.shell = shell_sleeper;
+	p = &args_lck;
 	
 	//char cmd_parun[] = "python -c 'import dbus; bus = dbus.SessionBus(); [exit(1 if dbus.SessionBus().get_object(service, \"/org/mpris/MediaPlayer2\").Get(\"org.mpris.MediaPlayer2.Player\", \"PlaybackStatus\", dbus_interface=\"org.freedesktop.DBus.Properties\") == \"Playing\" else 0) for service in bus.list_names() if service.startswith(\"org.mpris.MediaPlayer2.\")]'"; //if I put it at the start, it could get overwritten by servs[] (idk why, but ok)
 	//if(debug_high == 1)printf("%s\n",cmd_parun);
@@ -514,6 +553,19 @@ int main(int argc, char *argv[]) {
 	XSetErrorHandler(xerrh);
 	struct timespec start, end;
 	long int delta_time = 0;
+	signal(SIGUSR1, lock_now);
+	signal(SIGTERM, exit_from_signal);
+	signal(SIGINT, exit_from_signal);
+
+	pid_t pid = getpid();
+	fpid=fopen(PID_FILE,"w");
+	if(!fpid){
+		//TODO: add ignore switch if this happens
+		pr("Could not create %s\n",PID_FILE);
+		exit(EX_IOERR);
+	}
+	fprintf(fpid,"%d",pid);
+	fclose(fpid);
 	// Main Loop
 	while(my_display){
 		usleep(useconds - ((delta_time <= useconds) ? delta_time : useconds)); //pause for useconds micro-seconds
@@ -670,6 +722,7 @@ int main(int argc, char *argv[]) {
 		if(debug == 1)printf("can_lock_wm = %d\n",can_lock_wm);
 		if(debug == 1)printf("is_fullscreen = %d\n",is_fullscreen);
 		if(debug == 1)printf("is_fullscreen_geom = %d\n",is_fullscreen_geom);
+		if(debug == 1)printf("args_lck.locked = %d\n",args_lck.locked);
 		//lock if:
 		//- player not detected (can_lock_pa == 1)
 		//- focused tab hasn't servs
@@ -805,14 +858,17 @@ void *lck(void *ptr){ //function for locker thread
 	
 	struct lck_struct *args_struct = ptr;
 	sleep(args_struct->time_saver);
-
+	if(args_struct->locked == false) (*start_lck)();
+	//pthread_cancel_pid(args->svr, &(args->vpid), PID_PTHREAD_DEF_VALUE, 0);
+	return NULL;
+}
+void *start_lck(){
+	struct lck_struct *args_struct = p;
 	printf("locked\n");
 	args_struct->locked = true;
 	system_or_execlp(args_struct);
-
 	args_struct->locked = false;
 	printf("not locked anymore\n");
-	//pthread_cancel_pid(args->svr, &(args->vpid), PID_PTHREAD_DEF_VALUE, 0);
 	return NULL;
 }
 void *slf(void *ptr){ //function for sleeper thread
