@@ -1,3 +1,5 @@
 #!/bin/sh
 cd /home/koraynilay/Videos/screencasts
-yes q | ./push.sh
+git add *
+git commit -m "$(date +%Y-%m-%d_%H-%M-%S)"
+git push
