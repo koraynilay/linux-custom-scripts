@@ -4,7 +4,7 @@ winClass=$(xprop -id $winID WM_CLASS)
 winName=$(xprop -id $winID WM_NAME)
 echo $sig
 if [[ $winClass = *"google-chrome"* ]]; then
-	xdotool key --window $winID F11
+	xdotool key F11
 	exit $?
 else
 	i3-msg fullscreen toggle
