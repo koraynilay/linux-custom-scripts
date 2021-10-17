@@ -94,12 +94,14 @@ if [ "$arg" = "add" ];then
 fi
 
 if [ "$arg" = "play" ];then
-	if [ $update -eq 0 ];then
-		mpc clear >/dev/null
-		mpc load "$plf_name"
-		echo "playing"
-		mpc play >/dev/null
-		exit 0
+	if [ $dry -eq 0 ];then
+		if [ $update -eq 0 ];then
+			mpc clear >/dev/null
+			mpc load "$plf_name"
+			echo "playing"
+			mpc play >/dev/null
+			exit 0
+		fi
 	fi
 	#printf "play\n"
 	if [ $dry -eq 0 ];then
@@ -108,7 +110,6 @@ if [ "$arg" = "play" ];then
 	pwd
 	n=0
 	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
-		#echo $csong
 		if [ $dry -eq 0 ];then
 			mpc add "$csong" >/dev/null
 		fi
