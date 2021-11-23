@@ -9,6 +9,7 @@ elif [ "$1" = "on" ];then
 	chmod 0600 "$swapfile"
 	mkswap "$swapfile"
 	swapon "$swapfile" -v
+	chattr +d /swpfl.sys
 else
 	echo -e "Usage: $0 [on|off]"
 fi

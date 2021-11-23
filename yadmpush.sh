@@ -21,6 +21,7 @@ f_add=(
        	"$HOME/.config/rpcs3/GuiConfigs"
        	"$HOME/.config/rpcs3/InputConfigs"
        	"$HOME/.config/rpcs3/dev_hdd0/home"
+       	"$HOME/.config/PCSX2"
 )
 # functions
 pkg_list() {
