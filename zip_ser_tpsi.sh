@@ -1,16 +1,23 @@
 #!/bin/bash
+set -x
+set -e
+set -n
 echo=""
-#echo="echo"
+echo="echo"
 m=("ser" "tpsi")
 c="4D"
 f=("/home/koraynilay/lns/grassi/sistemi_e_reti/$c" "/home/koraynilay/lns/grassi/tpsi/$c")
 o=""
 ot=""
 for ((i=0;i<${#f[@]};i++)) do
-	$echo cd "${f[i]}"
-	$echo cat *.txt > ../${m[i]}.txt
-	$echo cd ..
-	$echo zip -r "${m[i]}.zip" "$c" "${m[i]}.txt"
+	cd "${f[i]}"
+	#cat *.txt > ../${m[i]}.txt
+	for k in *.txt; do
+		echo -n "\n$k\n" >> ../${m[i]}.txt
+		cat "$k" >> ../${m[i]}.txt
+	done
+	cd ..
+	zip -r "${m[i]}.zip" "$c" "${m[i]}.txt"
 	 o+="${f[i]}/../${m[i]}.zip "
 	ot+="${f[i]}/../${m[i]}.txt "
 done
