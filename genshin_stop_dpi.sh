@@ -1,2 +1,3 @@
 #!/bin/sh
-gksudo g203-led dpi 800 && dunstify "dpi 914"
+dpi=800
+gksudo g203-led dpi $dpi && dunstify "dpi $dpi"
