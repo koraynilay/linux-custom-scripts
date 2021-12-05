@@ -2,6 +2,7 @@
 set -x
 set -e
 set -n
+set -v
 echo=""
 echo="echo"
 m=("ser" "tpsi")
