@@ -1,3 +1,5 @@
 #!/bin/sh
 #sudo pacman -Scc
 yay -Scc
+npm cache clean --force
+go clean
