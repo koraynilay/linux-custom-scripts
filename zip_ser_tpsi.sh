@@ -1,10 +1,10 @@
 #!/bin/bash
-set -x
-set -e
-set -n
-set -v
+#set -x
+#set -e
+#set -n
+#set -v
 echo=""
-echo="echo"
+#echo="echo"
 m=("ser" "tpsi")
 c="4D"
 f=("/home/koraynilay/lns/grassi/sistemi_e_reti/$c" "/home/koraynilay/lns/grassi/tpsi/$c")
