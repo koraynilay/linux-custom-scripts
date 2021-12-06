@@ -12,7 +12,18 @@ dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
 #echo $light_pic
 #echo $dark_pic
 font='Tw Cen MT'
-if [ `date +%H` -lt 20 -a `date +%H` -ge 8 ];then
+if perl -e 'exit ((localtime)[8])' ; then
+	#winter (DST off)
+	#echo winter
+	hs=18 #hour sera
+	hm=7  #hour mattina
+else
+	#summer (DST on)
+	#echo summer
+	hs=20 #hour sera
+	hm=8  #hour mattina
+fi
+if [ `date +%H` -lt $hs -a `date +%H` -ge $hm ];then
 	pic=$light_pic
 else
 	pic=$dark_pic
