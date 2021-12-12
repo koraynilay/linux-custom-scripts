@@ -14,7 +14,7 @@ for ((i=0;i<${#f[@]};i++)) do
 	cd "${f[i]}"
 	#cat *.txt > ../${m[i]}.txt
 	for k in *.txt; do
-		echo -n "\n$k\n" >> ../${m[i]}.txt
+		echo -en "\n$k\n" >> ../${m[i]}.txt
 		cat "$k" >> ../${m[i]}.txt
 	done
 	cd ..
