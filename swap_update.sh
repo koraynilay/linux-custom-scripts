@@ -5,7 +5,7 @@ if [ "$1" = "off" ];then
 	swapoff "$swapfile" -v
 	rm "$swapfile"
 elif [ "$1" = "on" ];then
-	fallocate -l 14G "$swapfile"
+	fallocate -l 13G "$swapfile"
 	chmod 0600 "$swapfile"
 	mkswap "$swapfile"
 	swapon "$swapfile" -v
