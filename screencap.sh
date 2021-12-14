@@ -46,7 +46,7 @@ ffmpeg_opts_video+="-f pulse -i PulseEffects_mic.monitor -ac 1 " #pulseffects_mi
 #ffmpeg_opts_video+="-filter_complex [1][2]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a] "
 ffmpeg_opts_video+="-filter_complex [1][2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]
 ffmpeg_opts_video+="-map [a]? -map 0 -map 1 -map 2 "
-ffmpeg_opts_video+="-c:v h264_nvenc -r:v 60 -b:v 10M -bufsize 500K "
+ffmpeg_opts_video+="-c:v h264_nvenc -r:v 60 -b:v 10M -bufsize 5M -pix_fmt yuv444p " #pix_fmt yuv444p perché se no il rosso/magenta è sfocato
 ffmpeg_opts_video+="-c:a mp3 -r:a 44100 -b:a 320k "
 ffmpeg_opts_video+="-preset fast "
 
