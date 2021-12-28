@@ -5,6 +5,8 @@ echo pwd:$orig_dir
 echo='echo'
 echo=''
 
+#$echo doas etckeeper commit "$(date +'%Y-%m-%d %H:%M:%S') - $0"
+
 pkglist="pkglist"
 pkglistver="pkglist_ver"
 fm_add=(
