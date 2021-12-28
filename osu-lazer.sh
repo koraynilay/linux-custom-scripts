@@ -1,3 +1,3 @@
 #!/bin/sh
 export SDL_VIDEO_X11_FORCE_EGL=true
-osu-lazer
+osu-lazer 2>&1 > ~/osu_log.log
