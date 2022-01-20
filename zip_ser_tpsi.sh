@@ -24,4 +24,5 @@ for ((i=0;i<${#f[@]};i++)) do
 done
 echo $o $ot
 dragon-drag-and-drop -a $o
+read
 rm -v $o $ot
