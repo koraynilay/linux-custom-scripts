@@ -19,8 +19,8 @@ print(sm1,ip1,sb1)
 #    return 1
 
 for i in range(len(sb0)):
-    print(bin(int(sb0[i],base=2) & int(ip0[i])),end=' ')
-    print(bin(int(sb1[i],base=2) & int(ip1[i])),end=' ')
+    print(bin(int(sb0[i],base=2) & int(ip0[i])))
+    print(bin(int(sb1[i],base=2) & int(ip1[i])))
     if not int(sb0[i],base=2) & int(ip0[i]) == int(sb1[i],base=2) & int(ip1[i]):
         print("no stessa sottorete")
         exit(1)
