@@ -1,6 +1,4 @@
 #!/bin/python
-# 192.168.5.2/24 e 192.168.5.25/24 fanno parte della stessa sottorete
-# 37.163.9.97/27 e 37.163.9.156/27 non fanno parte della stessa sottorete
 import textwrap
 import sys
 ip0 = sys.argv[1].split(".")
