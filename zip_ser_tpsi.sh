@@ -5,9 +5,9 @@
 #set -v
 echo=""
 #echo="echo"
-m=("ser" "tpsi")
+m=("ser" "tpsi" "tele")
 c="4D"
-f=("/home/koraynilay/lns/grassi/sistemi_e_reti/$c" "/home/koraynilay/lns/grassi/tpsi/$c")
+f=("/home/koraynilay/lns/grassi/sistemi_e_reti/$c" "/home/koraynilay/lns/grassi/tpsi/$c" "/home/koraynilay/lns/grassi/telecomunicazioni/$c")
 o=""
 ot=""
 for ((i=0;i<${#f[@]};i++)) do
@@ -23,6 +23,6 @@ for ((i=0;i<${#f[@]};i++)) do
 	ot+="${f[i]}/../${m[i]}.txt "
 done
 echo $o $ot
-dragon-drag-and-drop -a $o
-read
+dragon-drag-and-drop $o
+#read
 rm -v $o $ot

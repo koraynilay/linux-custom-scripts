@@ -15,6 +15,9 @@ elif [[ $winName = *"archlinux_updates_script"* ]]; then
 	xdotool windowunmap $winID
 	touch /tmp/archlinux_updates_script_hidden
 	exit $?
+elif [[ $winName = *"Chrome"* ]]; then
+	zenity --question && i3-msg kill
+	exit $?
 else
 	i3-msg kill
 	exit $?
