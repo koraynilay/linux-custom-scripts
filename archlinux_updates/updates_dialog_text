@@ -1,5 +1,5 @@
 #!/bin/sh
-update_command='yay'
+update_command='paru'
 
 answ(){
 	printf "Update?: "
@@ -15,10 +15,10 @@ main(){
 	clear
 	printf "Updates available:\n\n"
 	#updates_news
-	yay -Pw
-	checkupdates
-	printf "AUR:\n"
-	yay -Qu
+	$update_command -Pw
+	#checkupdates
+	#printf "AUR:\n"
+	$update_command -Qu
 	exit_code=$?
 	printf "Check AUR mantaining pkgs? [y/n]: "
 	read pp
