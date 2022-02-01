@@ -1,4 +1,9 @@
 #!/bin/bash
+kill_command() {
+	i3-msg '['"id=$winID"']' kill
+}
+#kill_command="echo i3-msg '[id=$winID]' kill"
+
 winID=$(xdotool getactivewindow)
 winClass=$(xprop -id $winID WM_CLASS)
 winName=$(xprop -id $winID WM_NAME)
@@ -8,9 +13,6 @@ if [[ $sig -gt 0 ]];then
 	kill -$sig $(xdotool getwindowpid $winID)
 	exit $?
 fi
-kill_command="i3-msg "'['"id=$winID"']'" kill"
-echo $kill_command
-#kill_command="echo i3-msg '[id=$winID]' kill"
 if [[ $winClass = *"Steam"* ]]; then
 	xdotool windowunmap $winID
 	exit $?
@@ -19,12 +21,13 @@ elif [[ $winName = *"archlinux_updates_script"* ]]; then
 	touch /tmp/archlinux_updates_script_hidden
 	exit $?
 elif [[ $winName = *"Chrome"* ]]; then
-	zenity --question && $kill_command
+	zenity --question && kill_command $winID
 	exit $?
 else
-	$kill_command
+	kill_command $winID
 	exit $?
 fi
+
 
 
 
