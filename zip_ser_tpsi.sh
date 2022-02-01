@@ -5,9 +5,19 @@
 #set -v
 echo=""
 #echo="echo"
-m=("ser" "tpsi" "tele" "ita")
+m=(
+	"ser"
+	"tpsi"
+	"tele"
+	"ita"
+)
 c="4D"
-f=("/home/koraynilay/lns/grassi/sistemi_e_reti/$c" "/home/koraynilay/lns/grassi/tpsi/$c" "/home/koraynilay/lns/grassi/telecomunicazioni/$c" "/home/koraynilay/lns/grassi/italiano/$c")
+f=(
+	"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
+	"/home/koraynilay/lns/grassi/tpsi/$c"
+	"/home/koraynilay/lns/grassi/telecomunicazioni/$c"
+	"/home/koraynilay/lns/grassi/italiano/$c"
+)
 o=""
 ot=""
 for ((i=0;i<${#f[@]};i++)) do
