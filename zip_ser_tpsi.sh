@@ -23,14 +23,19 @@ ot=""
 for ((i=0;i<${#f[@]};i++)) do
 	cd "${f[i]}"
 	#cat *.txt > ../${m[i]}.txt
-	for k in *.txt; do
-		echo -en "\n$k\n" >> ../${m[i]}.txt
-		cat "$k" >> ../${m[i]}.txt
+	for k in appunti_*.txt; do
+		echo -en "\n$k\n" >> ../${m[i]}_appunti.txt
+		cat "$k" >> ../${m[i]}_compiti.txt
+	done
+	for k in compiti_*.txt; do
+		echo -en "\n$k\n" >> ../${m[i]}_appunti.txt
+		cat "$k" >> ../${m[i]}_compiti.txt
 	done
 	cd ..
-	zip -r "${m[i]}.zip" "$c" "${m[i]}.txt"
+	zip -r "${m[i]}.zip" "$c" "${m[i]}_appunti.txt" "${m[i]}_compiti.txt"
 	 o+="${f[i]}/../${m[i]}.zip "
-	ot+="${f[i]}/../${m[i]}.txt "
+	ot+="${f[i]}/../${m[i]}_appunti.txt "
+	ot+="${f[i]}/../${m[i]}_compiti.txt "
 done
 echo $o $ot
 dragon-drag-and-drop $o
