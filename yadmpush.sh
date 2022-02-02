@@ -10,11 +10,13 @@ echo=''
 pkglist="pkglist"
 pkglistver="pkglist_ver"
 fm_add=(
+	"$HOME/.config/systemd"
 	"$HOME/.lyrics"
 	"$HOME/.mpd/playlists"
 	"$HOME/.mpd/database"
 )
 f_add=(
+	"$HOME/.config/systemd"
 	"$HOME/.lyrics"
 	"$HOME/.mpd/playlists"
 	"$HOME/.mpd/database"
