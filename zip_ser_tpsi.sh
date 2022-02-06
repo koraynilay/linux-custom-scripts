@@ -25,11 +25,11 @@ for ((i=0;i<${#f[@]};i++)) do
 	#cat *.txt > ../${m[i]}.txt
 	for k in appunti_*.txt; do
 		echo -en "\n$k\n" >> ../${m[i]}_appunti.txt
-		cat "$k" >> ../${m[i]}_compiti.txt
+		cat "$k" >> ../${m[i]}_appunti.txt
 	done
-	for k in compiti_*.txt; do
-		echo -en "\n$k\n" >> ../${m[i]}_appunti.txt
-		cat "$k" >> ../${m[i]}_compiti.txt
+	for k2 in compiti_*.txt; do
+		echo -en "\n$k2\n" >> ../${m[i]}_compiti.txt
+		cat "$k2" >> ../${m[i]}_compiti.txt
 	done
 	cd ..
 	zip -r "${m[i]}.zip" "$c" "${m[i]}_appunti.txt" "${m[i]}_compiti.txt"
