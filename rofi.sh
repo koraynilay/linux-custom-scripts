@@ -1,9 +1,4 @@
 #!/bin/bash
-if [ "$XDG_SESSION_TYPE" = "wayland" ];then
-	rofi_command=wofi
-else
-	rofi_command=rofi
-fi
 if perl -e 'exit ((localtime)[8])' ; then
 	#winter (DST off)
 	#echo winter
@@ -26,7 +21,7 @@ case $1 in
 		main(){
 			entries="terminal\nhtop\nvirtual keyboard\nhibernate\nlogout\nrestart to other kernel\nrestart to windows\nrestart\nshutdown"
 			msg="Up: $(uptime -p | awk '{print $2"h "$4"m"}')"
-			res=$(echo -e "$entries" | $rofi_command -theme "$rofi_theme" -p "$msg"  -width 10 -xoffset 0 -lines 5 -no-fixed-num-lines -dmenu)
+			res=$(echo -e "$entries" | rofi -theme "$rofi_theme" -p "$msg"  -width 10 -xoffset 0 -lines 5 -no-fixed-num-lines -dmenu)
 
 			case $res in
 				terminal)
@@ -45,7 +40,11 @@ case $1 in
 					;;
 				logout)
 					ask "logout"
-					i3-msg exit
+					if [ "$XDG_SESSION_TYPE" = "wayland" ];then
+						swaymsg exit
+					else
+						i3-msg exit
+					fi
 					;;
 				restart\ to\ other\ kernel)
 					kerns
@@ -83,7 +82,7 @@ case $1 in
 			#echo -ne $entriesk
 			#echo ${array[@]}
 			msg="Up: $(uptime -p | awk '{print $2"h "$4"m"}')"
-			res=$(echo -e "${entriesk%\\n}" | $rofi_command -theme "$rofi_theme" -p "$msg"  -width 10 -xoffset 0 -no-fixed-num-lines -dmenu)
+			res=$(echo -e "${entriesk%\\n}" | rofi -theme "$rofi_theme" -p "$msg"  -width 10 -xoffset 0 -no-fixed-num-lines -dmenu)
 			for ((i=0;i<${#array[@]};i++)) do
 				if [ "${array[i+1]}" = "$res" ];then
 					ask "restart ot other kernel: $(awk '/title/ {$1="";print $0}' "$efif/${array[i]}")"
@@ -93,7 +92,7 @@ case $1 in
 			done
 		}
 		ask(){
-			res=$(echo -e "Yes\nNo" | $rofi_command -theme "$rofi_theme" -p "Are you sure you want to $@?"  -width 10 -xoffset 0 -lines 2 -no-fixed-num-lines -dmenu)
+			res=$(echo -e "Yes\nNo" | rofi -theme "$rofi_theme" -p "Are you sure you want to $@?"  -width 10 -xoffset 0 -lines 2 -no-fixed-num-lines -dmenu)
 			#echo $res
 			if [ ! "$res" = "Yes" ];then
 				exit 1
@@ -104,13 +103,13 @@ case $1 in
 		# chrome_tabs_keep shut_pc # Use chtb.sh b
 	;;
 	run)
-		$rofi_command -theme "$rofi_theme" -sidebar-mode -show run
+		rofi -theme "$rofi_theme" -sidebar-mode -show run
 	;;
 	show)
-		$rofi_command -theme "$rofi_theme" -sidebar-mode -show window
+		rofi -theme "$rofi_theme" -sidebar-mode -show window
 	;;
 	*)
-		$rofi_command -theme "$rofi_theme" $@
+		rofi -theme "$rofi_theme" $@
 	;;
 esac
 

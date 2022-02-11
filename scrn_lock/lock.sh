@@ -28,53 +28,89 @@ if [ `date +%H` -lt $hs -a `date +%H` -ge $hm ];then
 else
 	pic=$dark_pic
 fi
-i3lock -n -k \
-	-i "$pic" \
-	-C \
-	-c 000000 \
-	\
-	--time-pos='x+30:h-200' \
-	--time-size='100' \
-	--time-color=ffffffff \
-	--time-align 1 \
-	--time-font="$font" \
-	--time-str='%k %M %S' \
-	\
-	--date-pos='x+30:h-125' \
-	--date-size='40' \
-	--date-color=ffffffff \
-	--date-align 1 \
-	--date-font="$font" \
-	--date-str='%A %_d %B %Y' \
-	\
-	--insidever-color=00000000 \
-	--insidewrong-color=ff000000 \
-	--inside-color=00000000 \
-	\
-	--pass-media-keys \
-	--pass-screen-keys \
-	\
-	--ind-pos='x+1870:h-50' \
-	--keyhl-color=ffffffff \
-	--bshl-color=ff0000ff \
-	--separator-color=00000000 \
-	--radius=30 \
-	--line-color=ff000050 \
-	--ring-color=ff000000 \
-	--ringver-color=00000050 \
-	--ringwrong-color=ff000050 \
-	--verif-color=ffffffff \
-	--wrong-color=ff0000ff \
-	--verif-text="." \
-	--wrong-text="." \
-	--noinput-text="" \
-	--lock-text="" \
-	--lockfailed-text="" \
-	--layout-font="$font" \
-	--verif-font="$font" \
-	--wrong-font="$font" #\
-#	--debug	2> $HOME/i3lock.log
-xset -dpms
+#ipos_x="+$(($(xrandr --current | awk '/current/ {print $8,$10}' | tr -d ',' | cut -d' ' -f1)-50))"
+ipos_x="+$(($(xrandr --current | awk '/current/ {print $8}'  | tr -d ',')-50))"
+ipos_y="+$(($(xrandr --current | awk '/current/ {print $10}' | tr -d ',')-50))"
+echo $ipos_x $ipos_y
+if ! [ "$XDG_SESSION_TYPE" = "wayland" ];then
+	i3lock -n -k \
+		-i "$pic" \
+		-C \
+		-c 000000 \
+		\
+		--time-pos='x+30:h-200' \
+		--time-size='100' \
+		--time-color=ffffffff \
+		--time-align 1 \
+		--time-font="$font" \
+		--time-str='%k %M %S' \
+		\
+		--date-pos='x+30:h-125' \
+		--date-size='40' \
+		--date-color=ffffffff \
+		--date-align 1 \
+		--date-font="$font" \
+		--date-str='%A %_d %B %Y' \
+		\
+		--insidever-color=00000000 \
+		--insidewrong-color=ff000000 \
+		--inside-color=00000000 \
+		\
+		--pass-media-keys \
+		--pass-screen-keys \
+		\
+		--ind-pos="x${ipos_x}:h${ipos_y}" \
+		--keyhl-color=ffffffff \
+		--bshl-color=ff0000ff \
+		--separator-color=00000000 \
+		--radius=30 \
+		--line-color=ff000050 \
+		--ring-color=ff000000 \
+		--ringver-color=00000050 \
+		--ringwrong-color=ff000050 \
+		--verif-color=ffffffff \
+		--wrong-color=ff0000ff \
+		--verif-text="." \
+		--wrong-text="." \
+		--noinput-text="" \
+		--lock-text="" \
+		--lockfailed-text="" \
+		--layout-font="$font" \
+		--verif-font="$font" \
+		--wrong-font="$font" #\
+	#	--debug	2> $HOME/i3lock.log
+	xset -dpms
+else
+	swaylock \
+		-F \
+		-i "$pic" \
+		-s fill \
+		-c 000000 \
+		--font "$font" \
+		\
+		--clock \
+		--timestr '%k %M %S' \
+		--datestr '%A %_d %B %Y' \
+		\
+		--inside-ver-color 00000000 \
+		--inside-wrong-color ff000000 \
+		--inside-color 00000000 \
+		\
+		--indicator-x-position $ipos_x \
+		--indicator-y-position $ipos_y \
+		--key-hl-color ffffffff \
+		--bs-hl-color ff0000ff \
+		--caps-lock-bs-hl-color ff00ffff \
+		--caps-lock-key-hl-color ffff00ff \
+		--separator-color 00000000 \
+		--indicator-radius 20 \
+		--line-color ff000050 \
+		--ring-color ff000000 \
+		--ring-ver-color 00000050 \
+		--ring-wrong-color ff000050 \
+		--text-ver-color ffffffff \
+		--text-wrong-color ff0000ff
+fi
 
 #	--timestr='%l %M %S %p' \
 
