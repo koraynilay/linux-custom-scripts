@@ -59,7 +59,7 @@ if ! [ "$XDG_SESSION_TYPE" = "wayland" ];then
 		--pass-media-keys \
 		--pass-screen-keys \
 		\
-		--ind-pos="x${ipos_x}:h${ipos_y}" \
+		--ind-pos="x+1870:h-50" \
 		--keyhl-color=ffffffff \
 		--bshl-color=ff0000ff \
 		--separator-color=00000000 \
@@ -78,6 +78,7 @@ if ! [ "$XDG_SESSION_TYPE" = "wayland" ];then
 		--layout-font="$font" \
 		--verif-font="$font" \
 		--wrong-font="$font" #\
+		#--ind-pos="x${ipos_x}:h${ipos_y}" \
 	#	--debug	2> $HOME/i3lock.log
 	xset -dpms
 else
