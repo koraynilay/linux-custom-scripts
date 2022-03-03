@@ -1,5 +1,5 @@
 #!/bin/sh
 #sudo pacman -Scc
-sudo paru -Scc
+paru -Scc
 npm cache clean --force
 go clean
