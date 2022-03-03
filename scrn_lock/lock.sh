@@ -96,20 +96,20 @@ else
 		--inside-wrong-color ff000000 \
 		--inside-color 00000000 \
 		\
-		--indicator-x-position $ipos_x \
-		--indicator-y-position $ipos_y \
 		--key-hl-color ffffffff \
 		--bs-hl-color ff0000ff \
 		--caps-lock-bs-hl-color ff00ffff \
 		--caps-lock-key-hl-color ffff00ff \
 		--separator-color 00000000 \
-		--indicator-radius 20 \
 		--line-color ff000050 \
 		--ring-color ff000000 \
 		--ring-ver-color 00000050 \
 		--ring-wrong-color ff000050 \
 		--text-ver-color ffffffff \
 		--text-wrong-color ff0000ff
+		#--indicator-x-position $ipos_x \
+		#--indicator-y-position $ipos_y \
+		#--indicator-radius 20 \
 fi
 
 #	--timestr='%l %M %S %p' \

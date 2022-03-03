@@ -1,6 +1,10 @@
 #!/bin/bash
 kill_command() {
-	i3-msg '['"id=$winID"']' kill
+	if ! [ "$XDG_SESSION_TYPE" = "wayland" ];then
+		i3-msg '['"id=$winID"']' kill
+	else
+		swaymsg '['"id=$winID"']' kill
+	fi
 }
 #kill_command="echo i3-msg '[id=$winID]' kill"
 
