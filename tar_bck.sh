@@ -3,6 +3,7 @@ prefix=''
 folders=("${prefix}/etc" "${prefix}/var" "${prefix}/root" "${prefix}/opt" "${prefix}/usr")
 exfolders=(${folders[@]} "${prefix}/swpfl.sys")
 dest='/D/linux/tars'
+#dest='/C'
 topts='--one-file-system --acls --xattrs --preserve-permissions -c'
 v=''
 e=0
