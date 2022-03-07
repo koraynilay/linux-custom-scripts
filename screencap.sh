@@ -51,7 +51,7 @@ ffmpeg_opts_video+="-c:a mp3 -r:a 44100 -b:a 320k "
 ffmpeg_opts_video+="-preset fast "
 
 ffmpeg_opts_image="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
-ffmpeg_opts_image+="-vframes 1 -pix_fmt rgba "
+ffmpeg_opts_image+="-vframes 1 -pix_fmt yuv444p "
 ffmpeg_opts_image+="-preset fast "
 
 started_notif_time=200
