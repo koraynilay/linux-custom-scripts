@@ -3,9 +3,9 @@ echo=''
 echo
 echo $PWD $@
 #pwd
-# $1 parent dir of filename {//}
-# $2 filename only (basename of file) {/}
-# $3 path (from current position) {}
+# $1 parent dir of filename (fd: {//})
+# $2 filename only (basename of file) (fd: {/})
+# $3 path (from current position) (fd: {})
 # $4 password for the archive(s)
 OFS=$IFS
 IFS='/'
@@ -24,5 +24,7 @@ $echo mkdir -pv $folder
 
 echo $folder/$filename.7z
 filename=$(echo -n $2 | base32 -w0)
-$echo 7z a -t7z -p"$4" -mx=0 $folder/$filename.7z "$3"
+if ! [ -e $folder/$filename.7z ];then
+	$echo 7z a -t7z -p"$4" -mx=0 $folder/$filename.7z "$3"
+fi
 echo
