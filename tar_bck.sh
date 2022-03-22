@@ -1,7 +1,7 @@
 #!/bin/bash
 export XZ_OPT='-T0 -0'
 prefix=''
-folders=("${prefix}/etc" "${prefix}/var" "${prefix}/root" "${prefix}/opt" "${prefix}/usr")
+folders=("${prefix}/etc" "${prefix}/var" "${prefix}/root" "${prefix}/opt" "${prefix}/usr" "/efi")
 exfolders=(${folders[@]} "${prefix}/swpfl.sys")
 dest='/D/linux/tars'
 #dest='/C'
