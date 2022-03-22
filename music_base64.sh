@@ -1,14 +1,24 @@
 #!/bin/bash
 echo='echo'
-echo $PWD
+#pwd
 # $1 parent dir of filename {//}
 # $2 filename only (basename of file) {/}
 # $3 path (from current position) {}
-folder="$1"
+# $4 password for the archive(s)
 OFS=$IFS
 IFS='/'
-for i in $folder;do
-	echo $i
+ff=($1)
+folder="../Musica_base64"
+for i in "${ff[@]}";do
+	#echo $i
+	i=$(echo -n $i | base32 -w0)
+	#echo $i
+	folder+="/"
+	folder+="$i"
 done
-$echo mkdir -pv ../Musica_base64/$(echo $1 | base64)
-$echo 7z a -t7z -mx=0 ../Musica_base64/$(echo $1 | base64) "$3"
+IFS=$OFS
+echo $folder
+$echo mkdir -pv $folder
+
+filename=$(echo -n $2 | base32 -w0)
+$echo 7z a -t7z -p"$4" -mx=0 $folder/$filename "$3"
