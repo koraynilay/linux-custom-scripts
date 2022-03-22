@@ -1,5 +1,7 @@
 #!/bin/bash
-echo='echo'
+echo=''
+echo
+echo $PWD $@
 #pwd
 # $1 parent dir of filename {//}
 # $2 filename only (basename of file) {/}
@@ -8,7 +10,7 @@ echo='echo'
 OFS=$IFS
 IFS='/'
 ff=($1)
-folder="../Musica_base64"
+folder="../Musica_base32"
 for i in "${ff[@]}";do
 	#echo $i
 	i=$(echo -n $i | base32 -w0)
@@ -20,5 +22,7 @@ IFS=$OFS
 echo $folder
 $echo mkdir -pv $folder
 
+echo $folder/$filename.7z
 filename=$(echo -n $2 | base32 -w0)
-$echo 7z a -t7z -p"$4" -mx=0 $folder/$filename "$3"
+$echo 7z a -t7z -p"$4" -mx=0 $folder/$filename.7z "$3"
+echo
