@@ -84,7 +84,6 @@ if ! [ "$XDG_SESSION_TYPE" = "wayland" ];then
 else
 	swaylock \
 		-F \
-		-i "$pic" \
 		-s fill \
 		-c 000000 \
 		--font "$font" \
@@ -111,6 +110,8 @@ else
 		#--indicator-x-position $ipos_x \
 		#--indicator-y-position $ipos_y \
 		#--indicator-radius 20 \
+
+		#-i "$pic" \
 fi
 
 #	--timestr='%l %M %S %p' \

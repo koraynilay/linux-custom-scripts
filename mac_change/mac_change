@@ -1,4 +1,7 @@
 #!/bin/sh
+tmpfile="/tmp/mac_orig_mac_change"
+mac_orig=$(ip l | awk '/link\/ether/ {print $2}')
+echo $mac_orig > $tmpfile
 print_usage(){
 	printf "This script need root privileges\n"
 	printf "Usage: $0 [on|off]\n"
@@ -24,7 +27,7 @@ s="1c" #six
 if [ "$1" = "on" ];then
 	mac="$o:$t:$r:$f:$v:$s"
 elif [ "$1" = "off" ];then
-	mac="b0:6e:bf:33:eb:1c"
+	mac="$(cat $tmpfile)"
 else
 	print_usage
 	exit 2
