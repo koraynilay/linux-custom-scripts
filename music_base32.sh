@@ -24,7 +24,8 @@ $echo mkdir -pv $folder
 
 echo $folder/$filename.7z
 filename=$(echo -n $2 | base32 -w0)
-if ! [ -e $folder/$filename.7z ];then
-	$echo 7z a -t7z -p"$4" -mx=0 $folder/$filename.7z "$3"
-fi
+#if ! [ -e $folder/$filename.7z ];then
+	#$echo 7z a -t7z -p"$4" -mx=0 $folder/$filename.7z "$3"
+	$echo 7z u -t7z -p"$4" -mx=0 -up1q1r2x1y2z1w1 $folder/$filename.7z "$3"
+#fi
 echo
