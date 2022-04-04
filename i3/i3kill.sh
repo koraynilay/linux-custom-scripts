@@ -18,7 +18,11 @@ if [[ $sig -gt 0 ]];then
 	exit $?
 fi
 if [[ $winClass = *"Steam"* ]]; then
-	xdotool windowunmap $winID
+	if [ $sig -eq 9 ];then
+		kill_command $winID
+	else
+		xdotool windowunmap $winID
+	fi
 	exit $?
 elif [[ $winName = *"archlinux_updates_script"* ]]; then
 	xdotool windowunmap $winID

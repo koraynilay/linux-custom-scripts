@@ -122,6 +122,8 @@ case ${args[$(($OPTIND-1))]} in
 		if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
 			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
 			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
+		else
+			dunstify -a screencap.sh "rec failed" -t $finished_notif_time
 		fi
 		#else #this is cleaner, but if the exit codes change then the file would be removed
 		#	rm "$filename"
@@ -142,6 +144,8 @@ case ${args[$(($OPTIND-1))]} in
 		if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
 			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
 			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
+		else
+			dunstify -a screencap.sh "rec failed" -t $finished_notif_time
 		fi
 		#else #this is cleaner, but if the exit codes change then the file would be removed
 		#	rm "$filename"
@@ -162,6 +166,8 @@ case ${args[$(($OPTIND-1))]} in
 		if [ $ffmpeg_exit_code -eq 255 ] || [ $ffmpeg_exit_code -eq 0 ];then
 			dunstify -a ffmpeg "screencast is $filename" -t $finished_notif_time
 			xclip $xclip_opts -t video/ogg -selection clipboard "$filename"
+		else
+			dunstify -a screencap.sh "rec failed" -t $finished_notif_time
 		fi
 		#else #this is cleaner, but if the exit codes change then the file would be removed
 		#	rm "$filename"
