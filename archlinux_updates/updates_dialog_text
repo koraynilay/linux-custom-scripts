@@ -20,11 +20,12 @@ main(){
 	printf "AUR:\n"
 	$update_command -Qu
 	exit_code=$?
-	printf "Check AUR mantaining pkgs? [y/n]: "
-	read pp
-	if [[ "$pp" == "y" || "$pp" == "yes" ]];then
+	printf "Checking AUR mantaining pkgs..."
+	#printf "Check AUR mantaining pkgs? [y/n]: "
+	#read pp
+	#if [[ "$pp" == "y" || "$pp" == "yes" ]];then
 		aur_pkgs_notif
-	fi
+	#fi
 	if [ $exit_code -eq 2 ];then
 		return 0
 	fi
