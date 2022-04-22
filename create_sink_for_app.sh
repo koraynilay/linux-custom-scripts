@@ -1,12 +1,13 @@
 #!/bin/sh
-names=($@)
+names=("$@")
 sinks_file="/tmp/custom_app_sinks"
-for nn in ${names[@]};do
-	n="$nn"
+for n in "${names[@]}";do
 	defsink="$(pactl get-default-sink)"
-	sink="$(pactl load-module module-null-sink sink_name=$n sink_properties=device.description=$n)"
-	pactl set-default-sink $defsink
-	notify-send -a "$0" "added sink '$n' with id:$sink"
-	printf "%d;" $sink >> $sinks_file
-	printf "%s\n"  $n >> $sinks_file
+	echo loading sink for "$n"...
+	sink="$(pactl load-module module-null-sink sink_name="$(echo $n | tr ' ' '_')" sink_properties=device.description="$(echo $n | tr ' ' '_')")"
+	pactl set-default-sink "$defsink"
+	echo loaded sink $sink for "$n"...
+	notify-send -a "$0" "added sink $sink named '$n'"
+	printf "%d;" $sink >> "$sinks_file"
+	printf "%s\n" "$n" >> "$sinks_file"
 done
