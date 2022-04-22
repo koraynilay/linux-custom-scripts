@@ -4,6 +4,7 @@ sinks_file="/tmp/custom_app_sinks"
 if [ -n "$1" ];then
 	for n in "${names[@]}";do
 		echo unloading $sink...
+		n="$(echo $n | md5sum)"
 		sink="$(grep -F "$n" "$sinks_file" | cut -f1 -d';')"
 		pactl unload-module "$sink"
 		sed -i "s/^$sink;.*$//g" "$sinks_file"
