@@ -1,6 +1,6 @@
 #!/bin/sh
 file=$1
-comm=$(grep -E "^Exec" Tomb\ Raider\ 1.desktop | sed 's/^Exec=//g')
+comm=$(grep -E "^Exec" "$1" | sed 's/^Exec=//g')
 echo Command:$comm
 sh -c "$comm"
 exit $?
