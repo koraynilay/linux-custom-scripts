@@ -6,17 +6,17 @@
 echo=""
 #echo="echo"
 m=(
-	"ser"
-	"tpsi"
-	"tele"
+	#"ser"
+	#"tpsi"
+	#"tele"
 	"ita"
 )
 c="4D"
 f=(
-	"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
-	"/home/koraynilay/lns/grassi/tpsi/$c"
-	"/home/koraynilay/lns/grassi/telecomunicazioni/$c"
-	#"/home/koraynilay/lns/grassi/italiano/$c"
+	#"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
+	#"/home/koraynilay/lns/grassi/tpsi/$c"
+	#"/home/koraynilay/lns/grassi/telecomunicazioni/$c"
+	"/home/koraynilay/lns/grassi/italiano/$c"
 )
 o=""
 ot=""
