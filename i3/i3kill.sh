@@ -6,9 +6,19 @@ kill_command() {
 		swaymsg '['"id=$winID"']' kill
 	fi
 }
+kill_normal() {
+	if ! [ "$XDG_SESSION_TYPE" = "wayland" ];then
+		i3-msg kill
+	else
+		swaymsg kill
+	fi
+}
 #kill_command="echo i3-msg '[id=$winID]' kill"
 
 winID=$(xdotool getactivewindow)
+if [ -z $winID ];then
+	kill_normal
+fi
 winClass=$(xprop -id $winID WM_CLASS)
 winName=$(xprop -id $winID WM_NAME)
 sig=$(echo $1 | sed -e 's/[^0-9]//g')
