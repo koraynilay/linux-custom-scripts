@@ -24,9 +24,7 @@ f_add=(
        	"$HOME/.config/qutebrowser"
        	"$HOME/.local/share/lutris/banners"
        	"$HOME/.local/share/qutebrowser/sessions"
-       	"$HOME/.config/rpcs3/GuiConfigs"
-       	"$HOME/.config/rpcs3/InputConfigs"
-       	"$HOME/.config/rpcs3/dev_hdd0/home"
+       	"$HOME/.config/rpcs3"
        	"$HOME/.config/PCSX2"
 )
 # functions
