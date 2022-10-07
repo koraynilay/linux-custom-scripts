@@ -21,9 +21,13 @@ if [ "$1" != "r" ];then
 	if [ -n $_2peaclock_id ];then
 		xdotool windowkill $_2peaclock_id
 	fi
-	nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskcat -e 'cava' >/dev/null 2>&1 &!
-	nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskpct -e 'peaclock' >/dev/null 2>&1 &!
-	nice -n 19 termite -c ~/.config/termite/config_desktop -t $_2deskpct -e 'peaclock' >/dev/null 2>&1 &!
+	cava_command='cava'
+	peaclock_command='peaclock --config-dir ~/.config/peaclock'
+	nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskcat -e $cava_command >/dev/null 2>&1 &!
+	nice -n 19 termite -c ~/.config/termite/config_desktop -t $deskpct -e $peaclock_command >/dev/null 2>&1 &!
+	if [ "$(xrandr --listmonitors | head -1 | cut -d' ' -f2)" -gt 1 ];then
+		nice -n 19 termite -c ~/.config/termite/config_desktop -t $_2deskpct -e $peaclock_command >/dev/null 2>&1 &!
+	fi
 	sleep 0.5
 fi
 cava_id=$(xdotool search --name "^$deskcat\$")
