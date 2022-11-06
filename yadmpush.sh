@@ -82,7 +82,6 @@ dostuff_function() {
 	$echo $cmd status
 	$echo $cmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 	$echo $cmd push
-	$echo $cmd push azure master
 }
 copyq_function(){
 	if ! [ "$1" = "" ];then
