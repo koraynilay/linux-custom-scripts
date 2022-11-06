@@ -4,3 +4,4 @@
 yay -Scc
 npm cache clean --force
 go clean
+yarn cache clean

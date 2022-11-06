@@ -1,3 +1,4 @@
 #!/bin/bash
-cd "/C/lol/drive_c/users/koraynilay/Documents/League of Legends/Replays"
+folder="/C/lol"
+cd "$folder/drive_c/users/koraynilay/Documents/League of Legends"
 ./push.sh

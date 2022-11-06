@@ -7,14 +7,14 @@ echo=""
 #echo="echo"
 m=(
 	"ser"
-	"tpsi"
+	#"tpsi"
 	#"tele"
 	#"ita"
 )
-c="4D"
+c="5D"
 f=(
 	"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
-	"/home/koraynilay/lns/grassi/tpsi/$c"
+	#"/home/koraynilay/lns/grassi/tpsi/$c"
 	#"/home/koraynilay/lns/grassi/telecomunicazioni/$c"
 	#"/home/koraynilay/lns/grassi/italiano/$c"
 )
