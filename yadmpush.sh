@@ -81,6 +81,10 @@ dostuff_function() {
 	fi
 	$echo $cmd status
 	$echo $cmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+}
+dostuff_push() {
+	cmd="$1"
+	echo cmd_push:$cmd
 	$echo $cmd push
 }
 copyq_function(){
@@ -99,12 +103,14 @@ m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree
 ycmd="yadm"
 if [ -z $1 ];then
 	dostuff_function "$ycmd"
-	copyq_function ask
 	dostuff_function "$m"
+	dostuff_push "$ycmd"
+	dostuff_push "$m"
+	copyq_function ask
 else
 	case $1 in
-		yadm|y)   dostuff_function "$ycmd";;
-		dotmin|m) dostuff_function "$m";;
+		yadm|y)   dostuff_function "$ycmd";dostuff_push "$ycmd";;
+		dotmin|m) dostuff_function "$m";dostuff_push "$m";;
 		copyq|cq) copyq_function;;
 		*) echo -e "Usage: $0 [arg]\narg:\n  yadm, y\tyadm funtion\n  dotmin, m\tdotfiles-minimal funtion\n  copyq, cq\texecute $l/copyq_push.sh"
 	esac
