@@ -74,7 +74,7 @@ dostuff_function() {
 		for folder_to_add in ${fm_add[@]};do
 			$echo $cmd add -v "$folder_to_add"
 		done
-	else if [ "$cmd" = "$ycmd" ];then
+	elif [ "$cmd" = "$ycmd" ];then
 		for folder_to_add in ${f_add[@]};do
 			$echo $cmd add -v "$folder_to_add"
 		done
@@ -99,7 +99,9 @@ copyq_function(){
 }
 dovcsh() {
 	for repo in $(vcsh list);do
+		vcsh $repo status
 		vcsh $repo add -vu
+		vcsh $repo status
 		vcsh $repo commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 		vcsh $repo push
 	done
