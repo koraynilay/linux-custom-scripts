@@ -74,7 +74,7 @@ dostuff_function() {
 		for folder_to_add in ${fm_add[@]};do
 			$echo $cmd add -v "$folder_to_add"
 		done
-	else
+	else if [ "$cmd" = "$ycmd" ];then
 		for folder_to_add in ${f_add[@]};do
 			$echo $cmd add -v "$folder_to_add"
 		done
@@ -97,6 +97,13 @@ copyq_function(){
 		$echo ~/linux-custom-scripts/copyq_push.sh
 	fi
 }
+dovcsh() {
+	for repo in $(vcsh list);do
+		vcsh $repo add -vu
+		vcsh $repo commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+		vcsh $repo push
+	done
+}
 
 # main
 m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
@@ -106,12 +113,14 @@ if [ -z $1 ];then
 	dostuff_function "$m"
 	dostuff_push "$ycmd"
 	dostuff_push "$m"
+	dovcsh
 	copyq_function ask
 else
 	case $1 in
 		yadm|y)   dostuff_function "$ycmd";dostuff_push "$ycmd";;
 		dotmin|m) dostuff_function "$m";dostuff_push "$m";;
 		copyq|cq) copyq_function;;
+		vcsh|v) dovcsh;;
 		*) echo -e "Usage: $0 [arg]\narg:\n  yadm, y\tyadm funtion\n  dotmin, m\tdotfiles-minimal funtion\n  copyq, cq\texecute $l/copyq_push.sh"
 	esac
 fi
