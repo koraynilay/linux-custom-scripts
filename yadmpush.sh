@@ -99,9 +99,9 @@ copyq_function(){
 }
 dovcsh() {
 	for repo in $(vcsh list);do
-		vcsh $repo status
+		vcsh $repo status --untracked=no
 		vcsh $repo add -vu
-		vcsh $repo status
+		vcsh $repo status --untracked=no
 		vcsh $repo commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
 		vcsh $repo push
 	done
