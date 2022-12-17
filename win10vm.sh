@@ -2,7 +2,8 @@
 #vmsfolder='/C/linux/vms'
 vmsfolder='/I/vms/qemu'
 vmname="win10"
-share="$HOME/share_win"
+#share="$HOME/share_win"
+share="/A/Call.of.Duty.Modern.Warfare.II.Vault.Edition"
 #share="/D/The.Fruit.of.Grisaia.Unrated.Version"
 cd "$vmsfolder"
 cd "$vmname"
