@@ -6,17 +6,17 @@
 echo=""
 #echo="echo"
 m=(
-	"ser"
+	#"ser"
 	#"tpsi"
 	#"tele"
-	#"ita"
+	"ita"
 )
 c="5D"
 f=(
-	"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
+	#"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
 	#"/home/koraynilay/lns/grassi/tpsi/$c"
 	#"/home/koraynilay/lns/grassi/telecomunicazioni/$c"
-	#"/home/koraynilay/lns/grassi/italiano/$c"
+	"/home/koraynilay/lns/grassi/italiano/$c"
 )
 o=""
 ot=""
@@ -38,6 +38,6 @@ for ((i=0;i<${#f[@]};i++)) do
 	ot+="${f[i]}/../${m[i]}_compiti.txt "
 done
 echo $o $ot
-dragon-drag-and-drop $o
+dragon-drop $o
 #read
 rm -v $o $ot

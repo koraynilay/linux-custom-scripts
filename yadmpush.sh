@@ -26,6 +26,7 @@ f_add=(
        	"$HOME/.local/share/qutebrowser/sessions"
        	"$HOME/.config/rpcs3"
        	"$HOME/.config/PCSX2"
+       	"$HOME/.local/share/qBittorrent"
 )
 # functions
 pkg_list() {
