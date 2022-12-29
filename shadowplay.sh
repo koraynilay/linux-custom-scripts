@@ -2,7 +2,7 @@
 sound="$(pactl get-default-sink).monitor"
 mic="$(pactl get-default-source)"
 ext="mp4"
-time_sec=600
+time_sec=300
 folder="/home/koraynilay/Videos/screencasts"
 fps=60
 quality="ultra"

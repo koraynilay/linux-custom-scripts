@@ -7,7 +7,7 @@ export COMPlus_TieredCompilation=0
 export COMPlus_TC_QuickJit=0
 export COMPlus_TC_QuickJitForLoops=0
 
-LC_ALL=C osu-lazer 2>&1 > ~/osu_log.log
-#osu-lazer 2>&1 > ~/osu_log.log
+#LC_ALL=C osu-lazer 2>&1 > ~/osu_log.log
+osu-lazer 2>&1 > ~/osu_log.log
 cd /C/osu
 ./push.sh
