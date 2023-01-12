@@ -1,5 +1,6 @@
 #!/bin/sh
-dunstify -t 3000 -u LOW -r 1 -p -a volume $( amixer scontents | awk '$2 ~ /Left/ && $4 !~ /86842/ && $5 ~ /[0-9]%/ && $6 ~ /on/ {split($5, str, "["); split(str[2], str2, "]"); print str2[1]; exit}')
+vol=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP 'front-\w+:\s+\d+\s+\/\s+\K\d+%' | uniq | paste -sd '|')
+dunstify -t 3000 -u LOW -r 1 -p -a volume $vol
 if [ "$(mpc | cat -n | awk '$1 == 2 {print $2}' | sed -e 's/\[//g' -e 's/\]//g')" = "playing" ];then
 	songstate_change_notif
 fi
