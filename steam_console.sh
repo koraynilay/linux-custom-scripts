@@ -1,2 +1,2 @@
 #!/bin/sh
-steam -console $@
+steam -console -noverifyfiles $@

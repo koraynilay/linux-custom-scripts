@@ -41,9 +41,9 @@ IFS=$tmp_ifs
 #echo $size_to_replace $offset_to_replace
 ffmpeg_opts_video="-hwaccel vulkan "
 ffmpeg_opts_video+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
-ffmpeg_opts_video+="-f pulse -i alsa_output.pci-0000_00_1f.3.analog-stereo.monitor -ac 2 " #auto interno analogico # audio
+ffmpeg_opts_video+="-f pulse -i $(pactl get-default-sink).monitor -ac 2 " #auto interno analogico # audio
 #ffmpeg_opts_video+="-f pulse -i PulseEffects_apps.monitor -ac 2 " #pulseffects_apps # audio
-ffmpeg_opts_video+="-f pulse -i PulseEffects_mic.monitor  -ac 1 " #pulseffects_mic  # microphone
+ffmpeg_opts_video+="-f pulse -i "$(pactl get-default-source)"  -ac 1 " #pulseffects_mic  # microphone
 #ffmpeg_opts_video+="-f pulse -i alsa_input.usb-0c76_USB_PnP_Audio_Device-00.mono-fallback -ac 1 " #pulseffects_mic  # microphone
 #ffmpeg_opts_video+="-filter_complex [1][2]amerge=inputs=2,pan=stereo|FL<c0+c1|FR<c2+c3[a] "
 ffmpeg_opts_video+="-filter_complex [1][2]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a] " #[2]

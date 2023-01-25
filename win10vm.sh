@@ -2,9 +2,7 @@
 #vmsfolder='/C/linux/vms'
 vmsfolder='/I/vms/qemu'
 vmname="win10"
-#share="$HOME/share_win"
-share="/A/Call.of.Duty.Modern.Warfare.II.Vault.Edition"
-#share="/D/The.Fruit.of.Grisaia.Unrated.Version"
+share="$HOME/share_win"
 cd "$vmsfolder"
 cd "$vmname"
 qemu-system-x86_64 \
@@ -14,13 +12,13 @@ qemu-system-x86_64 \
 	-machine type=q35,accel=kvm \
 	-device intel-iommu \
 	-cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
-	-m 8192 \
+	-m 6000 \
 	-smp 3 \
 	\
 	-monitor unix:/tmp/monitor.sock,server,nowait \
 	\
 	-net nic,model=virtio \
-	-net user,smb="$share" \
+	-net user,smb="$share",smbserver=10.0.2.4 \
 	-net tap,ifname=tap0,script=no,downscript=no \
 	\
 	-drive file=win10.qcow2,if=virtio,cache=none,aio=native,cache.direct=on \
