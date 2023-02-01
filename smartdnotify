@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# from https://wiki.archlinux.org/title/S.M.A.R.T.#Notifying_potential_problems
+
 #IFS=$'\n'
 #for LINE in `w -hs`
 #do
