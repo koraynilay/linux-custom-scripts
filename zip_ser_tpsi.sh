@@ -6,16 +6,16 @@
 echo=""
 #echo="echo"
 m=(
-	#"ser"
-	"informatica"
+	"ser"
+	#"informatica"
 	#"tpsi"
 	#"tele"
 	#"ita"
 )
 c="5D"
 f=(
-	#"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
-	"/home/koraynilay/lns/grassi/informatica/$c"
+	"/home/koraynilay/lns/grassi/sistemi_e_reti/$c"
+	#"/home/koraynilay/lns/grassi/informatica/$c"
 	#"/home/koraynilay/lns/grassi/tpsi/$c"
 	#"/home/koraynilay/lns/grassi/telecomunicazioni/$c"
 	#"/home/koraynilay/lns/grassi/italiano/$c"
