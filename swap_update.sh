@@ -1,5 +1,5 @@
 #!/bin/sh
-swapfile=/swpfl.sys
+swapfile=/C/swpfl.sys
 g=16
 [[ $UID -ne 0 ]] && echo -e "This script needs root access. Exiting." && exit 1
 if [ "$1" = "off" ];then
