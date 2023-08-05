@@ -58,6 +58,10 @@ list_films_animes() {
 	echo >> ~/filmsanimes_list.txt
 	paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U) >> ~/filmsanimes_list.txt
 	cd "$orig_dir"
+	cd /F/free_ck/series
+	echo >> ~/filmsanimes_list.txt
+	paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U) >> ~/filmsanimes_list.txt
+	cd "$orig_dir"
 	#alias lsdt="paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U)"
 	#lsdt > ~/filmsanimes_list.txt
 }
@@ -116,7 +120,7 @@ if [ -z $1 ];then
 	dostuff_function "$m"
 	dostuff_push "$ycmd"
 	dostuff_push "$m"
-	dovcsh
+	#dovcsh
 	copyq_function ask
 else
 	case $1 in
