@@ -1,4 +1,9 @@
 #!/bin/sh
-target=${1:-$(pacman -Qq)}
-expac "%m %n" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n # no version displayed
-#expac "%m %n %v" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n # version displayed
+if [ "$1" = "-e" ]; then
+	target=$(pacman -Qqe)
+	expac "%m %n" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n # no version displayed
+else
+	target=${1:-$(pacman -Qq)}
+	expac "%m %n" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n # no version displayed
+	#expac "%m %n %v" -l'\n' -Q -H M $target | sed s/MiB//g | sort -n # version displayed
+fi
