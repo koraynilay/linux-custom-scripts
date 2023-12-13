@@ -29,3 +29,4 @@ done < abcd_la
 # listens.json is the downloaded json from listenbrainz
 # https://zerokspot.com/weblog/2013/07/18/processing-json-with-jq/
 # https://stackoverflow.com/a/18608100
+# .env is just the token
