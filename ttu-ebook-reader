@@ -1,6 +1,18 @@
 #!/bin/sh
-/bin/google-chrome-stable --profile-directory=Default --app-id=dhdagjlgajnmgafjlabfekbiimkbipfb
+/bin/google-chrome-stable --profile-directory=Default --app-id=ajgobbadjfdiblhkhkjghnhnkiilighh
 
+##!/usr/bin/env xdg-open
+#[Desktop Entry]
+#Version=1.0
+#Terminal=false
+#Type=Application
+#Name=Ebook Reader
+#Exec=/opt/google/chrome/google-chrome --profile-directory=Default --app-id=ajgobbadjfdiblhkhkjghnhnkiilighh
+#Icon=chrome-ajgobbadjfdiblhkhkjghnhnkiilighh-Default
+#StartupWMClass=crx_ajgobbadjfdiblhkhkjghnhnkiilighh
+
+
+# old:
 ##!/usr/bin/env xdg-open
 #[Desktop Entry]
 #Version=1.0
