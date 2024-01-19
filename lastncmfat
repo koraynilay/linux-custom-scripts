@@ -9,6 +9,9 @@ plf_tmp="/tmp/plf_toadd.m3u"
 plf_tmp2="/tmp/plf.m3u"
 IFS=$'\n'
 
+ff="$mf.fd"
+ffn="$ff.new"
+
 resume=0
 update=0
 dry=0
@@ -56,9 +59,32 @@ if [[ "$(lsblk -o FSTYPE $(df -T "$md" | awk '/\/dev\//{print $1}') | tail -1)" 
 	data_cmd=1
 fi
 cd "$md"
+#if [ $update -eq 1 ];then
+#	echo update
+#	for a in `find .`;do
+#		gr=$(grep -F "$a" "$mf")
+#		#echo $gr
+#		if [ -n "$gr" ];then
+#			continue
+#		else
+#			if [[ "${a##*.}" == "nfo" ]];then
+#				continue
+#			fi
+#			echo "adding $a to $mf"
+#			if [ $data_cmd -eq 1 ];then
+#				data=$(date -d @$(getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600') +%Y-%m-%d_%H-%M-%S)
+#			else
+#				data=$(date -d "$(stat "$a" | nl | awk '$1 == 8 {print $3,$4}')" +%Y-%m-%d_%H-%M-%S)
+#			fi
+#			echo "$data \"$a\"" >> $mf
+#		fi
+#	done
+#fi
 if [ $update -eq 1 ];then
 	echo update
-	for a in `find .`;do
+	fd | sort > $ffn
+	to_add=$(comm -13 "$ff" "$ffn")
+	for a in `echo $to_add`;do
 		gr=$(grep -F "$a" "$mf")
 		#echo $gr
 		if [ -n "$gr" ];then
