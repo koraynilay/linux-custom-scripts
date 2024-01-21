@@ -101,61 +101,12 @@ if [ $update -eq 1 ];then
 			fi
 			echo "$data \"$a\"" >> $mf
 		fi
-	done
-fi
 
-printf "csong\n"
-echo $arg
-if [ "$arg" = "add" ];then
-	n=0
-	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
-		#echo $csong
-		is_there=`mpc -f '%file%' playlist | grep -F "$csong"`
-		#echo $is_there
-		if [ -z "$is_there" ];then
-			mpc add "$csong"
-			let n++
-			mpc move `mpc status | perl -ne 'print "$1\n" if /#[0-9]+\/([0-9]+)/'` $n
-			printf "added: $csong\n"
-		fi
-	done
-	exit 0
-fi
-
-if [ "$arg" = "play" ];then
-	if [ $dry -eq 0 ];then
-		if [ $update -eq 0 ];then
-			mpc clear >/dev/null
-			mpc load "$plf_name"
-			echo "playing"
-			mpc play >/dev/null
-			exit 0
-		fi
-	fi
-	#printf "play\n"
-	if [ $dry -eq 0 ];then
-		mpc clear >/dev/null
-	fi
-	pwd
-	n=0
-	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
-		if [ $dry -eq 0 ];then
-			mpc add "$csong" >/dev/null
-		fi
-		#grep -F "$csong" "$plf" --color=always
 		if [ -z "$(grep -F "$csong" "$plf")" ];then
 			echo ${csong} added to "$plf"
 			echo "$csong" >> "$plf_tmp"
 			echo "echo '$csong' >> '$plf_tmp'"
 		fi
-		let n++
-		if [ $dry -eq 0 ];then
-			if [ $n -eq 100 ];then
-				mpc random off >/dev/null
-				mpc play >/dev/null
-			fi
-		fi
-		printf "\r$n"
 	done
 	if [ $dry -eq 0 ];then
 		if [ -f "$plf_tmp" ];then
@@ -168,28 +119,104 @@ if [ "$arg" = "play" ];then
 			rm "$plf_tmp" "$plf_tmp2"
 		fi
 	fi
+	mv -v "$ffn" "$ff"
 
-	#reorder_album Caparezza
-	#reorder_album "Death Parade"
-	#reorder_album "Kōtarō Nakagawa"
-	#reorder_album Kiznaiver
-	#reorder_album "Bakemonogatari OST"
-	#reorder_album "Bakemonogatari OST [0-9]" #for only the ost and not op/ed
-	#reorder_album "Vivy: Fluorite Eye's Song OST [0-9]"
-	#reorder_album "The Millionaire Detective - Balance: UNLIMITED \(Fugou Keiji: Balance:Unlimited\) OST"
-	#reorder_album "Akudama Drive OST"
-	#reorder_album "Saya no Uta Original Soundtrack"
-	#reorder_album "Wonderful Everyday \(Subarashiki Hibi\) OST"
-	#reorder_album "Euphoria OST"
-	#reorder_album "Menherafflesia"
-	#reorder_album "Kabaneri of the Iron Fortress"
-	#mpc rm "${plf%.*}"
-	#mpc save "${plf%.*}"
-	printf "\n"
-	if [ $dry -eq 0 ];then
-		mpc clear >/dev/null
-		mpc load "$(basename "${plf%.*}")"
-		mpc play >/dev/null
+	if [ "$arg" = "play" ];then
+		printf "\n"
+		if [ $dry -eq 0 ];then
+			mpc clear >/dev/null
+			mpc load "$(basename "${plf%.*}")"
+			mpc play >/dev/null
+		fi
 	fi
-	exit 0
 fi
+
+printf "csong\n"
+echo $arg
+#if [ "$arg" = "add" ];then
+#	n=0
+#	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+#		#echo $csong
+#		is_there=`mpc -f '%file%' playlist | grep -F "$csong"`
+#		#echo $is_there
+#		if [ -z "$is_there" ];then
+#			mpc add "$csong"
+#			let n++
+#			mpc move `mpc status | perl -ne 'print "$1\n" if /#[0-9]+\/([0-9]+)/'` $n
+#			printf "added: $csong\n"
+#		fi
+#	done
+#	exit 0
+#fi
+
+#if [ "$arg" = "play" ];then
+#	if [ $dry -eq 0 ];then
+#		if [ $update -eq 0 ];then
+#			mpc clear >/dev/null
+#			mpc load "$plf_name"
+#			echo "playing"
+#			mpc play >/dev/null
+#			exit 0
+#		fi
+#	fi
+#	#printf "play\n"
+#	if [ $dry -eq 0 ];then
+#		mpc clear >/dev/null
+#	fi
+#	pwd
+#	n=0
+#	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, index($0,$2))}'`;do
+#		if [ $dry -eq 0 ];then
+#			mpc add "$csong" >/dev/null
+#		fi
+#		#grep -F "$csong" "$plf" --color=always
+#		if [ -z "$(grep -F "$csong" "$plf")" ];then
+#			echo ${csong} added to "$plf"
+#			echo "$csong" >> "$plf_tmp"
+#			echo "echo '$csong' >> '$plf_tmp'"
+#		fi
+#		let n++
+#		if [ $dry -eq 0 ];then
+#			if [ $n -eq 100 ];then
+#				mpc random off >/dev/null
+#				mpc play >/dev/null
+#			fi
+#		fi
+#		printf "\r$n"
+#	done
+#	if [ $dry -eq 0 ];then
+#		if [ -f "$plf_tmp" ];then
+#			tac "$plf" > "$plf_tmp2"
+#			echo "tac '$plf' > '$plf_tmp2'"
+#			tac "$plf_tmp" >> "$plf_tmp2"
+#			echo "tac '$plf_tmp' >> '$plf_tmp2'"
+#			tac "$plf_tmp2" > "$plf"
+#			echo "tac '$plf_tmp2' > '$plf'"
+#			rm "$plf_tmp" "$plf_tmp2"
+#		fi
+#	fi
+#
+#	#reorder_album Caparezza
+#	#reorder_album "Death Parade"
+#	#reorder_album "Kōtarō Nakagawa"
+#	#reorder_album Kiznaiver
+#	#reorder_album "Bakemonogatari OST"
+#	#reorder_album "Bakemonogatari OST [0-9]" #for only the ost and not op/ed
+#	#reorder_album "Vivy: Fluorite Eye's Song OST [0-9]"
+#	#reorder_album "The Millionaire Detective - Balance: UNLIMITED \(Fugou Keiji: Balance:Unlimited\) OST"
+#	#reorder_album "Akudama Drive OST"
+#	#reorder_album "Saya no Uta Original Soundtrack"
+#	#reorder_album "Wonderful Everyday \(Subarashiki Hibi\) OST"
+#	#reorder_album "Euphoria OST"
+#	#reorder_album "Menherafflesia"
+#	#reorder_album "Kabaneri of the Iron Fortress"
+#	#mpc rm "${plf%.*}"
+#	#mpc save "${plf%.*}"
+#	printf "\n"
+#	if [ $dry -eq 0 ];then
+#		mpc clear >/dev/null
+#		mpc load "$(basename "${plf%.*}")"
+#		mpc play >/dev/null
+#	fi
+#	exit 0
+#fi
