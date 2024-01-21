@@ -121,6 +121,8 @@ if [ $update -eq 1 ];then
 	fi
 	mv -v "$ffn" "$ff"
 
+	printf "csong\n"
+	echo $arg
 	if [ "$arg" = "play" ];then
 		printf "\n"
 		if [ $dry -eq 0 ];then
@@ -131,8 +133,8 @@ if [ $update -eq 1 ];then
 	fi
 fi
 
-printf "csong\n"
-echo $arg
+#printf "csong\n"
+#echo $arg
 #if [ "$arg" = "add" ];then
 #	n=0
 #	for csong in `cat $mf | sort -nr | awk '!/^#/' | cut -c 1-2 --complement | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
