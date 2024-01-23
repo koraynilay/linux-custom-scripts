@@ -82,9 +82,27 @@ cd "$md"
 #fi
 if [ $update -eq 1 ];then
 	echo update
-	fd | sort > $ffn
+	fd \
+		-e aac \
+		-e aiff \
+		-e alac \
+		-e ape \
+		-e flac \
+		-e m4a \
+		-e mp3 \
+		-e ogg \
+		-e oga \
+		-e mogg \
+		-e opus \
+		-e vox \
+		-e wav \
+		-e wma \
+		-e wv \
+	| sort > $ffn
 	to_add=$(comm -13 "$ff" "$ffn")
+	echo $to_add
 	for a in `echo $to_add`;do
+		echo l:$a
 		gr=$(grep -F "$a" "$mf")
 		#echo $gr
 		if [ -n "$gr" ];then
@@ -102,10 +120,11 @@ if [ $update -eq 1 ];then
 			echo "$data \"$a\"" >> $mf
 		fi
 
-		if [ -z "$(grep -F "$csong" "$plf")" ];then
-			echo ${csong} added to "$plf"
-			echo "$csong" >> "$plf_tmp"
-			echo "echo '$csong' >> '$plf_tmp'"
+		echo $a
+		if [ -z "$(grep -F "$a" "$plf")" ];then
+			echo ${a} added to "$plf"
+			echo "$a" >> "$plf_tmp"
+			echo "echo '$a' >> '$plf_tmp'"
 		fi
 	done
 	if [ $dry -eq 0 ];then
