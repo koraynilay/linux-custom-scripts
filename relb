@@ -1,5 +1,6 @@
 #!/bin/zsh
 # relb
+# from my .zsh_custom/envar.zsh
 
 relb_base_path="/Q/relb"
 relb_menu_server="$relb_base_path/relb-server"
