@@ -1,0 +1,69 @@
+#!/bin/zsh
+# relb
+
+relb_base_path="/Q/relb"
+relb_menu_server="$relb_base_path/relb-server"
+relb_deployer="$relb_base_path/relb-deployer-node"
+relb_game_server="$relb_base_path/ll/LinuxServer"
+server_output_folder="/Q/relb/ll"
+ue4_path="/Q/relb/SourceUE4"
+game_server_path="/Q/relb/relb-game-server"
+
+linux_server_build() {
+	PATH="$ue4_path/../clang35_prebuilt/bin:$PATH" $ue4_path/Engine/Build/BatchFiles/RunUAT.sh BuildCookRun -project=$game_server_path/ShooterGame.uproject -noP4 -clientconfig=Development -serverconfig=Development -nocompileeditor -ue4exe=UE4Editor -utf8output -server -serverplatform=Linux -noclient -build -cook -map=B_redfalls+Highrise_Collisions_Temp+Highrise_Vista+Highrise_Lights+Highrise_Audio+ShooterEntry+Highrise_Gameplay+Highrise_Meshing+Sanctuary+Highrise+clash+clash_gameplay+clash_gameplay_tdm+clash_gameplay_killconf+detour+dev_gym+gateway+grandview_gameplay+grandview+grandview_gameplay_elimination+grandview_gameplay_rush+mammoth+namsan+promenade+promenade_night+reactor+reactor_night+redfalls+redfalls_gameplay+redfalls_gameplay_blitz+redfalls_gameplay_turfwar+C_redfalls+L_redfalls+redfalls_bloodmoon+station_gameplay+station_gameplay_blitz+station+station_gameplay_turfwar+trench+tutorial+B_vertigo+C_vertigo+vertigo+L_vertigo -unversionedcookedcontent -compressed -stage -package -stagingdirectory=$server_output_folder -cmdline=" -Messaging" -addcmdline="-SessionId=4745CDB71B080E0A003702C3899401A6 -SessionOwner='koraynilay' -SessionName='ciao'" -compile
+}
+menu_server_start() {
+	cd $relb_menu_server
+	yarn dev
+}
+game_server_start() {
+	cd $relb_game_server
+	./ShooterGameServer.sh -log -token=__secret__ -menuhost=http://localhost:4000 $@
+}
+deployer_start() {
+	cd $relb_deployer
+	yarn start
+}
+relb_cd() {
+	case $1 in
+		m|menu-server) cd $relb_base_path/relb-server;;
+		g|game-server) cd $relb_base_path/relb-game-server/Source;;
+		l|linux-build) cd $relb_base_path/ll/LinuxServer;;
+		ue4|SourceUE4_koraynilay) cd $relb_base_path/SourceUE4_koraynilay;;
+		w|wine|prefix|wineprefix) cd $relb_base_path/.wine;;
+		d|deployer) cd $relb_base_path/relb-deployer-node;;
+		*) cd $relb_base_path;;
+	esac
+}
+pull_relb() {
+	relb_cd m
+	git pull
+	relb_cd ue4
+	git pull
+}
+pull_g() {
+	relb_cd g
+	git stash push
+	git lfs fetch upstream --all
+	git pull upstream master #upstream
+	git pull origin master #my fork
+	echo "RUN: git stash pop"
+}
+
+main() {
+	case $1 in
+		l|linux-server-build) linux_server_build;;
+		y|menu-server-start) menu_server_start;;
+		s|game-server-start) game_server_start $@;;
+		d|deployer-node) deployer_start;;
+		u|update|git-pull|pull) pull_relb;;
+		gu) pull_g;;
+		v|vs|lb-launcher-settings|settings) vim $relb_base_path/.wine/drive_c/users/koraynilay/AppData/Roaming/AerialNinjaLauncher/settings.ini;;
+		r) PATH="$relb_base_path/clang35_prebuilt/bin:$PATH" /usr/bin/mono "$relb_base_path/SourceUE4/Engine/Binaries/DotNET/UnrealBuildTool.exe" ShooterGame Development Linux -project="$relb_base_path/relb-game-server/ShooterGame.uproject" -editorrecompile -progress -noubtmakefiles -NoHotReloadFromIDE;;
+		cd) relb_cd $2;;
+		*) printf "usage:\nrelb [l|cd]\n";;
+	esac
+
+}
+
+main $@
