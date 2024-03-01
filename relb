@@ -21,12 +21,12 @@ deployer_start() {
 }
 relb_cd() {
 	case $1 in
-		m|menu-server) cd $relb_base_path/relb-server;;
-		g|game-server) cd $relb_base_path/relb-game-server/Source;;
-		l|linux-build) cd $relb_base_path/ll/LinuxServer;;
+		m|menu-server) cd $relb_menu_server;;
+		g|game-server) cd $game_server_path/Source;;
+		l|linux-build) cd $relb_game_server;;
 		ue4|SourceUE4_koraynilay) cd $relb_base_path/SourceUE4_koraynilay;;
 		w|wine|prefix|wineprefix) cd $relb_base_path/.wine;;
-		d|deployer) cd $relb_base_path/relb-deployer-node;;
+		d|deployer) cd $relb_deployer;;
 		*) cd $relb_base_path;;
 	esac
 }
