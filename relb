@@ -6,6 +6,7 @@ source $HOME/.config/relb_envars
 
 linux_server_build() {
 	PATH="$ue4_path/../clang35_prebuilt/bin:$PATH" $ue4_path/Engine/Build/BatchFiles/RunUAT.sh BuildCookRun -project=$game_server_path/ShooterGame.uproject -noP4 -clientconfig=Development -serverconfig=Development -nocompileeditor -ue4exe=UE4Editor -utf8output -server -serverplatform=Linux -noclient -build -cook -map=B_redfalls+Highrise_Collisions_Temp+Highrise_Vista+Highrise_Lights+Highrise_Audio+ShooterEntry+Highrise_Gameplay+Highrise_Meshing+Sanctuary+Highrise+clash+clash_gameplay+clash_gameplay_tdm+clash_gameplay_killconf+detour+dev_gym+gateway+grandview_gameplay+grandview+grandview_gameplay_elimination+grandview_gameplay_rush+mammoth+namsan+promenade+promenade_night+reactor+reactor_night+redfalls+redfalls_gameplay+redfalls_gameplay_blitz+redfalls_gameplay_turfwar+C_redfalls+L_redfalls+redfalls_bloodmoon+station_gameplay+station_gameplay_blitz+station+station_gameplay_turfwar+trench+tutorial+B_vertigo+C_vertigo+vertigo+L_vertigo -unversionedcookedcontent -compressed -stage -package -stagingdirectory=$server_output_folder -cmdline=" -Messaging" -addcmdline="-SessionId=4745CDB71B080E0A003702C3899401A6 -SessionOwner='koraynilay' -SessionName='ciao'" -compile
+	notify-send -a relb "finished compiling relb"
 }
 menu_server_start() {
 	cd $relb_menu_server
