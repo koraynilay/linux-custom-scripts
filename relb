@@ -27,6 +27,7 @@ relb_cd() {
 		l|linux-build) cd $relb_game_server;;
 		ue4|SourceUE4_koraynilay) cd $relb_base_path/SourceUE4_koraynilay;;
 		w|wine|prefix|wineprefix) cd $relb_base_path/.wine;;
+		wa|wine_appdata) cd $relb_base_path/.wine/drive_c/users/koraynilay/AppData/Roaming/AerialNinjaLauncher;;
 		d|deployer) cd $relb_deployer;;
 		*) cd $relb_base_path;;
 	esac
