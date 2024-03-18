@@ -1,6 +1,7 @@
 #!/bin/zsh
 #old name: "last_added_ncmpcpp_getfattr"
 mf="/I/Raccolte/music_files.txt"
+mft="/I/Raccolte/music_files.txt.tmp"
 md="/I/Raccolte/Musica"
 plf="$HOME/.mpd/playlists/lastctime.m3u"
 plf_nn=$(basename $plf)
@@ -101,6 +102,7 @@ if [ $update -eq 1 ];then
 	| sort > $ffn
 	to_add=$(comm -13 "$ff" "$ffn")
 	echo $to_add
+	echo > $mft
 	for a in `echo $to_add`;do
 		echo l:$a
 		gr=$(grep -F "$a" "$mf")
@@ -115,16 +117,20 @@ if [ $update -eq 1 ];then
 			if [ $data_cmd -eq 1 ];then
 				data=$(date -d @$(getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600') +%Y-%m-%d_%H-%M-%S)
 			else
-				data=$(date -d "$(stat "$a" | nl | awk '$1 == 8 {print $3,$4}')" +%Y-%m-%d_%H-%M-%S)
+				#data=$(date -d "$(stat "$a" | nl | awk '$1 == 8 {print $3,$4}')" +%Y-%m-%d_%H-%M-%S)
+				data=$(date -d "$(stat -c '%w' "$a")" +%Y-%m-%d_%H-%M-%S)
 			fi
 			echo "$data \"$a\"" >> $mf
+			echo "$data \"$a\"" >> $mft
 		fi
 
 		echo $a
-		if [ -z "$(grep -F "$a" "$plf")" ];then
-			echo ${a} added to "$plf"
-			echo "$a" >> "$plf_tmp"
-			echo "echo '$a' >> '$plf_tmp'"
+	done
+	for csong in `cat $mft | sort -n`;do
+		if [ -z "$(grep -F "$csong" "$plf")" ];then
+			echo ${csong} added to "$plf"
+			echo "$csong" >> "$plf_tmp"
+			echo "echo '$csong' >> '$plf_tmp'"
 		fi
 	done
 	if [ $dry -eq 0 ];then
