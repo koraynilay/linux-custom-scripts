@@ -16,17 +16,19 @@ ffn="$ff.new"
 resume=0
 update=0
 dry=0
+debug=0
 for ar in $@;do
 	if [[ ! $ar =~ ^-.* ]];then
 		arg=$ar
 		break
 	fi
 done
-while getopts uhn opt;do #r #per -r (resume)
+while getopts uhnd opt;do #r #per -r (resume)
 	case $opt in
 		#r)resume=1;;
 		u)update=1;;
 		n)dry=1;;
+		d)debug=1;;
 		h)	echo -ne "Usage: $0 [opt]\n";
 			#echo -ne "  -n\t\tdon't be verbose (dont't print processed files)\n";
 			#echo -ne "  -r \tresume after populating playlist\n";
@@ -101,10 +103,23 @@ if [ $update -eq 1 ];then
 		-e wv \
 	| sort > $ffn
 	to_add=$(comm -13 "$ff" "$ffn")
+	echo #blank line to separate
+
+	echo to_add:
 	echo $to_add
 	echo > $mft
+
+	echo #blank line to separate
+
+	echo -ne "music_files.txt:\t"
+	echo -E "$mf"
+	echo -ne "music_files.txt tmp:\t"
+	echo -E "$mft"
 	for a in `echo $to_add`;do
-		echo l:$a
+		if [ $debug -eq 1 ];then
+			echo -ne "cur\t"
+			echo -E "$a"
+		fi
 		gr=$(grep -F "$a" "$mf")
 		#echo $gr
 		if [ -n "$gr" ];then
@@ -113,43 +128,80 @@ if [ $update -eq 1 ];then
 			if [[ "${a##*.}" == "nfo" ]];then
 				continue
 			fi
-			echo "adding $a to $mf"
+			echo -ne "mf adding\t"
+			echo -E "$a"
+			#echo -ne "\tto\t"
+			#echo -E "$mf"
 			if [ $data_cmd -eq 1 ];then
 				data=$(date -d @$(getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600') +%Y-%m-%d_%H-%M-%S)
 			else
 				#data=$(date -d "$(stat "$a" | nl | awk '$1 == 8 {print $3,$4}')" +%Y-%m-%d_%H-%M-%S)
 				data=$(date -d "$(stat -c '%w' "$a")" +%Y-%m-%d_%H-%M-%S)
 			fi
-			echo "$data \"$a\"" >> $mf
+			if [ $dry -eq 0 ];then
+				echo "$data \"$a\"" >> $mf
+			fi
 			echo "$data \"$a\"" >> $mft
 		fi
-
-		echo $a
 	done
-	for csong in `cat $mft | sort -n`;do
+
+	echo #blank line to separate
+
+	echo -ne "playlist:\t"
+	echo -E "$plf"
+	echo -ne "playlist tmp:\t"
+	echo -E "$plf_tmp"
+	for csong in `cat $mft | sort -nr | awk '!/^#/' | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
 		if [ -z "$(grep -F "$csong" "$plf")" ];then
-			echo ${csong} added to "$plf"
-			echo "$csong" >> "$plf_tmp"
-			echo "echo '$csong' >> '$plf_tmp'"
+			echo -ne "plf added\t"
+			echo -E " ${csong}"
+			if [ $dry -eq 0 ];then
+				echo "$csong" >> "$plf_tmp"
+			fi
+			if [ $debug -eq 1 ];then
+				echo -ne "echo\t\t"
+				echo -E "'$csong' >> '$plf_tmp'"
+			fi
 		fi
 	done
-	if [ $dry -eq 0 ];then
-		if [ -f "$plf_tmp" ];then
+
+	if [ -f "$plf_tmp" ];then
+		if [ $debug -eq 1 ];then
+			echo #blank line to separate
+			echo -ne "playlist tmp2:\t"
+			echo -E "$plf_tmp2"
+
+			echo -ne "tac\t"
+			echo -E "'$plf' > '$plf_tmp2'"
+			echo -ne "tac\t"
+			echo -E "'$plf_tmp' >> '$plf_tmp2'"
+			echo -ne "tac\t"
+			echo -E "'$plf_tmp2' > '$plf'"
+		fi
+		if [ $dry -eq 0 ];then
 			tac "$plf" > "$plf_tmp2"
-			echo "tac '$plf' > '$plf_tmp2'"
 			tac "$plf_tmp" >> "$plf_tmp2"
-			echo "tac '$plf_tmp' >> '$plf_tmp2'"
 			tac "$plf_tmp2" > "$plf"
-			echo "tac '$plf_tmp2' > '$plf'"
 			rm "$plf_tmp" "$plf_tmp2"
 		fi
+		echo
+		echo -E "playlist $plf updated"
 	fi
-	mv -v "$ffn" "$ff"
 
-	printf "csong\n"
-	echo $arg
+	if [ $dry -eq 0 ];then
+		echo #blank line to separate
+		if [ $debug -eq 1 ];then
+			echo "mv -v '$ffn' '$ff'"
+		fi
+		mv -v "$ffn" "$ff"
+	fi
+
+	if [ $debug -eq 1 ];then
+		echo -ne "\n"
+		echo -E "arg:$arg"
+	fi
 	if [ "$arg" = "play" ];then
-		printf "\n"
+		printf "'play' specified: doing mpc clear;load;play\n"
 		if [ $dry -eq 0 ];then
 			mpc clear >/dev/null
 			mpc load "$(basename "${plf%.*}")"

@@ -47,10 +47,17 @@ pull_g() {
 	echo "RUN: git stash pop"
 }
 
+menu_server_change_env() {
+	cd $relb_menu_server
+	ln -svf .env_$1 .env
+}
+
 main() {
 	case $1 in
 		l|linux-server-build) linux_server_build;;
 		y|menu-server-start) menu_server_start;;
+		yd|menu-server-envdev) menu_server_change_env "dev";;
+		yp|menu-server-envprod) menu_server_change_env "prod";;
 		s|game-server-start) game_server_start $@;;
 		d|deployer-node) deployer_start;;
 		u|update|git-pull|pull) pull_relb;;

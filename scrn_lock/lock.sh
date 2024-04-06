@@ -7,6 +7,8 @@
 #home="/home/koraynilay"
 light_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_light_blur.png"
 dark_pic="$HOME/Pictures/wallpapers/sweet/landscape_sweet_dark_blur.png"
+#light_pic="$HOME/Pictures/wallpapers/1303241-vertical-beretta-wallpaper-2048x1536.jpg"
+#dark_pic="$HOME/Pictures/wallpapers/1303241-vertical-beretta-wallpaper-2048x1536.jpg"
 #light_pic="$home/Pictures/wallpapers/wave/landscape_wave_blur.png"
 #dark_pic="$home/Pictures/wallpapers/wave/landscape_wave_4_blur.png"
 #echo $light_pic
