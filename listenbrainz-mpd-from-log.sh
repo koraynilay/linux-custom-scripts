@@ -1,25 +1,50 @@
 #!/bin/sh
-source $HOME/.config/listenbrainz-mpd-from-logrc
+. "$HOME/.config/listenbrainz-mpd-from-logrc"
 
 url="https://api.listenbrainz.org/1/submit-listens"
-# read from ~/.mpd/log from a certain time to another (quicker but less clean: use line numbers)
-json="
-{
-  \"inserted_at\": $now,
-  \"listened_at\": $listen_time,
-  \"track_metadata\": {
-    \"additional_info\": {
-      \"duration_ms\": $duration,
-      \"media_player\": \"MPD\",
-      \"submission_client\": \"listenbrainz-mpd-from-log.sh\",
-    },
-    \"artist_name\": \"$artist\",
-    \"track_name\": \"$title\"
-    \"release_name\": \"$album\",
-  },
-  \"user_name\": \"$USER\"
+music_dir="/I/Raccolte/Musica"
+info_func() {
+	ffprobe -v quiet -show_format -of json $1 | jq $2
 }
-"
+
+# read from ~/.mpd/log from a certain time to another (quicker but less clean: use line numbers)
+sl=$1 # start line number
+el=$2 # end line number
+mpd_log_file="$HOME/.mpd/log"
+to_add="$(tail -n +$sl $mpd_log_file | head -n $(($el-$sl)))"
+IFS=$'\n'
+for song in $to_add;do
+	echo "$song"
+	IFS=' ' read month day time colon logger action filename <<< $song
+	if ! [ "$logger" = "player:" ] && [ "$action" = "played" ];then
+		continue
+	fi
+	filename=${filename//\"/}
+	info_func $music_dir/$filename ".format.tags.TITLE"
+
+	now=$(date +%s)
+	listened_at=$(date -d "$month $day $time" +%s)
+
+	json="
+	{
+	  \"inserted_at\": $now,
+	  \"listened_at\": $listened_at,
+	  \"track_metadata\": {
+	    \"additional_info\": {
+	      \"duration_ms\": $duration,
+	      \"media_player\": \"MPD\",
+	      \"submission_client\": \"listenbrainz-mpd-from-log.sh\",
+	    },
+	    \"artist_name\": \"$artist\",
+	    \"track_name\": \"$title\"
+	    \"release_name\": \"$album\",
+	  },
+	  \"user_name\": \"$USER\"
+	}
+	"
+	printf '%s' "$json"
+done
+
 
 exit 1
 curl -X POST $url -H "Authorization: token $(<$TOKEN_FILE)" -d "$json"
