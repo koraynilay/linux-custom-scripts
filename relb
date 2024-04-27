@@ -29,6 +29,7 @@ relb_cd() {
 		w|wine|prefix|wineprefix) cd $relb_base_path/.wine;;
 		wa|wine_appdata) cd $relb_base_path/.wine/drive_c/users/koraynilay/AppData/Roaming/AerialNinjaLauncher;;
 		d|deployer) cd $relb_deployer;;
+		lb|lawbreakers) cd $lb_dir;;
 		*) cd $relb_base_path;;
 	esac
 }

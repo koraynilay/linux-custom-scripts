@@ -2,7 +2,8 @@
 #vmsfolder='/C/linux/vms'
 vmsfolder='/I/vms/qemu'
 vmname="win10"
-share="$HOME/share_win"
+#share="$HOME/share_win"
+share="/Q/relb/relb-replicate"
 cd "$vmsfolder"
 cd "$vmname"
 qemu-system-x86_64 \
