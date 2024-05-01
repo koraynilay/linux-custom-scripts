@@ -2,17 +2,17 @@
 . "$HOME/.config/listenbrainz-mpd-from-logrc"
 
 alias jq='jq -r' # needed to remove quotes from json
-alias json_metada_cmd='ffprobe -v quiet -show_format -of json'
+alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 
 url="https://api.listenbrainz.org/1/submit-listens"
 music_dir="/I/Raccolte/Musica"
 info_func() {
-	ret=$(json_metada_cmd $1 | jq $2)
+	ret=$(json_metadata_cmd "$1" | jq "$2 // empty")
 	printf '%s' "$ret"
 }
 recmbid_func() {
-	ret=$(mid3v2 -l $1 | jc --ini --pretty | jq $2)
-	ret=$(grep -Po '[a-z0-9-]{36}' <<< $ret)
+	ret=$(mid3v2 -l "$1" | jc --ini --pretty | jq "$2 // empty")
+	ret=$(grep -Po '[a-z0-9-]{36}' <<< "$ret")
 	printf '%s' "$ret"
 }
 
@@ -20,7 +20,7 @@ recmbid_func() {
 sl=$1 # start line number
 el=$2 # end line number
 mpd_log_file="$HOME/.mpd/log"
-to_add="$(tail -n +$sl $mpd_log_file | head -n $(($el-$sl)))"
+to_add="$(tail -n +"$sl" "$mpd_log_file" | head -n $((el-sl)))"
 IFS=$'\n'
 recording_mbid="none"
 for song in $to_add;do
@@ -31,60 +31,50 @@ for song in $to_add;do
 	fi
 	filename=${filename//\"/}
 	json_cur=$(info_func "$music_dir/$filename" ".format")
-	recording_mbid=$(recmbid_func "$music_dir/$filename" ".UFID")
+	#printf '%s' "$json_cur"
 
 	now=$(date +%s)
 	listened_at=$(date -d "$month $day $time" +%s)
-	printf '%s' "$json_cur"
-	printf '\n%s\n' "$recording_mbid"
-	format=$(jq '.format_name' <<< $json_cur | tr -d '"')
-	if [ "$format" = "mp3" ];then
-		title=$(jq '.tags.title' <<< $json_cur)
-		artist=$(jq '.tags.artist' <<< $json_cur)
-		album=$(jq '.tags.album' <<< $json_cur)
+	duration="$(jq '.duration // empty' <<< "$json_cur")"
+	duration=$(calc -p "$duration * 1000")
+	track_number=$(jq '.tags.track // empty' <<< "$json_cur")
 
-		if [[ "$recording_mbid" =~ [a-z0-9-]{36} ]];then
-			track_mbid="$(jq '.tags."MusicBrainz Release Track Id"' <<< $json_cur)"
-			#recording_mbid="$(jq '.tags.""' <<< $json_cur)"
-			release_mbid="$(jq '.tags."MusicBrainz Album Id"' <<< $json_cur)"
-			artist_mbid="$(jq '.tags."MusicBrainz Artist Id"' <<< $json_cur)"
+	format=$(jq '.format_name' <<< "$json_cur" | tr -d '"')
+
+	if [ "$format" = "mp3" ];then
+		recording_mbid=$(recmbid_func "$music_dir/$filename" ".UFID")
+		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
+		echo "mp3 $use_mb:$recording_mbid"
+	elif [ "$format" = "flac" ];then
+		recording_mbid="$(jq '.tags."MUSICBRAINZ_TRACKID" // empty' <<< "$json_cur")"
+		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
+		echo "flac $use_mb:$recording_mbid"
+	fi
+
+	if [ "$format" = "mp3" ];then
+		title=$(jq '.tags.title // empty' <<< "$json_cur")
+		artist=$(jq '.tags.artist // empty' <<< "$json_cur")
+		album=$(jq '.tags.album // empty' <<< "$json_cur")
+
+		if [ "$use_mb" -ge 1 ];then
+			track_mbid="$(jq '.tags."MusicBrainz Release Track Id" // empty' <<< "$json_cur")"
+			#recording_mbid="$(jq '.tags."" // empty' <<< "$json_cur")" #can't because not stored like the other data
+			release_mbid="$(jq '.tags."MusicBrainz Album Id" // empty' <<< "$json_cur")"
+			artist_mbid="$(jq '.tags."MusicBrainz Artist Id" // empty' <<< "$json_cur")"
 		fi
 	elif [ "$format" = "flac" ];then
-		title=$(jq '.tags.TITLE' <<< $json_cur)
-		artist=$(jq '.tags.ARTIST' <<< $json_cur)
-		album=$(jq '.tags.ALBUM' <<< $json_cur)
+		title=$(jq '.tags.TITLE // empty' <<< "$json_cur")
+		artist=$(jq '.tags.ARTIST // empty' <<< "$json_cur")
+		album=$(jq '.tags.ALBUM // empty' <<< "$json_cur")
 
-		if [[ "$recording_mbid" =~ [a-z0-9-]{36} ]];then
-			track_mbid="$(jq '.tags."MUSICBRAINZ_RELEASETRACKID"' <<< $json_cur)"
-			recording_mbid="$(jq '.tags."MUSICBRAINZ_TRACKID"' <<< $json_cur)"
-			release_mbid="$(jq '.tags."MUSICBRAINZ_ALBUMID"' <<< $json_cur)"
-			artist_mbid="$(jq '.tags."MUSICBRAINZ_ARTISTID"' <<< $json_cur)"
+		if [ "$use_mb" -ge 1 ];then
+			track_mbid="$(jq '.tags."MUSICBRAINZ_RELEASETRACKID" // empty' <<< "$json_cur")"
+			release_mbid="$(jq '.tags."MUSICBRAINZ_ALBUMID" // empty' <<< "$json_cur")"
+			artist_mbid="$(jq '.tags."MUSICBRAINZ_ARTISTID" // empty' <<< "$json_cur")"
 		fi
 	fi
-	track_number=$(jq '.tags.track' <<< $json_cur)
-	duration="$(jq '.duration' <<< $json_cur)"
-	duration=$(calc -p "$duration * 1000")
 
-	if ! [[ "$recording_mbid" =~ [a-z0-9-]{36} ]];then
-		json="
-		{
-		  \"inserted_at\": $now,
-		  \"listened_at\": $listened_at,
-		  \"track_metadata\": {
-		    \"additional_info\": {
-		      \"duration_ms\": $duration,
-		      \"media_player\": \"MPD\",
-		      \"submission_client\": \"listenbrainz-mpd-from-log.sh\",
-		    },
-		    \"artist_name\": \"$artist\",
-		    \"track_name\": \"$title\"
-		    \"release_name\": \"$album\",
-		  },
-		  \"user_name\": \"$USER\"
-		}
-		"
-		printf '%s\n' "$json"
-	else
+	if [ "$use_mb" -ge 1 ];then
 		json="
 		{
 		  \"inserted_at\": $now,
@@ -110,11 +100,30 @@ for song in $to_add;do
 		}
 		"
 		printf '%s\n' "$json"
+	else
+		json="
+		{
+		  \"inserted_at\": $now,
+		  \"listened_at\": $listened_at,
+		  \"track_metadata\": {
+		    \"additional_info\": {
+		      \"duration_ms\": $duration,
+		      \"media_player\": \"MPD\",
+		      \"submission_client\": \"listenbrainz-mpd-from-log.sh\",
+		    },
+		    \"artist_name\": \"$artist\",
+		    \"track_name\": \"$title\"
+		    \"release_name\": \"$album\",
+		  },
+		  \"user_name\": \"$USER\"
+		}
+		"
+		printf '%s\n' "$json"
 	fi
 done
 
 
-exit 1
+exit 69
 curl -X POST $url -H "Authorization: token $(<$TOKEN_FILE)" -d "$json"
 
 #{
@@ -217,4 +226,22 @@ curl -X POST $url -H "Authorization: token $(<$TOKEN_FILE)" -d "$json"
 #    "track_name": "Never Gonna Give You Up",
 #    "release_name": "Whenever you need somebody"
 #  }
-#}
+#{
+
+#{
+#  "inserted_at": 1714584618,
+#  "listened_at": 1714584571,
+#  "recording_msid": "2c2d2172-96ba-4449-a293-f0967fdfba06",
+#  "track_metadata": {
+#    "additional_info": {
+#      "duration_ms": 94680,
+#      "media_player": "MPD",
+#      "recording_msid": "2c2d2172-96ba-4449-a293-f0967fdfba06",
+#      "submission_client": "listenbrainz-mpd",
+#      "submission_client_version": "2.3.5"
+#    },
+#    "artist_name": "The Chalkeaters",
+#    "track_name": "DOOM CROSSING: Eternal Horizons ■ Music Video feat. Natalia Natchan"
+#  },
+#  "user_name": "koraynilay"
+#}}
