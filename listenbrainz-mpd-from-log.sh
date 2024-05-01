@@ -1,10 +1,18 @@
 #!/bin/sh
 . "$HOME/.config/listenbrainz-mpd-from-logrc"
 
+alias jq='jq -r' # needed to remove quotes from json
+alias json_metada_cmd='ffprobe -v quiet -show_format -of json'
+
 url="https://api.listenbrainz.org/1/submit-listens"
 music_dir="/I/Raccolte/Musica"
 info_func() {
-	ret=$(ffprobe -v quiet -show_format -of json $1 | jq $2)
+	ret=$(json_metada_cmd $1 | jq $2)
+	printf '%s' "$ret"
+}
+recmbid_func() {
+	ret=$(mid3v2 -l $1 | jc --ini --pretty | jq $2)
+	ret=$(grep -Po '[a-z0-9-]{36}' <<< $ret)
 	printf '%s' "$ret"
 }
 
@@ -14,78 +22,95 @@ el=$2 # end line number
 mpd_log_file="$HOME/.mpd/log"
 to_add="$(tail -n +$sl $mpd_log_file | head -n $(($el-$sl)))"
 IFS=$'\n'
+recording_mbid="none"
 for song in $to_add;do
-	echo "$song"
+	echo "csong:$song"
 	IFS=' ' read month day time colon logger action filename <<< $song
 	if ! [ "$logger" = "player:" ] && [ "$action" = "played" ];then
 		continue
 	fi
 	filename=${filename//\"/}
-	json_cur=$(info_func $music_dir/$filename ".format")
+	json_cur=$(info_func "$music_dir/$filename" ".format")
+	recording_mbid=$(recmbid_func "$music_dir/$filename" ".UFID")
 
 	now=$(date +%s)
 	listened_at=$(date -d "$month $day $time" +%s)
 	printf '%s' "$json_cur"
-	format=$(jq '.format_name' <<< $json_cur)
+	printf '\n%s\n' "$recording_mbid"
+	format=$(jq '.format_name' <<< $json_cur | tr -d '"')
 	if [ "$format" = "mp3" ];then
 		title=$(jq '.tags.title' <<< $json_cur)
 		artist=$(jq '.tags.artist' <<< $json_cur)
 		album=$(jq '.tags.album' <<< $json_cur)
 
-		track_mbid="$(jq '.tags."MusicBrainz Release Track Id"' <<< $json_cur)"
-		recording_mbid="$(jq '.tags.""' <<< $json_cur)"
-		release_mbid="$(jq '.tags.""' <<< $json_cur)"
+		if [[ "$recording_mbid" =~ [a-z0-9-]{36} ]];then
+			track_mbid="$(jq '.tags."MusicBrainz Release Track Id"' <<< $json_cur)"
+			#recording_mbid="$(jq '.tags.""' <<< $json_cur)"
+			release_mbid="$(jq '.tags."MusicBrainz Album Id"' <<< $json_cur)"
+			artist_mbid="$(jq '.tags."MusicBrainz Artist Id"' <<< $json_cur)"
+		fi
 	elif [ "$format" = "flac" ];then
 		title=$(jq '.tags.TITLE' <<< $json_cur)
 		artist=$(jq '.tags.ARTIST' <<< $json_cur)
 		album=$(jq '.tags.ALBUM' <<< $json_cur)
+
+		if [[ "$recording_mbid" =~ [a-z0-9-]{36} ]];then
+			track_mbid="$(jq '.tags."MUSICBRAINZ_RELEASETRACKID"' <<< $json_cur)"
+			recording_mbid="$(jq '.tags."MUSICBRAINZ_TRACKID"' <<< $json_cur)"
+			release_mbid="$(jq '.tags."MUSICBRAINZ_ALBUMID"' <<< $json_cur)"
+			artist_mbid="$(jq '.tags."MUSICBRAINZ_ARTISTID"' <<< $json_cur)"
+		fi
 	fi
+	track_number=$(jq '.tags.track' <<< $json_cur)
+	duration="$(jq '.duration' <<< $json_cur)"
+	duration=$(calc -p "$duration * 1000")
 
-	json="
-	{
-	  \"inserted_at\": $now,
-	  \"listened_at\": $listened_at,
-	  \"track_metadata\": {
-	    \"additional_info\": {
-	      \"duration_ms\": $duration,
-	      \"media_player\": \"MPD\",
-	      \"submission_client\": \"listenbrainz-mpd-from-log.sh\",
-	    },
-	    \"artist_name\": \"$artist\",
-	    \"track_name\": \"$title\"
-	    \"release_name\": \"$album\",
-	  },
-	  \"user_name\": \"$USER\"
-	}
-	"
-	printf '%s' "$json"
-
-	json="
-	{
-	  \"inserted_at\": $now,
-	  \"listened_at\": $listened_at,
-	  \"track_metadata\": {
-	    \"additional_info\": {
-	      \"artist_mbids\": [
-		\"$artist_mbid\"
-	      ],
-	      \"duration_ms\": $duration,
-	      \"media_player\": \"MPD\",
-	      \"recording_mbid\": \"$recording_mbid\",
-	      \"release_mbid\": \"$release_mbid\",
-	      \"submission_client\": \"listenbrainz-mpd-from-logs.sh\",
-	      \"track_mbid\": \"$track_mbid\",
-	      \"tracknumber\": \"$track_number\"
-	    },
-	    \"artist_name\": \"$artist\",
-	    \"track_name\": \"$title\"
-	    \"release_name\": \"$album\",
-	  },
-	  \"user_name\": \"koraynilay\"
-	}
-	"
-
-	printf '%s' "$json"
+	if ! [[ "$recording_mbid" =~ [a-z0-9-]{36} ]];then
+		json="
+		{
+		  \"inserted_at\": $now,
+		  \"listened_at\": $listened_at,
+		  \"track_metadata\": {
+		    \"additional_info\": {
+		      \"duration_ms\": $duration,
+		      \"media_player\": \"MPD\",
+		      \"submission_client\": \"listenbrainz-mpd-from-log.sh\",
+		    },
+		    \"artist_name\": \"$artist\",
+		    \"track_name\": \"$title\"
+		    \"release_name\": \"$album\",
+		  },
+		  \"user_name\": \"$USER\"
+		}
+		"
+		printf '%s\n' "$json"
+	else
+		json="
+		{
+		  \"inserted_at\": $now,
+		  \"listened_at\": $listened_at,
+		  \"track_metadata\": {
+		    \"additional_info\": {
+		      \"artist_mbids\": [
+			\"$artist_mbid\"
+		      ],
+		      \"duration_ms\": $duration,
+		      \"media_player\": \"MPD\",
+		      \"recording_mbid\": \"$recording_mbid\",
+		      \"release_mbid\": \"$release_mbid\",
+		      \"submission_client\": \"listenbrainz-mpd-from-logs.sh\",
+		      \"track_mbid\": \"$track_mbid\",
+		      \"tracknumber\": \"$track_number\"
+		    },
+		    \"artist_name\": \"$artist\",
+		    \"track_name\": \"$title\"
+		    \"release_name\": \"$album\",
+		  },
+		  \"user_name\": \"koraynilay\"
+		}
+		"
+		printf '%s\n' "$json"
+	fi
 done
 
 
