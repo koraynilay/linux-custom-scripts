@@ -5,7 +5,7 @@ alias jq='jq -r' # needed to remove quotes from json
 alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 
 url="https://api.listenbrainz.org/1/submit-listens"
-music_dir="/I/Raccolte/Musica"
+music_dir="$MPD_MUSIC_DIR" # taken from the rc at the start, like TOKEN_FILE
 info_func() {
 	ret=$(json_metadata_cmd "$1" | jq "$2 // empty")
 	printf '%s' "$ret"
@@ -16,36 +16,63 @@ recmbid_func() {
 	printf '%s' "$ret"
 }
 
+# TODO: add --debug|-d and --dry-run|-n and maybe also flags for the token file and music dir
+
 # read from ~/.mpd/log from a certain time to another (quicker but less clean: use line numbers)
 sl=$1 # start line number
-el=$(($2+1)) # end line number
+el=$(($2+1)) # end line number # +1 since $2 is the last line to be parsed, but $el is the last line + 1
+dry=$3
 mpd_log_file="$HOME/.mpd/log"
-to_add="$(tail -n +"$sl" "$mpd_log_file" | head -n $((el-sl)))"
-jsons=()
+to_add="$(tail -n +"$sl" "$mpd_log_file" | head -n $((el-sl)))" # list of lines to parse
+jsons=() # array of json of songs to be sent as import
+skipped=() # skipped files
 IFS=$'\n'
+
+# from https://stackoverflow.com/a/20983251/12206923
+# Num  Colour    #define         R G B
+# 
+# 0    black     COLOR_BLACK     0,0,0
+# 1    red       COLOR_RED       1,0,0
+# 2    green     COLOR_GREEN     0,1,0
+# 3    yellow    COLOR_YELLOW    1,1,0
+# 4    blue      COLOR_BLUE      0,0,1
+# 5    magenta   COLOR_MAGENTA   1,0,1
+# 6    cyan      COLOR_CYAN      0,1,1
+# 7    white     COLOR_WHITE     1,1,1
+# 
+# tput setab [1-7] # Set the background colour using ANSI escape
+# tput setaf [1-7] # Set the foreground colour using ANSI escape
+
+err=$(tput setaf 1) # red
+warn=$(tput setaf 3) # yellow
+reset=$(tput sgr0)
+
 for song in $to_add;do
 	echo "csong:$song"
 	IFS=' ' read month day time colon logger action filename <<< $song
-	echo $logger
-	echo $action
+	#echo $logger
+	#echo $action
+
+	# skip if not a played action
+	# (unfortunately "player: played" is also used when restarting mpd)
 	if [ "$logger" != "player:" ] && [ "$action" != "played" ];then
 		continue
 	fi
-	filename=${filename//\"/}
-	json_cur=$(info_func "$music_dir/$filename" ".format")
+	filename=${filename//\"/} # remove double quotes (") from around the filename
+	json_cur=$(info_func "$music_dir/$filename" ".format") # get metadata json
 	#printf '%s' "$json_cur"
 
-	now=$(date +%s)
-	duration="$(jq '.duration // empty' <<< "$json_cur")"
-	duration=$(calc -p "round($duration * 1000)")
-	listened_at=$(date -d "$month $day $time" +%s)
-	date -d @$listened_at
-	listened_at=$((listened_at-(duration/1000)))
-	date -d @$listened_at
+	duration="$(jq '.duration // empty' <<< "$json_cur")" # duration in seconds
+	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
+	listened_at=$(date -d "$month $day $time" +%s) # get the timestamp for when the listen finished
+	#date -d @$listened_at
+	listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
+	#date -d @$listened_at
 	track_number=$(jq '.tags.track // empty' <<< "$json_cur")
 
-	format=$(jq '.format_name' <<< "$json_cur" | tr -d '"')
+	format=$(jq '.format_name' <<< "$json_cur" | tr -d '"') # mp3, flag, whatever
 
+	# check if the files has MusicBrainz tags
 	if [ "$format" = "mp3" ];then
 		recording_mbid=$(recmbid_func "$music_dir/$filename" ".UFID")
 		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
@@ -54,8 +81,13 @@ for song in $to_add;do
 		recording_mbid="$(jq '.tags."MUSICBRAINZ_TRACKID" // empty' <<< "$json_cur")"
 		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
 		echo "flac $use_mb:$recording_mbid"
+	else
+		echo "${warn}WARNING: unsupported format, this listen won't be sent to listenbrainz${reset}"
+		skipped+=("$filename")
+		continue
 	fi
 
+	# get tags
 	if [ "$format" = "mp3" ];then
 		title=$(jq '.tags.title // empty' <<< "$json_cur")
 		artist=$(jq '.tags.artist // empty' <<< "$json_cur")
@@ -80,6 +112,7 @@ for song in $to_add;do
 	fi
 
 	if [ "$use_mb" -ge 1 ];then
+		# json with MusicBrainz tags
 		json="
 		{
 		  \"listened_at\": $listened_at,
@@ -103,6 +136,7 @@ for song in $to_add;do
 		}
 		"
 	else
+		# json with MusicBrainz tags
 		json="
 		{
 		  \"listened_at\": $listened_at,
@@ -127,134 +161,22 @@ done
 #echo jsons:$(IFS=,;echo "${jsons[*]}")
 
 #exit 69
-curl $url -X POST \
-	-H "Authorization: token $(<$TOKEN_FILE)" \
-	-H "Content-Type: application/json" \
-	-d "{
-		\"listen_type\": \"import\",
-		\"payload\": [
-			$(IFS=, ; echo "${jsons[*]}")
-		]
-	}"
-echo [$(IFS=, ; echo "${jsons[*]}")] | jq
-echo ${#jsons[@]}
-
-#{
-#  "inserted_at": 1714236481,
-#  "listened_at": 1714236392,
-#  "recording_msid": "3f65f2e5-8f3a-4467-9ac2-6a52e9052b4e",
-#  "track_metadata": {
-#    "additional_info": {
-#      "artist_mbids": [
-#        "a9d3a905-9a5b-4c84-829a-2f8fedf3e513"
-#      ],
-#      "duration_ms": 176440,
-#      "media_player": "MPD",
-#      "recording_mbid": "8ed6cb7e-8f37-43da-8f05-0817e477be94",
-#      "recording_msid": "3f65f2e5-8f3a-4467-9ac2-6a52e9052b4e",
-#      "release_mbid": "21a925c9-1fc1-45e7-a4c0-9424242e8282",
-#      "submission_client": "listenbrainz-mpd",
-#      "submission_client_version": "2.3.4",
-#      "track_mbid": "442995ef-c57f-34fe-a06c-c98d03d5535d",
-#      "tracknumber": "10"
-#    },
-#    "artist_name": "Shintaro Jinbo",
-#    "mbid_mapping": {
-#      "artist_mbids": [
-#        "a9d3a905-9a5b-4c84-829a-2f8fedf3e513"
-#      ],
-#      "artists": [
-#        {
-#          "artist_credit_name": "神保伸太郎",
-#          "artist_mbid": "a9d3a905-9a5b-4c84-829a-2f8fedf3e513",
-#          "join_phrase": ""
-#        }
-#      ],
-#      "caa_id": 6079247992,
-#      "caa_release_mbid": "21a925c9-1fc1-45e7-a4c0-9424242e8282",
-#      "recording_mbid": "8ed6cb7e-8f37-43da-8f05-0817e477be94",
-#      "recording_name": "SCARE SHADOW",
-#      "release_mbid": "21a925c9-1fc1-45e7-a4c0-9424242e8282"
-#    },
-#    "release_name": "Saya no Uta Original Soundtrack",
-#    "track_name": "SCARE SHADOW"
-#  },
-#  "user_name": "koraynilay"
-#}
-
-#{
-#  "inserted_at": 1714186556,
-#  "listened_at": 1714186430,
-#  "recording_msid": "4590f2a4-beee-4fd7-91f2-05a02fca718c",
-#  "track_metadata": {
-#    "additional_info": {
-#      "duration_ms": 250128,
-#      "media_player": "MPD",
-#      "recording_msid": "4590f2a4-beee-4fd7-91f2-05a02fca718c",
-#      "submission_client": "listenbrainz-mpd",
-#      "submission_client_version": "2.3.4",
-#      "tracknumber": "8"
-#    },
-#    "artist_name": "KEMU VOXX",
-#    "track_name": "Life-Cheating Game「イカサマライフゲイム」"
-#  },
-#  "user_name": "koraynilay"
-#}
-
-#{
-#  "inserted_at": 1714149285,
-#  "listened_at": 1714149194,
-#  "recording_msid": "80e1c29c-db5b-4b50-8a83-8cae2c008a90",
-#  "track_metadata": {
-#    "additional_info": {
-#      "duration_ms": 182773,
-#      "media_player": "MPD",
-#      "recording_msid": "80e1c29c-db5b-4b50-8a83-8cae2c008a90",
-#      "submission_client": "listenbrainz-mpd",
-#      "submission_client_version": "2.3.4",
-#      "tags": [
-#        "OST"
-#      ],
-#      "tracknumber": "10"
-#    },
-#    "artist_name": "szak, ryo, H.B STUDIO",
-#    "release_name": "Wonderful Everyday (Subarashiki Hibi) OST 1",
-#    "track_name": "Winner of the Denpa Relay「電波リレーの勝者」"
-#  },
-#  "user_name": "koraynilay"
-#}
-
-#{
-#  "listened_at": 1443521965,
-#  "track_metadata": {
-#    "additional_info": {
-#      "release_mbid": "bf9e91ea-8029-4a04-a26a-224e00a83266",
-#      "artist_mbids": [
-#        "db92a151-1ac2-438b-bc43-b82e149ddd50"
-#      ],
-#      "recording_mbid": "98255a8c-017a-4bc7-8dd6-1fa36124572b",
-#      "tags": [ "you", "just", "got", "rick rolled!"]
-#    },
-#    "artist_name": "Rick Astley",
-#    "track_name": "Never Gonna Give You Up",
-#    "release_name": "Whenever you need somebody"
-#  }
-#{
-
-#{
-#  "inserted_at": 1714584618,
-#  "listened_at": 1714584571,
-#  "recording_msid": "2c2d2172-96ba-4449-a293-f0967fdfba06",
-#  "track_metadata": {
-#    "additional_info": {
-#      "duration_ms": 94680,
-#      "media_player": "MPD",
-#      "recording_msid": "2c2d2172-96ba-4449-a293-f0967fdfba06",
-#      "submission_client": "listenbrainz-mpd",
-#      "submission_client_version": "2.3.5"
-#    },
-#    "artist_name": "The Chalkeaters",
-#    "track_name": "DOOM CROSSING: Eternal Horizons ■ Music Video feat. Natalia Natchan"
-#  },
-#  "user_name": "koraynilay"
-#}}
+if [ "$dry" != "y" ] && [ "$dry" != "yes" ];then
+	curl $url -X POST \
+		-H "Authorization: token $(<$TOKEN_FILE)" \
+		-H "Content-Type: application/json" \
+		-d "{
+			\"listen_type\": \"import\",
+			\"payload\": [
+				$(IFS=, ; echo "${jsons[*]}")
+			]
+		}"
+else
+	echo "Dry run, not running curl"
+fi
+#echo [$(IFS=, ; echo "${jsons[*]}")] | jq
+echo "found and sent ${#jsons[@]} listens (check curl output)"
+echo "skipped ${#skipped[@]} unsupported files:"
+for s in "${skipped[@]}";do
+	echo "- $s"
+done
