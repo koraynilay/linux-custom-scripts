@@ -18,18 +18,17 @@ recmbid_func() {
 
 # read from ~/.mpd/log from a certain time to another (quicker but less clean: use line numbers)
 sl=$1 # start line number
-el=$2 # end line number
+el=$(($2+1)) # end line number
 mpd_log_file="$HOME/.mpd/log"
 to_add="$(tail -n +"$sl" "$mpd_log_file" | head -n $((el-sl)))"
-jsons=("a" "b")
-jsons+="c"
-jsons+="d"
-echo $jsons
+jsons=()
 IFS=$'\n'
 for song in $to_add;do
 	echo "csong:$song"
 	IFS=' ' read month day time colon logger action filename <<< $song
-	if ! [ "$logger" = "player:" ] && [ "$action" = "played" ];then
+	echo $logger
+	echo $action
+	if [ "$logger" != "player:" ] && [ "$action" != "played" ];then
 		continue
 	fi
 	filename=${filename//\"/}
@@ -37,9 +36,12 @@ for song in $to_add;do
 	#printf '%s' "$json_cur"
 
 	now=$(date +%s)
-	listened_at=$(date -d "$month $day $time" +%s)
 	duration="$(jq '.duration // empty' <<< "$json_cur")"
-	duration=$(calc -p "$duration * 1000")
+	duration=$(calc -p "round($duration * 1000)")
+	listened_at=$(date -d "$month $day $time" +%s)
+	date -d @$listened_at
+	listened_at=$((listened_at-(duration/1000)))
+	date -d @$listened_at
 	track_number=$(jq '.tags.track // empty' <<< "$json_cur")
 
 	format=$(jq '.format_name' <<< "$json_cur" | tr -d '"')
@@ -95,12 +97,11 @@ for song in $to_add;do
 		      \"tracknumber\": \"$track_number\"
 		    },
 		    \"artist_name\": \"$artist\",
-		    \"track_name\": \"$title\",
-		    \"release_name\": \"$album\"
+		    \"track_name\": \"$title\"
+		    $(if [ -n "$album" ];then echo ,\"release_name\": \"$album\";fi)
 		  }
 		}
 		"
-		printf '%s\n' "$json"
 	else
 		json="
 		{
@@ -112,22 +113,21 @@ for song in $to_add;do
 		      \"submission_client\": \"listenbrainz-mpd-from-log.sh\"
 		    },
 		    \"artist_name\": \"$artist\",
-		    \"track_name\": \"$title\",
-		    \"release_name\": \"$album\"
+		    \"track_name\": \"$title\"
+		    $(if [ -n "$album" ];then echo ,\"release_name\": \"$album\";fi)
 		  }
 		}
 		"
-		printf '%s\n' "$json"
 	fi
+	printf '%s\n' "$json"
 	json=$(jq -c <<< $json)
-	IFS=' ' jsons+="$json"
+	IFS=' ' jsons+=("$json")
 done
-for s in "${jsons[@]}" ; do echo "---" $s ; done
-exit
-echo jsons:$(IFS=,;echo "${jsons[*]}")
+#for s in "${jsons[@]}" ; do echo "---" $s ; done
+#echo jsons:$(IFS=,;echo "${jsons[*]}")
 
-exit 69
-echo curl $url -X POST \
+#exit 69
+curl $url -X POST \
 	-H "Authorization: token $(<$TOKEN_FILE)" \
 	-H "Content-Type: application/json" \
 	-d "{
@@ -136,6 +136,8 @@ echo curl $url -X POST \
 			$(IFS=, ; echo "${jsons[*]}")
 		]
 	}"
+echo [$(IFS=, ; echo "${jsons[*]}")] | jq
+echo ${#jsons[@]}
 
 #{
 #  "inserted_at": 1714236481,
