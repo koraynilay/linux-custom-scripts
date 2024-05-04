@@ -21,8 +21,11 @@ sl=$1 # start line number
 el=$2 # end line number
 mpd_log_file="$HOME/.mpd/log"
 to_add="$(tail -n +"$sl" "$mpd_log_file" | head -n $((el-sl)))"
+jsons=("a" "b")
+jsons+="c"
+jsons+="d"
+echo $jsons
 IFS=$'\n'
-recording_mbid="none"
 for song in $to_add;do
 	echo "csong:$song"
 	IFS=' ' read month day time colon logger action filename <<< $song
@@ -77,7 +80,6 @@ for song in $to_add;do
 	if [ "$use_mb" -ge 1 ];then
 		json="
 		{
-		  \"inserted_at\": $now,
 		  \"listened_at\": $listened_at,
 		  \"track_metadata\": {
 		    \"additional_info\": {
@@ -93,38 +95,47 @@ for song in $to_add;do
 		      \"tracknumber\": \"$track_number\"
 		    },
 		    \"artist_name\": \"$artist\",
-		    \"track_name\": \"$title\"
-		    \"release_name\": \"$album\",
-		  },
-		  \"user_name\": \"koraynilay\"
+		    \"track_name\": \"$title\",
+		    \"release_name\": \"$album\"
+		  }
 		}
 		"
 		printf '%s\n' "$json"
 	else
 		json="
 		{
-		  \"inserted_at\": $now,
 		  \"listened_at\": $listened_at,
 		  \"track_metadata\": {
 		    \"additional_info\": {
 		      \"duration_ms\": $duration,
 		      \"media_player\": \"MPD\",
-		      \"submission_client\": \"listenbrainz-mpd-from-log.sh\",
+		      \"submission_client\": \"listenbrainz-mpd-from-log.sh\"
 		    },
 		    \"artist_name\": \"$artist\",
-		    \"track_name\": \"$title\"
-		    \"release_name\": \"$album\",
-		  },
-		  \"user_name\": \"$USER\"
+		    \"track_name\": \"$title\",
+		    \"release_name\": \"$album\"
+		  }
 		}
 		"
 		printf '%s\n' "$json"
 	fi
+	json=$(jq -c <<< $json)
+	IFS=' ' jsons+="$json"
 done
-
+for s in "${jsons[@]}" ; do echo "---" $s ; done
+exit
+echo jsons:$(IFS=,;echo "${jsons[*]}")
 
 exit 69
-curl -X POST $url -H "Authorization: token $(<$TOKEN_FILE)" -d "$json"
+echo curl $url -X POST \
+	-H "Authorization: token $(<$TOKEN_FILE)" \
+	-H "Content-Type: application/json" \
+	-d "{
+		\"listen_type\": \"import\",
+		\"payload\": [
+			$(IFS=, ; echo "${jsons[*]}")
+		]
+	}"
 
 #{
 #  "inserted_at": 1714236481,
