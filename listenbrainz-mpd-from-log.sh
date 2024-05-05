@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 . "$HOME/.config/listenbrainz-mpd-from-logrc"
 
+shopt -s expand_aliases
 alias jq='jq -r' # needed to remove quotes from json
 alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 
-url="https://api.listenbrainz.org/1/submit-listens"
 music_dir="$MPD_MUSIC_DIR" # taken from the rc at the start, like TOKEN_FILE
 info_func() {
 	ret=$(json_metadata_cmd "$1" | jq "$2 // empty")
@@ -15,14 +15,43 @@ recmbid_func() {
 	ret=$(grep -Po '[a-z0-9-]{36}' <<< "$ret")
 	printf '%s' "$ret"
 }
+print_help() {
+	echo -ne "Usage: $0 [start line] [end line] [option(s)]\n";
+	echo -ne "\nOptions:\n";
+	echo -ne "  -n\tdry run, don't send anything to listenbrainz\n";
+	echo -ne "  -y\tuse year (need to be manually added it after the date (eg. 'May 05' -> 'May 05 2024')\n";
+	echo -ne "  -u\tset api domain (default: $api_domain\n";
+	exit 1;
+}
+
 
 # TODO: add --debug|-d and --dry-run|-n and maybe also flags for the token file and music dir
 
 # read from ~/.mpd/log from a certain time to another (quicker but less clean: use line numbers)
-sl=$1 # start line number
-el=$(($2+1)) # end line number # +1 since $2 is the last line to be parsed, but $el is the last line + 1
-dry=$3
-mpd_log_file="$HOME/.mpd/log"
+sl=${@: -2:1} # start line number
+el=${@: -1:1} # end line number # +1 since $2 is the last line to be parsed, but $el is the last line + 1
+if [ -z $sl ] || [ -z $el ];then
+	print_help
+fi
+echo $sl $el
+el=$((el+1)) # end line number # +1 since $2 is the last line to be parsed, but $el is the last line + 1
+
+dry=0
+use_year=0
+api_domain='api.listenbrainz.org'
+while getopts nyhu opt;do
+	case $opt in
+		n)dry=1;;
+		y)use_year=1;;
+		u)api_domain="$OPTARG";;
+		h)print_help;;
+		?)exit 2;;
+	esac
+done
+
+url="https://$api_domain/1/submit-listens"
+
+mpd_log_file="$HOME/mpd_log_for_listenbrainz"
 to_add="$(tail -n +"$sl" "$mpd_log_file" | head -n $((el-sl)))" # list of lines to parse
 jsons=() # array of json of songs to be sent as import
 skipped=() # skipped files
@@ -48,26 +77,36 @@ warn=$(tput setaf 3) # yellow
 reset=$(tput sgr0)
 
 for song in $to_add;do
-	echo "csong:$song"
-	IFS=' ' read month day time colon logger action filename <<< $song
+	echo -n "$song"
+	if [ "$use_year" -eq 1 ];then
+		IFS=' ' read month day year time colon logger action filename <<< $song
+	else
+		IFS=' ' read month day time colon logger action filename <<< $song
+	fi
 	#echo $logger
 	#echo $action
 
 	# skip if not a played action
 	# (unfortunately "player: played" is also used when restarting mpd)
 	if [ "$logger" != "player:" ] && [ "$action" != "played" ];then
+		echo -e "\rskipping: $song"
 		continue
 	fi
+	echo
 	filename=${filename//\"/} # remove double quotes (") from around the filename
 	json_cur=$(info_func "$music_dir/$filename" ".format") # get metadata json
 	#printf '%s' "$json_cur"
 
 	duration="$(jq '.duration // empty' <<< "$json_cur")" # duration in seconds
 	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
-	listened_at=$(date -d "$month $day $time" +%s) # get the timestamp for when the listen finished
-	#date -d @$listened_at
+	if [ "$use_year" -eq 1 ];then
+		listened_at=$(date -d "$month $day $year $time" +%s) # get the timestamp for when the listen finished
+	else
+		listened_at=$(date -d "$month $day $time" +%s) # get the timestamp for when the listen finished
+	fi
+	date -d @$listened_at
 	listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
-	#date -d @$listened_at
+	date -d @$listened_at
 	track_number=$(jq '.tags.track // empty' <<< "$json_cur")
 
 	format=$(jq '.format_name' <<< "$json_cur" | tr -d '"') # mp3, flag, whatever
@@ -161,8 +200,8 @@ done
 #echo jsons:$(IFS=,;echo "${jsons[*]}")
 
 #exit 69
-if [ "$dry" != "y" ] && [ "$dry" != "yes" ];then
-	curl $url -X POST \
+if [ "$dry" -ne 1 ];then
+	echo curl $url -X POST \
 		-H "Authorization: token $(<$TOKEN_FILE)" \
 		-H "Content-Type: application/json" \
 		-d "{
