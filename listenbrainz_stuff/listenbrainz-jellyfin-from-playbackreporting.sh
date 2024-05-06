@@ -13,13 +13,10 @@ for i in `seq 0 100`;do
 	json=$(jq ".[$i]" < $file)
 
 	itemname=$(jq '.ItemName // empty' <<< $json)
-	eval $(awk 'BEGIN { q="\"" }
-		{
-			match($0, /^([^-]*) - (.*) \((.*)\)$/, ta);
-			print "artist="q ta[1] q;
-			print  "title="q ta[2] q;
-			print  "album="q ta[3] q;
-		}' <<< $itemname)
+	eval $(perl -ne '$_ =~ /^([^-]*) - (.*) \(((?:[^()]*\([^()]*\)[^()]*)|(?:[^()]*))\)$/s;
+			print "artist=\"" . $1 . "\"\n";
+			print "title=\"". $2 . "\"\n";
+			print "album=\"" . $3 . "\"\n";' <<< $itemname)
 	if [ "$artist" = "Not Known" ] || [ "$artist" = "Artista sconosciuto" ];then
 		artist=""
 	fi
