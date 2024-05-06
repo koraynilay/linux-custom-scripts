@@ -8,8 +8,8 @@ alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_edited.json"
 
 len=$(jq ". | length" < $file)
-for i in `seq 0 100`;do
-#for i in `seq 0 $len`;do
+#for i in `seq 0 100`;do
+for i in `seq 0 $len`;do
 	json=$(jq ".[$i]" < $file)
 
 	itemname=$(jq '.ItemName // empty' <<< $json)
@@ -24,9 +24,12 @@ for i in `seq 0 100`;do
 		album=""
 	fi
 
-	echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
+	#echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
 	filename=$(get_filename_from_tags_mpd "$artist" "$title" "$album" "$tracknumber" "$recording_mbid")
-	echo $filename
+	if [ -z "$filename" ];then
+		echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
+		echo $filename
+	fi
 
 	artist=""
 	title=""
