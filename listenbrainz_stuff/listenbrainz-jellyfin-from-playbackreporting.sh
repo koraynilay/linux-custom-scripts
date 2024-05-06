@@ -12,8 +12,12 @@ len=$(jq ". | length" < $file)
 for i in `seq 0 $len`;do
 	json=$(jq ".[$i]" < $file)
 
+	itemtype=$(jq '.ItemType // empty' <<< $json)
+	if [ "$itemtype" != "Audio" ];then
+		continue
+	fi
 	itemname=$(jq '.ItemName // empty' <<< $json)
-	eval $(perl -ne '$_ =~ /^([^-]*) - (.*) \(((?:[^()]*\([^()]*\)[^()]*)|(?:[^()]*))\)$/s;
+	eval $(perl -ne '/^([^-]*) - (.*) \(((?:[^()]*\([^()]*\)[^()]*)|(?:[^()]*))\)$/;
 			print "artist=\"" . $1 . "\"\n";
 			print "title=\"". $2 . "\"\n";
 			print "album=\"" . $3 . "\"\n";' <<< $itemname)
@@ -27,8 +31,12 @@ for i in `seq 0 $len`;do
 	#echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
 	filename=$(get_filename_from_tags_mpd "$artist" "$title" "$album" "$tracknumber" "$recording_mbid")
 	if [ -z "$filename" ];then
-		echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
-		echo $filename
+		echo [$i] at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
+		echo $json | jq
+		echo $itemname
+#	else
+#		echo [$i] at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
+#		echo $filename
 	fi
 
 	artist=""
