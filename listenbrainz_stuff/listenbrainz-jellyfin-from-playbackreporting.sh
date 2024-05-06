@@ -8,8 +8,8 @@ alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_edited.json"
 
 len=$(jq ". | length" < $file)
-#for i in `seq 0 100`;do
-for i in `seq 0 $len`;do
+for i in `seq 71 72`;do
+#for i in `seq 0 $len`;do
 	json=$(jq ".[$i]" < $file)
 
 	itemtype=$(jq '.ItemType // empty' <<< $json)
@@ -17,10 +17,12 @@ for i in `seq 0 $len`;do
 		continue
 	fi
 	itemname=$(jq '.ItemName // empty' <<< $json)
-	eval $(perl -ne '/^([^-]*) - (.*) \(((?:[^()]*\([^()]*\)[^()]*)|(?:[^()]*))\)$/;
-			print "artist=\"" . $1 . "\"\n";
-			print "title=\"". $2 . "\"\n";
-			print "album=\"" . $3 . "\"\n";' <<< $itemname)
+	set -x
+	eval $(perl -ne "/^([^-]*(?:[^ ]* -[^ ]|[^ ]- [^ ]*|[^ ]*[^ ]-[^ ][^ ]*)*[^-]*)(?-1)* - (.*) \\(((?:[^()]*\\([^()]*\\)[^()]*)|(?:[^()]*))\\)$/;
+			print \"artist=\'\".\$1.\"\'\n\";
+			print  \"title=\'\".\$2.\"\'\n\";
+			print  \"album=\'\".\$3.\"\'\n\";" <<< "$itemname")
+	set +x
 	if [ "$artist" = "Not Known" ] || [ "$artist" = "Artista sconosciuto" ];then
 		artist=""
 	fi
@@ -32,8 +34,8 @@ for i in `seq 0 $len`;do
 	filename=$(get_filename_from_tags_mpd "$artist" "$title" "$album" "$tracknumber" "$recording_mbid")
 	if [ -z "$filename" ];then
 		echo [$i] at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
-		echo $json | jq
-		echo $itemname
+		#echo $json | jq
+		#echo $itemname
 #	else
 #		echo [$i] at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
 #		echo $filename
