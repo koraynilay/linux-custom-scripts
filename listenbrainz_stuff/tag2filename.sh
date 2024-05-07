@@ -19,7 +19,7 @@ fd_func() {
 
 # $1: key, $2: json object
 get_json_value() {
-	ret="$(jq -r "'$1' // empty" <<< "$2")"
+	ret="$(jq -r ".\"$1\" // empty" <<< "$2")"
 	printf '%s' "$ret"
 }
 
