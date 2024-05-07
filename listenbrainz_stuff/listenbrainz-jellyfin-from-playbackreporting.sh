@@ -8,15 +8,15 @@ alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_edited.json"
 
 len=$(jq ". | length" < $file)
-for i in `seq 120 121`;do
-#for i in `seq 0 $len`;do
+#for i in `seq 119 120`;do
+for i in `seq 0 $len`;do
 	json=$(jq ".[$i]" < $file)
 
 	#echo -ne "$i\r"
 
 	itemtype=$(get_json_value 'ItemType' "$json")
 	if [ "$itemtype" != "Audio" ];then
-		echo "$i"
+		echo "$i no Audio"
 		continue
 	fi
 
@@ -35,7 +35,7 @@ for i in `seq 120 121`;do
 	fi
 
 	#echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
-	filename=$(get_filename_from_tags_mpd "$artist" "$title" "$album" "$tracknumber" "$recording_mbid")
+	filename=$(get_filename_from_tags_mpd "$artist" "$title" "$album" "$tracknumber" "$recording_mbid" | head -1)
 	if [ -z "$filename" ];then
 		echo [$i] at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
 		#echo $json | jq
