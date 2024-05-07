@@ -1,13 +1,13 @@
 #!/bin/bash
 # $1: filename, $2: json key to get (optional)
 info_func() {
-	ret=$(ffprobe -v quiet -show_format -of json "$1" | jq -r "${2:='.'} // empty")
+	local ret=$(ffprobe -v quiet -show_format -of json "$1" | jq -r "${2:='.'} // empty")
 	printf '%s' "$ret"
 }
 
 # $1: filename, $2: recording_mbid key (e.g. ".UFID" for mp3)
 recmbid_func() {
-	ret=$(mid3v2 -l "$1" | jc --ini --pretty | jq -r "$2 // empty")
+	local ret=$(mid3v2 -l "$1" | jc --ini --pretty | jq -r "$2 // empty")
 	ret=$(grep -Po '[a-z0-9-]{36}' <<< "$ret")
 	printf '%s' "$ret"
 }
@@ -19,17 +19,104 @@ fd_func() {
 
 # $1: key, $2: json object
 get_json_value() {
-	ret="$(jq -r ".\"$1\" // empty" <<< "$2")"
+	local ret="$(jq -r ".\"$1\" // empty" <<< "$2")"
 	printf '%s' "$ret"
 }
 
+get_filename_from_tags_mpd() {
+	local tochk_artist="$1"
+	local tochk_title="$2"
+	local tochk_album="$3"
+	local tochk_tracknumber="$4"
+	local tochk_recording_mbid="$5"
+
+	#echo $tochk_artist $tochk_title $tochk_album $tochk_tracknumber $tochk_recording_mbid
+
+	IFS=''
+	if [ -n "$tochk_artist" ];then
+		local artist_query=("artist" "$tochk_artist")
+	fi
+	if [ -n "$tochk_title" ];then
+		local title_query=("title" "$tochk_title")
+	else
+		exit 1
+	fi
+	if [ -n "$tochk_album" ];then
+		local album_query=("album" "$tochk_album")
+	fi
+	if [ -n "$tochk_tracknumber" ];then
+		local track_query=("track" "$tochk_tracknumber")
+	fi
+
+	#echo mpc find ${artist_query[@]} ${title_query[@]} ${album_query[@]} ${track_query[@]}
+	#mpc find ${artist_query[@]} ${title_query[@]} ${album_query[@]} ${track_query[@]}
+
+	if [ -z "$tochk_recording_mbid" ];then
+		local filename=$(mpc find ${artist_query[@]} ${title_query[@]} ${album_query[@]} ${track_query[@]})
+	else
+		local filename=$(mpc find 'MUSICBRAINZ_TRACKID' "$tochk_recording_mbid")
+	fi
+	printf '%s' "$filename"
+}
+
+# array of JSONs passed as argument
+# need $LISTENBRAINZ_TOKEN_FILE and $LISTEBRAINZ_API_URL to be set in the caller
+listenbrainz_submit_import() {
+	local func_name="listenbrainz_import"
+	local log_start="$func_name(): "
+
+	local token=""
+	if [ -n "$LISTENBRAINZ_TOKEN" ];then
+		token="$LISTENBRAINZ_TOKEN"
+	elif [ -n "$LISTENBRAINZ_TOKEN_FILE" ];then
+		token="$(<$LISTENBRAINZ_TOKEN_FILE)"
+	else
+		token="no token provided"
+		echo $log_start'Missing ListenBrainz token, use either $LISTENBRAINZ_TOKEN_FILE or $LISTENBRAINZ_TOKEN'
+		exit 5
+	fi
+
+	local api_domain="api.listenbrainz.org"
+	local url="https://$api_domain/1/submit-listens"
+	if [ -n "$LISTEBRAINZ_API_DOMAIN" ];then
+		url="$LISTEBRAINZ_API_DOMAIN"
+	fi
+	if [ "$LISTENBRAINZ_IMPORT_DEBUG" -eq 1 ];then
+		echo $log_start"Using '$api_domain' as domain for the listenbrainz api; complete url is: $url"
+	fi
+
+	local echo=""
+	if [ "$LISTENBRAINZ_IMPORT_DRY" -eq 1 ];then
+		echo="echo"
+	fi
+
+
+	local jsons=($@)
+	echo ${jsons[0]}
+	echo ${jsons[1]}
+
+	local payload="$(IFS=, ; echo "${jsons[*]}")"
+
+	$echo curl "$url" -X POST \
+		-H "Authorization: token $token" \
+		-H "Content-Type: application/json" \
+		-d "{
+			\"listen_type\": \"import\",
+			\"payload\": [
+				$payload
+			]
+		}"
+}
+
 check_if_correct() {
-	music_dir="$1"
-	tochk_artist="$2"
-	tochk_title="$3"
-	tochk_album="$4"
-	tochk_tracknumber="$5"
-	tochk_recording_mbid="$6"
+	local music_dir="$1"
+	local tochk_artist="$2"
+	local tochk_title="$3"
+	local tochk_album="$4"
+	local tochk_tracknumber="$5"
+	local tochk_recording_mbid="$6"
+	local filename=""
+	local filepath=""
 
 	echo md:$music_dir at:$tochk_artist tt:$tochk_title ab:$tochk_album tn:$tochk_tracknumber rmbid:$tochk_recording_mbid
 
@@ -117,11 +204,12 @@ check_if_correct() {
 	echo found:$filepath
 	exit 0
 
-	json_cur=$(info_func "$filepath" ".format") # get metadata json
+	local json_cur=$(info_func "$filepath" ".format") # get metadata json
 	#printf '%s' "$json_cur"
 
-	duration="$(jq -r '.duration // empty' <<< "$json_cur")" # duration in seconds
+	local duration="$(jq -r '.duration // empty' <<< "$json_cur")" # duration in seconds
 	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
+	local listened_at=""
 	if [ "$use_year" -eq 1 ];then
 		listened_at=$(date -d "$month $day $year $time" +%s) # get the timestamp for when the listen finished
 	else
@@ -130,10 +218,12 @@ check_if_correct() {
 	date -d @$listened_at
 	listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
 	date -d @$listened_at
-	track_number=$(jq -r '.tags.track // empty' <<< "$json_cur")
+	local track_number=$(jq -r '.tags.track // empty' <<< "$json_cur")
 
-	format=$(jq -r '.format_name' <<< "$json_cur" | tr -d '"') # mp3, flag, whatever
+	local format=$(jq -r '.format_name' <<< "$json_cur" | tr -d '"') # mp3, flag, whatever
 
+	local recording_mbid=""
+	local use_mb=""
 	# check if the files has MusicBrainz tags
 	if [ "$format" = "mp3" ];then
 		recording_mbid=$(recmbid_func "$music_dir/$filename" ".UFID")
@@ -149,6 +239,12 @@ check_if_correct() {
 		continue
 	fi
 
+	local title=""
+	local artist=""
+	local album=""
+	local track_mbid=""
+	local release_mbid=""
+	local artist_mbid=""
 	# get tags
 	if [ "$format" = "mp3" ];then
 		title=$(jq -r '.tags.title // empty' <<< "$json_cur")
@@ -197,50 +293,4 @@ check_if_correct() {
 	fi
 
 	exit 0
-}
-
-get_filename_from_tags_mpd() {
-	tochk_artist=""
-	tochk_title=""
-	tochk_album=""
-	tochk_tracknumber=""
-	tochk_recording_mbid=""
-	artist_query=()
-	title_query=()
-	album_query=()
-	track_query=()
-
-	tochk_artist="$1"
-	tochk_title="$2"
-	tochk_album="$3"
-	tochk_tracknumber="$4"
-	tochk_recording_mbid="$5"
-
-	#echo $tochk_artist $tochk_title $tochk_album $tochk_tracknumber $tochk_recording_mbid
-
-	IFS=''
-	if [ -n "$tochk_artist" ];then
-		artist_query=("artist" "$tochk_artist")
-	fi
-	if [ -n "$tochk_title" ];then
-		title_query=("title" "$tochk_title")
-	else
-		exit 1
-	fi
-	if [ -n "$tochk_album" ];then
-		album_query=("album" "$tochk_album")
-	fi
-	if [ -n "$tochk_tracknumber" ];then
-		track_query=("track" "$tochk_tracknumber")
-	fi
-
-	#echo mpc find ${artist_query[@]} ${title_query[@]} ${album_query[@]} ${track_query[@]}
-	#mpc find ${artist_query[@]} ${title_query[@]} ${album_query[@]} ${track_query[@]}
-
-	if [ -z "$tochk_recording_mbid" ];then
-		filename=$(mpc find ${artist_query[@]} ${title_query[@]} ${album_query[@]} ${track_query[@]})
-	else
-		filename=$(mpc find 'MUSICBRAINZ_TRACKID' "$tochk_recording_mbid")
-	fi
-	printf '%s' "$filename"
 }
