@@ -15,11 +15,11 @@ for i in `seq 0 $len`;do
 	echo -ne "$i\r"
 	sleep 0.05
 
-	itemtype=$(jq '.ItemType // empty' <<< $json)
+	itemtype=$(get_json_field '.ItemType' "$json")
 	if [ "$itemtype" != "Audio" ];then
 		continue
 	fi
-	itemname=$(jq '.ItemName // empty' <<< $json)
+	itemname=$(get_json_field '.ItemName' "$json")
 	eval $(perl -ne '/^([^-]*(?:[^ ]* -[^ ]|[^ ]- [^ ]*|[^ ]*[^ ]-[^ ][^ ]*)*[^-]*)(?-1)* - (.*) \(((?:[^()]*\([^()]*\)[^()]*)|(?:[^()]*))\)$/;
 			print "artist=\"".($1 =~ s/"/\\"/rg)."\"\n";
 			print  "title=\"".($2 =~ s/"/\\"/rg)."\"\n";
@@ -43,10 +43,15 @@ for i in `seq 0 $len`;do
 	fi
 	echo $filename
 
+	song_json=$(info_cmd "$filename" ".format")
+	tags_json=$(get_json_field ".tags" "$song_json")
+
+	duration=$(get_json_field ".duration" "$song_json")
+
+	playduration=$(get_json_field '.PlayDuration' "$json")
+	echo $playduration
+
 	artist=""
 	title=""
 	album=""
 done
-
-#playduration=$(jq '.PlayDuration // empty' <<< $json)
-#echo $playduration
