@@ -1,15 +1,26 @@
 #!/bin/bash
+# $1: filename, $2: json key to get (optional)
 info_func() {
-	ret=$(ffprobe -v quiet -show_format -of json "$1" | jq -r "$2 // empty")
+	ret=$(ffprobe -v quiet -show_format -of json "$1" | jq -r "${2:='.'} // empty")
 	printf '%s' "$ret"
 }
+
+# $1: filename, $2: recording_mbid key (e.g. ".UFID" for mp3)
 recmbid_func() {
 	ret=$(mid3v2 -l "$1" | jc --ini --pretty | jq -r "$2 // empty")
 	ret=$(grep -Po '[a-z0-9-]{36}' <<< "$ret")
 	printf '%s' "$ret"
 }
+
+# $1: filename to find, $2: dir to find $1 in
 fd_func() {
 	printf '%s' "$(fd -g "$2" "$1")"
+}
+
+# $1: key, $2: json object
+get_json_value() {
+	ret="$(jq -r "'$1' // empty" <<< "$2")"
+	printf '%s' "$ret"
 }
 
 check_if_correct() {
