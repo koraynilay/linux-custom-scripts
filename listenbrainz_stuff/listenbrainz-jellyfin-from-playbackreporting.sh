@@ -47,9 +47,15 @@ for i in `seq 0 $len`;do
 	tags_json=$(get_json_field ".tags" "$song_json")
 
 	duration=$(get_json_field ".duration" "$song_json")
+	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
+	halfduration=$(calc -p "$duration / 2") # duration is ms (as int)
 
 	playduration=$(get_json_field '.PlayDuration' "$json")
-	echo $playduration
+	echo $playduration $duration
+	
+	if [ "$playduration" -ge "$halfduration" ];then
+		echo curl
+	fi
 
 	artist=""
 	title=""
