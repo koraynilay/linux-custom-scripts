@@ -32,7 +32,7 @@ get_filename_from_tags_mpd() {
 
 	#echo $tochk_artist $tochk_title $tochk_album $tochk_tracknumber $tochk_recording_mbid
 
-	IFS=''
+	local IFS=''
 	if [ -n "$tochk_artist" ];then
 		local artist_query=("artist" "$tochk_artist")
 	fi
@@ -62,7 +62,7 @@ get_filename_from_tags_mpd() {
 # array of JSONs passed as argument
 # need $LISTENBRAINZ_TOKEN_FILE and $LISTEBRAINZ_API_URL to be set in the caller
 listenbrainz_submit_import() {
-	local func_name="listenbrainz_import"
+	local func_name="listenbrainz_submit_import"
 	local log_start="$func_name(): "
 
 	local token=""
@@ -91,11 +91,11 @@ listenbrainz_submit_import() {
 	fi
 
 
-	local jsons=($@)
-	echo ${jsons[0]}
-	echo ${jsons[1]}
+	local jsons=("$@")
+	#echo ${jsons[0]}
+	#echo ${jsons[1]}
 
-	local payload="$(IFS=, ; echo "${jsons[*]}")"
+	local payload="$(local IFS=, ; echo "${jsons[*]}")"
 
 	$echo curl "$url" -X POST \
 		-H "Authorization: token $token" \
@@ -293,4 +293,123 @@ check_if_correct() {
 	fi
 
 	exit 0
+}
+
+get_listenbrainz_json() {
+	local func_name="listenbrainz_submit_json"
+	local log_start="$func_name(): "
+	local filename="$1"
+	local timestamp="$2"
+	local ts_end="${3:-'false'}"
+
+	local json_cur=$(info_func "$filename" ".format") # get metadata json
+	#printf '%s' "$json_cur"
+
+	local duration=""
+	duration=$(get_json_value "duration" "$json_cur")
+	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
+
+	local listened_at=""
+	listened_at=$(date -d "$timestamp" +%s) # get the timestamp for when the listen finished
+	#date -d @$listened_at
+	if [ "$ts_end" -eq "true" ];then
+		listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
+		#date -d @$listened_at
+	fi
+
+	local track_number=$(get_json_value 'tags.track' "$json_cur")
+
+	local format=$(jq '.format_name' <<< "$json_cur" | tr -d '"') # mp3, flag, whatever
+
+	local recording_mbid=""
+	local use_mb=""
+	# check if the files has MusicBrainz tags
+	if [ "$format" = "mp3" ];then
+		recording_mbid=$(recmbid_func "$filename" ".UFID")
+		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
+		#echo "mp3 $use_mb:$recording_mbid"
+	elif [ "$format" = "flac" ];then
+		recording_mbid="$(get_json_value 'tags."MUSICBRAINZ_TRACKID"' "$json_cur")"
+		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
+		#echo "flac $use_mb:$recording_mbid"
+	else
+		#echo "listenbrainz_submit_json(): unsupported format, this listen won't be sent to listenbrainz${reset}"
+		printf 'error: unsupported format'
+	fi
+
+	local title=""
+	local artist=""
+	local album=""
+
+	local track_mbid=""
+	local release_mbid=""
+	local artist_mbid=""
+
+	# get tags
+	if [ "$format" = "mp3" ];then
+		title=$(get_json_value 'tags.title' "$json_cur")
+		artist=$(get_json_value 'tags.artist' "$json_cur")
+		album=$(get_json_value 'tags.album' "$json_cur")
+
+		if [ "$use_mb" -ge 1 ];then
+			track_mbid="$(get_json_value 'tags."MusicBrainz Release Track Id"' "$json_cur")"
+			#recording_mbid="$(get_json_value 'tags.""' "$json_cur")" #can't because not stored like the other data
+			release_mbid="$(get_json_value 'tags."MusicBrainz Album Id"' "$json_cur")"
+			artist_mbid="$(get_json_value 'tags."MusicBrainz Artist Id"' "$json_cur")"
+		fi
+	elif [ "$format" = "flac" ];then
+		title=$(get_json_value 'tags.TITLE' "$json_cur")
+		artist=$(get_json_value 'tags.ARTIST' "$json_cur")
+		album=$(get_json_value 'tags.ALBUM' "$json_cur")
+
+		if [ "$use_mb" -ge 1 ];then
+			track_mbid="$(get_json_value 'tags."MUSICBRAINZ_RELEASETRACKID"' "$json_cur")"
+			release_mbid="$(get_json_value 'tags."MUSICBRAINZ_ALBUMID"' "$json_cur")"
+			artist_mbid="$(get_json_value 'tags."MUSICBRAINZ_ARTISTID"' "$json_cur")"
+		fi
+	fi
+
+	if [ "$use_mb" -ge 1 ];then
+		# json with MusicBrainz tags
+		json="
+		{
+		  \"listened_at\": $listened_at,
+		  \"track_metadata\": {
+		    \"additional_info\": {
+		      \"artist_mbids\": [
+			\"$artist_mbid\"
+		      ],
+		      \"duration_ms\": $duration,
+		      \"media_player\": \"MPD\",
+		      \"recording_mbid\": \"$recording_mbid\",
+		      \"release_mbid\": \"$release_mbid\",
+		      \"submission_client\": \"listenbrainz-mpd-from-logs.sh\",
+		      \"track_mbid\": \"$track_mbid\",
+		      \"tracknumber\": \"$track_number\"
+		    },
+		    \"artist_name\": \"$artist\",
+		    \"track_name\": \"$title\"
+		    $(if [ -n "$album" ];then echo ,\"release_name\": \"$album\";fi)
+		  }
+		}
+		"
+	else
+		# json with MusicBrainz tags
+		json="
+		{
+		  \"listened_at\": $listened_at,
+		  \"track_metadata\": {
+		    \"additional_info\": {
+		      \"duration_ms\": $duration,
+		      \"media_player\": \"MPD\",
+		      \"submission_client\": \"listenbrainz-mpd-from-log.sh\"
+		    },
+		    \"artist_name\": \"$artist\",
+		    \"track_name\": \"$title\"
+		    $(if [ -n "$album" ];then echo ,\"release_name\": \"$album\";fi)
+		  }
+		}
+		"
+	fi
+	printf '%s\n' "$json"
 }
