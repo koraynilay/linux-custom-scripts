@@ -7,6 +7,8 @@ alias jq='jq -r' # needed to remove quotes from json
 alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_edited.json"
 
+jsons_to_submit=()
+
 len=$(jq ". | length" < $file)
 #for i in `seq 119 120`;do
 for i in `seq 0 $len`;do
@@ -46,24 +48,33 @@ for i in `seq 0 $len`;do
 	fi
 	#echo -n " "$filename
 
-	song_json=$(info_func "$mdir/$filename" ".format")
-	tags_json=$(get_json_value "tags" "$song_json")
+	song_json="$(info_func "$mdir/$filename" ".format")"
 
-	duration=$(get_json_value "duration" "$song_json")
-	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
-	halfduration=$(calc -p "round($duration / 2000)")
+	duration="$(get_json_value "duration" "$song_json")"
+	duration="$(calc -p "round($duration * 1000)")" # duration is ms (as int)
+	halfduration="$(calc -p "round($duration / 2000)")"
 
-	playduration=$(get_json_value "PlayDuration" "$json")
+	playduration="$(get_json_value "PlayDuration" "$json")"
 
-	echo -n " "$playduration $halfduration $duration
+	#echo -n " "$playduration $halfduration $duration
 	
-	if [ "$playduration" -ge "$halfduration" ];then
-		echo -n " curl"
+	if [ "$playduration" -lt "$halfduration" ];then
+		echo "skipping because playduration ($playduration) < half of the duration ($halfduration)"
+		continue
 	fi
 
-	echo
+	datetime="$(get_json_value "DateCreated" "$json")"
+
+	listenbrainz_json="$(get_listenbrainz_json "$mdir/$filename" "$datetime")"
+
+	jsons_to_submit+=("$listenbrainz_json")
 
 	artist=""
 	title=""
 	album=""
 done
+
+LISTENBRAINZ_IMPORT_DEBUG=1
+LISTENBRAINZ_TOKEN='aa'
+LISTENBRAINZ_IMPORT_DRY=1
+listenbrainz_submit_import "${jsons_to_submit[@]}"
