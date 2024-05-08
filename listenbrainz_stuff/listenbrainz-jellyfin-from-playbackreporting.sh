@@ -8,21 +8,36 @@ alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_edited.json"
 
 jsons_to_submit=()
+skipped_duration=()
+skipped_noaudio=()
+skipped_error=()
+skipped_not_found=()
 
 len=$(jq ". | length" < $file)
-#for i in `seq 119 120`;do
+#for i in `seq 187 187`;do
+#for i in `seq 400 $len`;do
 for i in `seq 0 $len`;do
 	json=$(jq ".[$i]" < $file)
 
-	#echo -ne "$i\r"
+	jtsl="${#jsons_to_submit[@]}"
+	skdl="${#skipped_duration[@]}"
+	skal="${#skipped_noaudio[@]}"
+	skel="${#skipped_error[@]}"
+	sknl="${#skipped_not_found[@]}"
+	vald=$(( jtsl + skdl + skal + skel + sknl == i ))
+	if [ $vald -eq 1 ];then
+		vald="yee"
+	else
+		vald="noo"
+	fi
+	echo -ne "[$i]($vald); added: $jtsl; skipped playduration: $skdl; skipped no audio: $skal; skipped error: $skel; skipped not found: $sknl\r"
 
 	itemtype=$(get_json_value 'ItemType' "$json")
 	if [ "$itemtype" != "Audio" ];then
-		echo "$i no Audio"
+		#echo "$i no Audio"
+		skipped_noaudio+=("$i")
 		continue
 	fi
-
-	echo -ne "$i"
 
 	itemname=$(get_json_value 'ItemName' "$json")
 	eval $(perl -ne '/^([^-]*(?:[^ ]* -[^ ]|[^ ]- [^ ]*|[^ ]*[^ ]-[^ ][^ ]*)*[^-]*)(?-1)* - (.*) \(((?:[^()]*\([^()]*\)[^()]*)|(?:[^()]*))\)$/;
@@ -39,12 +54,10 @@ for i in `seq 0 $len`;do
 	#echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
 	filename=$(get_filename_from_tags_mpd "$artist" "$title" "$album" "$tracknumber" "$recording_mbid" | head -1)
 	if [ -z "$filename" ];then
-		echo [$i] at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
-		#echo $json | jq
-		#echo $itemname
-#	else
-#		echo [$i] at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
-#		echo $filename
+		echo
+		echo "not found $i (at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid)"
+		skipped_not_found+=("$i")
+		continue
 	fi
 	#echo -n " "$filename
 
@@ -59,13 +72,26 @@ for i in `seq 0 $len`;do
 	#echo -n " "$playduration $halfduration $duration
 	
 	if [ "$playduration" -lt "$halfduration" ];then
-		echo "skipping because playduration ($playduration) < half of the duration ($halfduration)"
+		#echo "skipping because playduration ($playduration) < half of the duration ($halfduration)"
+		skipped_duration+=("$i '$filename'")
 		continue
 	fi
 
 	datetime="$(get_json_value "DateCreated" "$json")"
 
-	listenbrainz_json="$(get_listenbrainz_json "$mdir/$filename" "$datetime")"
+	client="$(get_json_value "ClientName" "$json")"
+	device="$(get_json_value "DeviceName" "$json")"
+
+	media_player="$client (Jellyfin) on $device"
+
+	listenbrainz_json="$(get_listenbrainz_json "$mdir/$filename" "$datetime" "false" "$media_player" "listenbrainz-jellyfin-from-playbackreporting.sh")"
+
+	if [ $? -eq 2 ];then
+		echo
+		echo "error in $i ($filename), skipping"
+		skipped_error+=("$i")
+		continue
+	fi
 
 	jsons_to_submit+=("$listenbrainz_json")
 
@@ -75,6 +101,21 @@ for i in `seq 0 $len`;do
 done
 
 LISTENBRAINZ_IMPORT_DEBUG=1
-LISTENBRAINZ_TOKEN='aa'
+LISTENBRAINZ_TOKEN="aa"
+#LISTENBRAINZ_TOKEN_FILE=""
 LISTENBRAINZ_IMPORT_DRY=1
 listenbrainz_submit_import "${jsons_to_submit[@]}"
+
+IFS=$'\n'
+if [ $skdl -ne 0 ];then
+	echo -n "${skipped_duration[*]}" > skipped_duration.txt
+fi
+if [ $skal -ne 0 ];then
+	echo -n "${skipped_noaudio[*]}" > skipped_noaudio.txt
+fi
+if [ $skel -ne 0 ];then
+	echo -n "${skipped_error[*]}" > skipped_error.txt
+fi
+if [ $sknl -ne 0 ];then
+	echo -n "${skipped_not_found[*]}" > skipped_not_found.txt
+fi
