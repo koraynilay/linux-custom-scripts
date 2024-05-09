@@ -19,7 +19,10 @@ fd_func() {
 
 # $1: key, $2: json object
 get_json_value() {
-	local ret="$(jq -r ".\"$1\" // empty" <<< "$2")"
+	local ret="$(jq --arg key "$1" '.[$key] // empty' <<< "$2")"
+	#eval "$(jq -r --arg key "$1" ' @sh "local ret="\(.$key)' <<< "$2")"
+	ret=${ret#\"}
+	ret=${ret%\"}
 	printf '%s' "$ret"
 }
 
@@ -298,11 +301,14 @@ check_if_correct() {
 get_listenbrainz_json() {
 	local func_name="listenbrainz_submit_json"
 	local log_start="$func_name(): "
+
+	# args
 	local filename="$1"
 	local timestamp="$2"
 	local ts_end="${3:-false}"
-	local media_player="${4:-unknown}"
-	local submission_client="${5:-tag2filename.sh}"
+	local ts_epoch="${4:-false}"
+	local media_player="${5:-unknown}"
+	local submission_client="${6:-tag2filename.sh}"
 
 	local json_cur=$(info_func "$filename" ".format") # get metadata json
 	#printf '%s' "$json_cur"
@@ -312,14 +318,14 @@ get_listenbrainz_json() {
 	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
 
 	local listened_at=""
-	listened_at=$(date -d "$timestamp" +%s) # get the timestamp for when the listen finished
-	#date -d @$listened_at
-	if [ "$ts_end" = "true" ];then
-		listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
-		#date -d @$listened_at
+	if [ "$ts_epoch" != "true" ];then
+		listened_at=$(date -d "$timestamp" +%s) # get the timestamp for when the listen finished
+		if [ "$ts_end" = "true" ];then
+			listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
+		fi
+	else
+		listened_at="$timestamp"
 	fi
-
-	local track_number=$(get_json_value 'tags.track' "$json_cur")
 
 	local format=$(jq '.format_name' <<< "$json_cur" | tr -d '"') # mp3, flag, whatever
 
@@ -333,7 +339,7 @@ get_listenbrainz_json() {
 		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
 		#echo "mp3 $use_mb:$recording_mbid"
 	elif [ "$format" = "flac" ];then
-		recording_mbid="$(get_json_value 'MUSICBRAINZ_TRACKID' "$json_cur")"
+		recording_mbid="$(get_json_value 'MUSICBRAINZ_TRACKID' "$json_tags")"
 		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
 		#echo "flac $use_mb:$recording_mbid"
 	else
@@ -349,6 +355,8 @@ get_listenbrainz_json() {
 	local track_mbid=""
 	local release_mbid=""
 	local artist_mbid=""
+
+	local track_number=$(get_json_value 'track' "$json_tags")
 
 	# get tags
 	if [ "$format" = "mp3" ];then
@@ -374,11 +382,11 @@ get_listenbrainz_json() {
 		fi
 	fi
 
-	artist="${artist//\"/\\\"}"
-	title="${title//\"/\\\"}"
-	album="${album//\"/\\\"}"
-	media_player="${media_player//\"/\\\"}"
-	submission_client="${submission_client//\"/\\\"}"
+	#artist="${artist//\"/\\\"}"
+	#title="${title//\"/\\\"}"
+	#album="${album//\"/\\\"}"
+	#media_player="${media_player//\"/\\\"}"
+	#submission_client="${submission_client//\"/\\\"}"
 
 	if [ "$use_mb" -ge 1 ];then
 		# json with MusicBrainz tags

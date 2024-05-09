@@ -5,7 +5,7 @@ shopt -s expand_aliases
 alias jq='jq -r' # needed to remove quotes from json
 alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
 
-music_dir="$MPD_MUSIC_DIR" # taken from the rc at the start, like TOKEN_FILE
+music_dir="$MPD_MUSIC_DIR" # taken from the rc at the start, like LISTENBRAINZ_TOKEN_FILE
 info_func() {
 	ret=$(json_metadata_cmd "$1" | jq "$2 // empty")
 	printf '%s' "$ret"
@@ -52,6 +52,7 @@ done
 url="https://$api_domain/1/submit-listens"
 
 mpd_log_file="$HOME/mpd_log_for_listenbrainz"
+echo $el $sl $((el-sl))
 to_add="$(tail -n +"$sl" "$mpd_log_file" | head -n $((el-sl)))" # list of lines to parse
 jsons=() # array of json of songs to be sent as import
 skipped=() # skipped files
@@ -77,7 +78,7 @@ warn=$(tput setaf 3) # yellow
 reset=$(tput sgr0)
 
 for song in $to_add;do
-	echo -n "$song"
+	#echo -n "$song"
 	if [ "$use_year" -eq 1 ];then
 		IFS=' ' read month day year time colon logger action filename <<< $song
 	else
@@ -89,10 +90,10 @@ for song in $to_add;do
 	# skip if not a played action
 	# (unfortunately "player: played" is also used when restarting mpd)
 	if [ "$logger" != "player:" ] && [ "$action" != "played" ];then
-		echo -e "\rskipping: $song"
+		echo -e "skipping: $song\r"
 		continue
 	fi
-	echo
+	#echo
 	filename=${filename//\"/} # remove double quotes (") from around the filename
 	json_cur=$(info_func "$music_dir/$filename" ".format") # get metadata json
 	#printf '%s' "$json_cur"
@@ -115,11 +116,11 @@ for song in $to_add;do
 	if [ "$format" = "mp3" ];then
 		recording_mbid=$(recmbid_func "$music_dir/$filename" ".UFID")
 		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
-		echo "mp3 $use_mb:$recording_mbid"
+		#echo "mp3 $use_mb:$recording_mbid"
 	elif [ "$format" = "flac" ];then
 		recording_mbid="$(jq '.tags."MUSICBRAINZ_TRACKID" // empty' <<< "$json_cur")"
 		use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
-		echo "flac $use_mb:$recording_mbid"
+		#echo "flac $use_mb:$recording_mbid"
 	else
 		echo "${warn}WARNING: unsupported format, this listen won't be sent to listenbrainz${reset}"
 		skipped+=("$filename")
@@ -192,7 +193,7 @@ for song in $to_add;do
 		}
 		"
 	fi
-	printf '%s\n' "$json"
+	#printf '%s\n' "$json"
 	json=$(jq -c <<< $json)
 	IFS=' ' jsons+=("$json")
 done
@@ -202,7 +203,7 @@ done
 #exit 69
 if [ "$dry" -ne 1 ];then
 	echo curl $url -X POST \
-		-H "Authorization: token $(<$TOKEN_FILE)" \
+		-H "Authorization: token $(<$LISTENBRAINZ_TOKEN_FILE)" \
 		-H "Content-Type: application/json" \
 		-d "{
 			\"listen_type\": \"import\",
