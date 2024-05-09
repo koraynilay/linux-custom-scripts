@@ -1,11 +1,10 @@
 #!/bin/bash
 . ./tag2filename.sh
+. $HOME/.config/listenbrainz-mpd-from-logrc
 
 mdir="$HOME/lns/music_ntfs"
-shopt -s expand_aliases
-alias jq='jq -r' # needed to remove quotes from json
-alias json_metadata_cmd='ffprobe -v quiet -show_format -of json'
-file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_edited.json"
+#file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_edited.json"
+file="$HOME/jellyfin_listenbrainz/playback_reporting.db.sql_output_2.json"
 
 jsons_to_submit=()
 skipped_duration=()
@@ -16,6 +15,7 @@ skipped_not_found=()
 len=$(jq ". | length" < $file)
 #for i in `seq 187 187`;do
 #for i in `seq 400 $len`;do
+#for i in `seq 181 181`;do
 for i in `seq 0 $len`;do
 	json=$(jq ".[$i]" < $file)
 
@@ -54,9 +54,8 @@ for i in `seq 0 $len`;do
 	#echo at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid
 	filename=$(get_filename_from_tags_mpd "$artist" "$title" "$album" "$tracknumber" "$recording_mbid" | head -1)
 	if [ -z "$filename" ];then
-		echo
-		echo "not found $i (at:$artist tt:$title ab:$album tn:$tracknumber rmbid:$recording_mbid)"
-		skipped_not_found+=("$i")
+		echo "[$i] not found $i (artist '$artist' title '$title' album '$album' track '$tracknumber' MUSICBRAINZ_TRACKID '$recording_mbid')"
+		skipped_not_found+=("$i artist '$artist' title '$title' album '$album' track '$tracknumber' MUSICBRAINZ_TRACKID '$recording_mbid'")
 		continue
 	fi
 	#echo -n " "$filename
@@ -93,6 +92,7 @@ for i in `seq 0 $len`;do
 		continue
 	fi
 
+	#echo $listenbrainz_json
 	jsons_to_submit+=("$listenbrainz_json")
 
 	artist=""
@@ -101,9 +101,9 @@ for i in `seq 0 $len`;do
 done
 
 LISTENBRAINZ_IMPORT_DEBUG=1
-LISTENBRAINZ_TOKEN="aa"
+#LISTENBRAINZ_TOKEN="aa"
 #LISTENBRAINZ_TOKEN_FILE=""
-LISTENBRAINZ_IMPORT_DRY=1
+#LISTENBRAINZ_IMPORT_DRY=1
 listenbrainz_submit_import "${jsons_to_submit[@]}"
 
 IFS=$'\n'
