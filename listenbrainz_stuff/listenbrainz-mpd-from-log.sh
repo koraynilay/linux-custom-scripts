@@ -94,7 +94,8 @@ for song in $to_add;do
 		continue
 	fi
 	#echo
-	filename=${filename//\"/} # remove double quotes (") from around the filename
+	filename=${filename#\"} # remove double quotes (") from around the filename
+	filename=${filename%\"} # remove double quotes (") from around the filename
 	json_cur=$(info_func "$music_dir/$filename" ".format") # get metadata json
 	#printf '%s' "$json_cur"
 
