@@ -83,7 +83,7 @@ for i in `seq 0 $len`;do
 
 	media_player="$client (Jellyfin) on $device"
 
-	listenbrainz_json="$(get_listenbrainz_json "$mdir/$filename" "$datetime" "false" "$media_player" "listenbrainz-jellyfin-from-playbackreporting.sh")"
+	listenbrainz_json="$(get_listenbrainz_json "$mdir/$filename" "$datetime" "false" "false" "$media_player" "listenbrainz-jellyfin-from-playbackreporting.sh")"
 
 	if [ $? -eq 2 ];then
 		echo
