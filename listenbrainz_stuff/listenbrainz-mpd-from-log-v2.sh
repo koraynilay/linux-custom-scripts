@@ -28,6 +28,12 @@ for song in $to_add;do
 
 	filename=${filename#\"} # remove double quotes (") from around the filename
 	filename=${filename%\"} # remove double quotes (") from around the filename
+	
+	# save last timestamp
+	# if current timestamp - last timestapm < halfduration
+	# 	don't submit
+	#
+	# not much but better than assuming all "played" action are fully listened songs
 
 	datetime="$month $day $year $time"
 	media_player="MPD"
