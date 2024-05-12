@@ -24,7 +24,19 @@ info_func_mpd() {
 	local filename="$1"
 	local key="${2:-.}"
 	#local ret=$(mpc find filename "$filename" | jq -r "$key // empty")
-	local ret=$(printf '%s\n%s\n' "search filename \"$filename\"" "close" | nc $MPD_HOST $MPD_PORT | jc --ini --pretty | jq -r "$key // empty")
+
+	#local ret=$(printf '%s\n%s\n' "search filename \"$filename\"" "close" | nc $MPD_HOST $MPD_PORT | \
+	#	jc --ini --pretty | jq -r "$key // empty"
+	#)
+
+	local ret=$(printf '%s\n%s\n' "search filename \"$filename\"" "close" | nc $MPD_HOST $MPD_PORT | \
+		sed -E \
+		-e 's/"/\\"/g' \
+		-e 's/^OK MPD [0-9]\.[0-9]{2}\.[0-9]$/{"json_start":"",/g' \
+		-e 's/(.*): (.*)/"\1": "\2",/g' \
+		-e 's/^OK$/"json_end":""}/g'
+	)
+
 	printf '%s' "$ret"
 }
 
@@ -487,6 +499,26 @@ get_listenbrainz_json_mpd() {
 		listened_at="$timestamp"
 	fi
 
-	json=$(./tagsjson2listenbrainzjson.pl "$json_cur" "$listened_at" "$duration" "$media_player" "$submission_client")
+	json=$(./tagsjson2listenbrainzjson.pl lbj "$json_cur" "$listened_at" "$duration" "$media_player" "$submission_client")
+	printf '%s\n' "$json"
+}
+
+get_almost_listenbrainz_json_mpd() {
+	local func_name="$FUNCNAME"
+	local log_start="$func_name(): "
+
+	# args
+	local filename="$1"
+	local media_player="${2:-unknown}"
+	local submission_client="${3:-tag2filename.sh}"
+
+	local json_cur=$(info_func_mpd "$filename") # get metadata json
+	#printf '%s' "$json_cur"
+
+	local duration=""
+	duration=$(get_json_value "duration" "$json_cur")
+	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
+
+	json=$(./tagsjson2listenbrainzjson.pl albj "$json_cur" "$duration" "$media_player" "$submission_client")
 	printf '%s\n' "$json"
 }

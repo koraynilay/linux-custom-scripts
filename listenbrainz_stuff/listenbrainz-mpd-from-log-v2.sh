@@ -7,13 +7,19 @@ mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2"
 jsons_to_submit=()
 skipped_duration=()
 skipped_error=()
+json_cache=()
 
 to_add=$(<"$mpd_log_file")
+#to_add="Nov 28 2019 21:51 : player: played \"Megalovania - An Instrumental Version of Retro Gaming's REVENGE (Megalovania Remix).mp3\""
 
 IFS=$'\n'
 i=0
 for song in $to_add;do
 	echo -ne "line $i\r"
+
+	if [ "$i" -eq 200 ];then
+		exit
+	fi
 
 	IFS=' ' read month day year time colon logger action filename <<< $song
 	#echo $logger
@@ -33,6 +39,7 @@ for song in $to_add;do
 
 	media_player="MPD"
 	client="listenbrainz-mpd-from-log-v2.sh"
+	#listenbrainz_json="$(get_listenbrainz_json "$MPD_MUSIC_DIR/$filename" "$datetime" "true" "false" "$media_player" "$client")"
 	listenbrainz_json="$(get_listenbrainz_json_mpd "$filename" "$datetime" "true" "false" "$media_player" "$client")"
 	if [ $? -eq 2 ];then
 		echo
@@ -60,6 +67,7 @@ for song in $to_add;do
 	echo $listenbrainz_json | jq
 	echo $filename
 	jsons_to_submit+=("$listenbrainz_json")
+	#json_cache["$filename"]="$listenbrainz_json"
 	((i++))
 done
 
