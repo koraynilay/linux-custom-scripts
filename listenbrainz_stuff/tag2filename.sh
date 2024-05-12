@@ -5,6 +5,29 @@ info_func() {
 	printf '%s' "$ret"
 }
 
+info_func_mpd() {
+	#declare -x MPC_FORMAT='{
+	#	"duration": "%time%",
+	#	"musicbrainz_artistid": "%MUSICBRAINZ_ARTISTID%",
+	#	"musicbrainz_albumid": "%MUSICBRAINZ_ALBUMID%",
+	#	"musicbrainz_albumartistid": "%MUSICBRAINZ_ALBUMARTISTID%",
+	#	"musicbrainz_workid": "%MUSICBRAINZ_WORKID%",
+	#	"musicbrainz_trackid": "%MUSICBRAINZ_TRACKID%",
+	#	"musicbrainz_releasetrackid": "%MUSICBRAINZ_RELEASETRACKID%",
+	#	"title": "%title%",
+	#	"artist": "%artist%",
+	#	"album": "%album%",
+	#	"track_number": "%track%"
+	#}'
+	local MPD_HOST="localhost"
+	local MPD_PORT="6600"
+	local filename="$1"
+	local key="${2:-.}"
+	#local ret=$(mpc find filename "$filename" | jq -r "$key // empty")
+	local ret=$(printf '%s\n%s\n' "search filename \"$filename\"" "close" | nc $MPD_HOST $MPD_PORT | jc --ini --pretty | jq -r "$key // empty")
+	printf '%s' "$ret"
+}
+
 # $1: filename, $2: recording_mbid key (e.g. ".UFID" for mp3)
 recmbid_func() {
 	local ret=$(mid3v2 -l "$1" | jc --ini --pretty | jq -r "$2 // empty")
@@ -65,7 +88,7 @@ get_filename_from_tags_mpd() {
 # array of JSONs passed as argument
 # need $LISTENBRAINZ_TOKEN_FILE and $LISTEBRAINZ_API_URL to be set in the caller
 listenbrainz_submit_import() {
-	local func_name="listenbrainz_submit_import"
+	local func_name="$FUNCNAME"
 	local log_start="$func_name(): "
 
 	local token=""
@@ -299,8 +322,8 @@ check_if_correct() {
 }
 
 get_listenbrainz_json() {
-	local func_name="listenbrainz_submit_json"
-	local log_start="$func_name(): "
+	local func_name="$FUNCNAME"
+	local log_start="$FUNCNAME(): "
 
 	# args
 	local filename="$1"
@@ -327,7 +350,7 @@ get_listenbrainz_json() {
 		listened_at="$timestamp"
 	fi
 
-	local format=$(jq '.format_name' <<< "$json_cur" | tr -d '"') # mp3, flag, whatever
+	local format=$(get_json_value 'format_name' "$json_cur") # mp3, flag, whatever
 
 	local json_tags="$(get_json_value "tags" "$json_cur")" # get .tags
 
@@ -387,6 +410,104 @@ get_listenbrainz_json() {
 	#album="${album//\"/\\\"}"
 	#media_player="${media_player//\"/\\\"}"
 	#submission_client="${submission_client//\"/\\\"}"
+
+	if [ "$use_mb" -ge 1 ];then
+		# json with MusicBrainz tags
+		json="
+		{
+		  \"listened_at\": $listened_at,
+		  \"track_metadata\": {
+		    \"additional_info\": {
+		      \"artist_mbids\": [
+			\"$artist_mbid\"
+		      ],
+		      \"duration_ms\": $duration,
+		      \"media_player\": \"$media_player\",
+		      \"recording_mbid\": \"$recording_mbid\",
+		      \"release_mbid\": \"$release_mbid\",
+		      \"submission_client\": \"$submission_client\",
+		      \"track_mbid\": \"$track_mbid\",
+		      \"tracknumber\": \"$track_number\"
+		    },
+		    \"artist_name\": \"$artist\",
+		    \"track_name\": \"$title\"
+		    $(if [ -n "$album" ];then echo ,\"release_name\": \"$album\";fi)
+		  }
+		}
+		"
+	else
+		# json with MusicBrainz tags
+		json="
+		{
+		  \"listened_at\": $listened_at,
+		  \"track_metadata\": {
+		    \"additional_info\": {
+		      \"duration_ms\": $duration,
+		      \"media_player\": \"$media_player\",
+		      \"submission_client\": \"$submission_client\"
+		    },
+		    \"artist_name\": \"$artist\",
+		    \"track_name\": \"$title\"
+		    $(if [ -n "$album" ];then echo ,\"release_name\": \"$album\";fi)
+		  }
+		}
+		"
+	fi
+
+	json=$(jq -c '.' <<< "$json")
+	printf '%s\n' "$json"
+}
+
+get_listenbrainz_json_mpd() {
+	local func_name="$FUNCNAME"
+	local log_start="$func_name(): "
+
+	# args
+	local filename="$1"
+	local timestamp="$2"
+	local ts_end="${3:-false}"
+	local ts_epoch="${4:-false}"
+	local media_player="${5:-unknown}"
+	local submission_client="${6:-tag2filename.sh}"
+
+	local json_cur=$(info_func_mpd "$filename") # get metadata json
+	#printf '%s' "$json_cur"
+
+	local duration=""
+	duration=$(get_json_value "duration" "$json_cur")
+	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
+
+	local listened_at=""
+	if [ "$ts_epoch" != "true" ];then
+		listened_at=$(date -d "$timestamp" +%s) # get the timestamp for when the listen finished
+		if [ "$ts_end" = "true" ];then
+			listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
+		fi
+	else
+		listened_at="$timestamp"
+	fi
+
+	local recording_mbid="$(get_json_value "MUSICBRAINZ_TRACKID" "$json_cur")"
+	# check if the files has MusicBrainz tags
+	local use_mb=$(grep -cP '[a-z0-9-]{36}' <<< "$recording_mbid")
+	#echo "mp3 $use_mb:$recording_mbid"
+
+	local title=$(get_json_value 'Title' "$json_cur")
+	local artist=$(get_json_value 'Artist' "$json_cur")
+	local album=$(get_json_value 'Album' "$json_cur")
+
+	local track_number=$(get_json_value 'Track' "$json_cur")
+
+	local track_mbid=""
+	local release_mbid=""
+	local artist_mbid=""
+
+	# get tags
+	if [ "$use_mb" -ge 1 ];then
+		track_mbid="$(get_json_value 'MUSICBRAINZ_RELEASETRACKID' "$json_cur")"
+		release_mbid="$(get_json_value 'MUSICBRAINZ_ALBUMID' "$json_cur")"
+		artist_mbid="$(get_json_value 'MUSICBRAINZ_ARTISTID' "$json_cur")"
+	fi
 
 	if [ "$use_mb" -ge 1 ];then
 		# json with MusicBrainz tags
