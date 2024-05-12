@@ -7,7 +7,9 @@ mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2"
 jsons_to_submit=()
 skipped_duration=()
 skipped_error=()
-json_cache=()
+skipped_noartist=()
+skipped_notitle=()
+declare -A json_cache
 
 to_add=$(<"$mpd_log_file")
 #to_add="Nov 28 2019 21:51 : player: played \"Megalovania - An Instrumental Version of Retro Gaming's REVENGE (Megalovania Remix).mp3\""
@@ -16,8 +18,9 @@ IFS=$'\n'
 i=0
 for song in $to_add;do
 	echo -ne "line $i\r"
+	#echo -e "line $i"
 
-	if [ "$i" -eq 200 ];then
+	if [ "$i" -eq 10000 ];then
 		exit
 	fi
 
@@ -29,6 +32,7 @@ for song in $to_add;do
 	# (unfortunately "player: played" is also used when restarting mpd)
 	if [ "$logger" != "player:" ] && [ "$action" != "played" ];then
 		#echo -ne "skipping: $song\r"
+		((i++))
 		continue
 	fi
 
@@ -37,19 +41,33 @@ for song in $to_add;do
 
 	datetime="$month $day $year $time"
 
-	media_player="MPD"
-	client="listenbrainz-mpd-from-log-v2.sh"
-	#listenbrainz_json="$(get_listenbrainz_json "$MPD_MUSIC_DIR/$filename" "$datetime" "true" "false" "$media_player" "$client")"
-	listenbrainz_json="$(get_listenbrainz_json_mpd "$filename" "$datetime" "true" "false" "$media_player" "$client")"
-	if [ $? -eq 2 ];then
-		echo
-		echo "error for '$song' ($filename), skipping"
-		skipped_error+=("$i '$song' ($filename)")
-		continue
+	if [ -z "${json_cache[$filename]}" ];then
+
+		media_player="MPD"
+		client="listenbrainz-mpd-from-log-v2.sh"
+		#listenbrainz_json="$(get_listenbrainz_json "$MPD_MUSIC_DIR/$filename" "$datetime" "true" "false" "$media_player" "$client")"
+		#listenbrainz_json="$(get_listenbrainz_json_mpd "$filename" "$datetime" "true" "false" "$media_player" "$client")"
+		track_metadata="$(get_almost_listenbrainz_json_mpd "$filename" "$media_player" "$client")"
+		if [ $? -eq 1 ];then
+			#echo "no artist for '$song' ($filename), skipping"
+			skipped_noartist+=("$i '$song' ($filename)")
+			((i++))
+			continue
+		elif [ $? -eq 2 ];then
+			#echo "no title for '$song' ($filename), skipping"
+			skipped_notitle+=("$i '$song' ($filename)")
+			((i++))
+			continue
+		fi
+
+		echo $track_metadata | jq
+		json_cache[$filename]="$track_metadata"
+	else
+		track_metadata="${json_cache["$filename"]}"
 	fi
 
-	cur_ts="$(get_json_value "listened_at" "$listenbrainz_json")"
-	halfduration="$(get_json_value "track_metadata.duration_ms" "$listenbrainz_json")"
+	cur_ts="$(date -d "$datetime" +%s)"
+	halfduration="$(get_json_value "additional_info\"][\"duration_ms" "$track_metadata")"
 	halfduration="$((halfduration / 2))"
 
 	# save last timestamp
@@ -60,14 +78,21 @@ for song in $to_add;do
 	if [ $((cur_ts - last_ts)) -lt $halfduration ];then
 		#echo "not enough duration '$song' ($filename), skipping"
 		skipped_duration+=("$i '$song' ($filename)")
+		((i++))
 		continue
 	fi
 	last_ts=$cur_ts
 
-	echo $listenbrainz_json | jq
+	listenbrainz_json="
+	{
+	  \"listened_at\": $cur_ts,
+	  \"track_metadata\": $track_metadata
+	}
+	";
+
+	echo $listenbrainz_json | jq -c
 	echo $filename
 	jsons_to_submit+=("$listenbrainz_json")
-	#json_cache["$filename"]="$listenbrainz_json"
 	((i++))
 done
 
@@ -86,7 +111,16 @@ fi
 if [ ${#skipped_error[@]} -ne 0 ];then
 	echo -n "${skipped_error[*]}" > skipped_error.txt
 fi
+if [ ${#skipped_noartist[@]} -ne 0 ];then
+	echo -n "${skipped_noartist[*]}" > skipped_noartist.txt
+fi
+if [ ${#skipped_notitle[@]} -ne 0 ];then
+	echo -n "${skipped_notitle[*]}" > skipped_notitle.txt
+fi
 #if [ $sknl -ne 0 ];then
 #	echo -n "${skipped_not_found[*]}" > skipped_not_found.txt
 #fi
-
+touch json_cache.txt
+for x in "${!json_cache[@]}"; do
+	printf "%s=%s\n" "$x" "${json_cache[$x]}" >> json_cache.txt
+done

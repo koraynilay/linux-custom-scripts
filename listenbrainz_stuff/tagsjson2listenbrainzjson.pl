@@ -56,7 +56,8 @@ sub listenbrainz_json {
 		delete $lb_json_tm->{release_name};
 	}
 
-	exit 1 if !$lb_json_tm->{artist_name} or !$lb_json_tm->{track_name};
+	exit 1 if !$lb_json_tm->{artist_name};
+	exit 2 if !$lb_json_tm->{track_name};
 
 	my $final_json = encode_json \%lb_json;
 	print $final_json;
@@ -77,47 +78,44 @@ sub almost_listenbrainz_json {
 	my $use_mb = $recording_mbid =~ /[a-z0-9-]{36}/;
 
 	my %lb_json = (
-		'track_metadata' => {
-			'additional_info' => {
-				'artist_mbids' => [
-					$song_tags->{MUSICBRAINZ_ARTISTID},
-				],
-				"duration_ms" => @_[2],
-				"media_player" => @_[3],
-				"recording_mbid" => $recording_mbid,
-				"release_mbid" => $song_tags->{MUSICBRAINZ_ALBUMID},
-				"submission_client" => @_[4],
-				"track_mbid" => $song_tags->{MUSICBRAINZ_RELEASETRACKID},
-				"tracknumber" => $song_tags->{Track},
-			},
-			"artist_name" => $song_tags->{Artist},
-			"track_name" => $song_tags->{Title},
-			"release_name" => $song_tags->{Album},
+		'additional_info' => {
+			'artist_mbids' => [
+				$song_tags->{MUSICBRAINZ_ARTISTID},
+			],
+			"duration_ms" => @_[1],
+			"media_player" => @_[2],
+			"recording_mbid" => $recording_mbid,
+			"release_mbid" => $song_tags->{MUSICBRAINZ_ALBUMID},
+			"submission_client" => @_[3],
+			"track_mbid" => $song_tags->{MUSICBRAINZ_RELEASETRACKID},
+			"tracknumber" => $song_tags->{Track},
 		},
+		"artist_name" => $song_tags->{Artist},
+		"track_name" => $song_tags->{Title},
+		"release_name" => $song_tags->{Album},
 	);
 
-	my $lb_json_tm = $lb_json{track_metadata};
-	my $lb_json_tm_ai = $lb_json_tm->{additional_info};
+	my $lb_json_ai = $lb_json{additional_info};
 
 	if (!$use_mb) {
-		delete $lb_json_tm_ai->{artist_mbids};
+		delete $lb_json_ai->{artist_mbids};
 
-		delete $lb_json_tm_ai->{recording_mbid};
-		delete $lb_json_tm_ai->{release_mbid};
+		delete $lb_json_ai->{recording_mbid};
+		delete $lb_json_ai->{release_mbid};
 
-		delete $lb_json_tm_ai->{track_mbid};
-		delete $lb_json_tm_ai->{tracknumber};
+		delete $lb_json_ai->{track_mbid};
+		delete $lb_json_ai->{tracknumber};
 	}
 
-	if (!$lb_json_tm->{release_name}) {
-		delete $lb_json_tm->{release_name};
+	if (!$lb_json{release_name}) {
+		delete $lb_json{release_name};
 	}
 
-	exit 1 if !$lb_json_tm->{artist_name} or !$lb_json_tm->{track_name};
+	exit 1 if !$lb_json{artist_name};
+	exit 2 if !$lb_json{track_name};
 
 	my $final_json = encode_json \%lb_json;
 	print $final_json;
-	#print Dumper(\%lb_json);
 }
 
 my %funcs = (
@@ -126,6 +124,7 @@ my %funcs = (
 );
 my $funcname = shift @ARGV;
 $funcs{$funcname}(@ARGV);
+exit 0;
 
 #if ($use_mb) {
 #	# json with MusicBrainz tags;

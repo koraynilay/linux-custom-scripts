@@ -54,8 +54,9 @@ fd_func() {
 
 # $1: key, $2: json object
 get_json_value() {
-	local ret="$(jq --arg key "$1" '.[$key] // empty' <<< "$2")"
+	#local ret="$(jq --arg key "$1" '.[$key] // empty' <<< "$2")"
 	#eval "$(jq -r --arg key "$1" ' @sh "local ret="\(.$key)' <<< "$2")"
+	local ret="$(jq ".[\"$1\"]  // empty" <<< "$2")"
 	ret=${ret#\"}
 	ret=${ret%\"}
 	printf '%s' "$ret"
@@ -520,5 +521,8 @@ get_almost_listenbrainz_json_mpd() {
 	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
 
 	json=$(./tagsjson2listenbrainzjson.pl albj "$json_cur" "$duration" "$media_player" "$submission_client")
+	local json_ret="$?"
 	printf '%s\n' "$json"
+	unset json
+	return $json_ret
 }
