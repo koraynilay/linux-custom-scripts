@@ -22,40 +22,26 @@ my %lb_json = (
 	'track_metadata' => {
 		'additional_info' => {
 			'artist_mbids' => [
+				$song_tags->{MUSICBRAINZ_ARTISTID},
 			],
-			"duration_ms" => "",
-			"media_player" => "",
-			"recording_mbid" => "",
-			"release_mbid" => "",
-			"submission_client" => "",
-			"track_mbid" => "",
-			"tracknumber" => "",
+			"duration_ms" => $ARGV[2],
+			"media_player" => $ARGV[3],
+			"recording_mbid" => $recording_mbid,
+			"release_mbid" => $song_tags->{MUSICBRAINZ_ALBUMID},
+			"submission_client" => $ARGV[4],
+			"track_mbid" => $song_tags->{MUSICBRAINZ_RELEASETRACKID},
+			"tracknumber" => $song_tags->{Track},
 		},
-		"artist_name" => "",
-		"track_name" => "",
-		"release_name" => "",
+		"artist_name" => $song_tags->{Artist},
+		"track_name" => $song_tags->{Title},
+		"release_name" => $song_tags->{Album},
 	},	
 );
 
 my $lb_json_tm = $lb_json{track_metadata};
-$lb_json_tm->{artist_name} = $song_tags->{Artist};
-$lb_json_tm->{track_name} = $song_tags->{Title};
-$lb_json_tm->{release_name} = $song_tags->{Album};
-
 my $lb_json_tm_ai = $lb_json_tm->{additional_info};
-$lb_json_tm_ai->{tracknumber} = $song_tags->{Track};
-$lb_json_tm_ai->{duration_ms} = $ARGV[2];
-$lb_json_tm_ai->{recording_mbid} = $recording_mbid;
 
-$lb_json_tm_ai->{media_player} = $ARGV[3];
-$lb_json_tm_ai->{submission_client} = $ARGV[4];
-
-if ($use_mb) {
-	#        $lb_json_tm_ai{artist_mbids} = $song_tags->{MUSICBRAINZ_ARTISTID};
-	push @{$lb_json_tm_ai->{artist_mbids}}, $song_tags->{MUSICBRAINZ_ARTISTID};
-	$lb_json_tm_ai->{release_mbid} = $song_tags->{MUSICBRAINZ_ALBUMID};
-	$lb_json_tm_ai->{track_mbid} = $song_tags->{MUSICBRAINZ_RELEASETRACKID};
-} else {
+if (!$use_mb) {
 	delete $lb_json_tm_ai->{artist_mbids};
 
 	delete $lb_json_tm_ai->{recording_mbid};
@@ -68,6 +54,8 @@ if ($use_mb) {
 if (!$lb_json_tm->{release_name}) {
 	delete $lb_json_tm->{release_name};
 }
+
+exit 1 if !$lb_json_tm->{artist_name} or !$lb_json_tm->{track_name};
 
 my $final_json = encode_json \%lb_json;
 print $final_json;
