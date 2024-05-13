@@ -98,13 +98,17 @@ for song in $to_add;do
 	# 	don't submit
 	#
 	# not much but better than assuming all "played" action are fully listened songs
-	if [ $((cur_ts - last_ts)) -lt $halfduration ];then
+	#set -x
+	sub=$((cur_ts - last_ts))
+	last_ts=$cur_ts
+	if [ $sub -lt $halfduration ];then
+		#set +x
 		#echo "not enough duration '$song' ($filename), skipping"
 		skipped_duration+=("$i '$song' ($filename)")
 		((i++))
 		continue
 	fi
-	last_ts=$cur_ts
+	#set +x
 
 	listenbrainz_json="
 	{
