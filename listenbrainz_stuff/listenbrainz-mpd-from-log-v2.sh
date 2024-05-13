@@ -9,6 +9,7 @@ skipped_duration=()
 skipped_error=()
 skipped_noartist=()
 skipped_notitle=()
+skipped_not_found=()
 declare -A json_cache
 
 to_add=$(<"$mpd_log_file")
@@ -17,12 +18,28 @@ to_add=$(<"$mpd_log_file")
 IFS=$'\n'
 i=0
 for song in $to_add;do
-	echo -ne "line $i\r"
-	#echo -e "line $i"
+	#echo -ne "line $i\r"
+	echo -e "line $i"
 
 	if [ "$i" -eq 10000 ];then
 		exit
 	fi
+
+#	if [ "$i" -eq 910 ];then
+#		exit
+#	fi
+#
+#	if [ "$i" -lt 908 ];then
+#		((i++))
+#		continue
+#	fi
+
+#	if [ "$i" -eq 908 ];then
+#		set -x
+#	fi
+#	if [ "$i" -eq 9010 ];then
+#		set +x
+#	fi
 
 	IFS=' ' read month day year time colon logger action filename <<< $song
 	#echo $logger
@@ -48,19 +65,25 @@ for song in $to_add;do
 		#listenbrainz_json="$(get_listenbrainz_json "$MPD_MUSIC_DIR/$filename" "$datetime" "true" "false" "$media_player" "$client")"
 		#listenbrainz_json="$(get_listenbrainz_json_mpd "$filename" "$datetime" "true" "false" "$media_player" "$client")"
 		track_metadata="$(get_almost_listenbrainz_json_mpd "$filename" "$media_player" "$client")"
-		if [ $? -eq 1 ];then
+		exitcode=$?
+		if [ $exitcode -eq 1 ];then
 			#echo "no artist for '$song' ($filename), skipping"
 			skipped_noartist+=("$i '$song' ($filename)")
 			((i++))
 			continue
-		elif [ $? -eq 2 ];then
+		elif [ $exitcode -eq 2 ];then
 			#echo "no title for '$song' ($filename), skipping"
 			skipped_notitle+=("$i '$song' ($filename)")
 			((i++))
 			continue
+		elif [ $exitcode -eq 249 ];then
+			#echo "not found '$song' ($filename), skipping"
+			skipped_not_found+=("$i '$song' ($filename)")
+			((i++))
+			continue
 		fi
 
-		echo $track_metadata | jq
+		echo $track_metadata | jq -c
 		json_cache[$filename]="$track_metadata"
 	else
 		track_metadata="${json_cache["$filename"]}"
@@ -90,7 +113,7 @@ for song in $to_add;do
 	}
 	";
 
-	echo $listenbrainz_json | jq -c
+	echo $listenbrainz_json | jq
 	echo $filename
 	jsons_to_submit+=("$listenbrainz_json")
 	((i++))
@@ -117,9 +140,9 @@ fi
 if [ ${#skipped_notitle[@]} -ne 0 ];then
 	echo -n "${skipped_notitle[*]}" > skipped_notitle.txt
 fi
-#if [ $sknl -ne 0 ];then
-#	echo -n "${skipped_not_found[*]}" > skipped_not_found.txt
-#fi
+if [ ${#skipped_not_found[@]} -ne 0 ];then
+	echo -n "${skipped_not_found[*]}" > skipped_not_found.txt
+fi
 touch json_cache.txt
 for x in "${!json_cache[@]}"; do
 	printf "%s=%s\n" "$x" "${json_cache[$x]}" >> json_cache.txt
