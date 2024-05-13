@@ -91,7 +91,7 @@ for song in $to_add;do
 
 	cur_ts="$(date -d "$datetime" +%s)"
 	halfduration="$(get_json_value "additional_info\"][\"duration_ms" "$track_metadata")"
-	halfduration="$((halfduration / 2))"
+	halfduration="$((halfduration / 2 / 1000))"
 
 	# save last timestamp
 	# if current timestamp - last timestamp < halfduration
