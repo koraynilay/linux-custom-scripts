@@ -56,12 +56,13 @@ sub listenbrainz_json {
 		delete $lb_json_tm->{release_name};
 	}
 
+	#print Dumper(\%lb_json);
+
 	exit 1 if !$lb_json_tm->{artist_name};
 	exit 2 if !$lb_json_tm->{track_name};
 
 	my $final_json = encode_json \%lb_json;
 	print $final_json;
-	#print Dumper(\%lb_json);
 }
 
 sub almost_listenbrainz_json {
@@ -110,6 +111,8 @@ sub almost_listenbrainz_json {
 	if (!$lb_json{release_name}) {
 		delete $lb_json{release_name};
 	}
+
+	#print Dumper(\%lb_json);
 
 	exit 1 if !$lb_json{artist_name};
 	exit 2 if !$lb_json{track_name};

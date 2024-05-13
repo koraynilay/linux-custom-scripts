@@ -29,15 +29,18 @@ info_func_mpd() {
 	#	jc --ini --pretty | jq -r "$key // empty"
 	#)
 
-	local ret=$(printf '%s\n%s\n' "search filename \"$filename\"" "close" | nc $MPD_HOST $MPD_PORT | \
+	local ret=$(printf '%s\n%s\n' "find filename \"$filename\"" "close" | nc $MPD_HOST $MPD_PORT | \
 		sed -E \
 		-e 's/"/\\"/g' \
 		-e 's/^OK MPD [0-9]\.[0-9]{2}\.[0-9]$/{"json_start":"",/g' \
-		-e 's/(.*): (.*)/"\1": "\2",/g' \
+		-e 's/([^:]*): (.*)/"\1": "\2",/g' \
 		-e 's/^OK$/"json_end":""}/g'
 	)
+	#if [[ "$ret" =~ '^\{"json_start":"",.*,.*"json_end":""\}' ]];then # works in zsh but not bash
+	if [[ "$ret" =~ ^\{\"json_start\":\"\",.*,.*\"json_end\":\"\"\}$ ]];then
+		printf '%s' "$ret"
+	fi
 
-	printf '%s' "$ret"
 }
 
 # $1: filename, $2: recording_mbid key (e.g. ".UFID" for mp3)
@@ -347,6 +350,9 @@ get_listenbrainz_json() {
 	local submission_client="${6:-tag2filename.sh}"
 
 	local json_cur=$(info_func "$filename" ".format") # get metadata json
+	if [ -z "$json_cur" ];then
+		exit 249
+	fi
 	#printf '%s' "$json_cur"
 
 	local duration=""
@@ -484,6 +490,9 @@ get_listenbrainz_json_mpd() {
 	local submission_client="${6:-tag2filename.sh}"
 
 	local json_cur=$(info_func_mpd "$filename") # get metadata json
+	if [ -z "$json_cur" ];then
+		exit 249
+	fi
 	#printf '%s' "$json_cur"
 
 	local duration=""
@@ -514,6 +523,9 @@ get_almost_listenbrainz_json_mpd() {
 	local submission_client="${3:-tag2filename.sh}"
 
 	local json_cur=$(info_func_mpd "$filename") # get metadata json
+	if [ -z "$json_cur" ];then
+		exit 249
+	fi
 	#printf '%s' "$json_cur"
 
 	local duration=""
@@ -526,3 +538,74 @@ get_almost_listenbrainz_json_mpd() {
 	unset json
 	return $json_ret
 }
+
+#get_listenbrainz_json_mpd_jq() {
+#	local func_name="$FUNCNAME"
+#	local log_start="$func_name(): "
+#
+#	# args
+#	local filename="$1"
+#	local timestamp="$2"
+#	local ts_end="${3:-false}"
+#	local ts_epoch="${4:-false}"
+#	local media_player="${5:-unknown}"
+#	local submission_client="${6:-tag2filename.sh}"
+#
+#	local json_cur=$(info_func_mpd "$filename") # get metadata json
+#	#printf '%s' "$json_cur"
+#
+#	local duration=""
+#	duration=$(get_json_value "duration" "$json_cur")
+#	duration=$(calc -p "round($duration * 1000)") # duration is ms (as int)
+#
+#	local listened_at=""
+#	if [ "$ts_epoch" != "true" ];then
+#		listened_at=$(date -d "$timestamp" +%s) # get the timestamp for when the listen finished
+#		if [ "$ts_end" = "true" ];then
+#			listened_at=$((listened_at-(duration/1000))) # get the timestamp for when the listen started
+#		fi
+#	else
+#		listened_at="$timestamp"
+#	fi
+#
+#	if [ "$use_mb" -ge 1 ];then
+#		json=$(jq ". | 
+#			\"listened_at\" => $listened_at,
+#			\"track_metadata\" => {
+#				'additional_info' => {
+#					'artist_mbids' => [
+#						.MUSICBRAINZ_ARTISTID
+#					],
+#					\"duration_ms\" => $duration,
+#					\"media_player\" => $media_player,
+#					\"recording_mbid\" => .MUSICBRAINZ_TRACKID,
+#					\"release_mbid\" => .MUSICBRAINZ_ALBUMID,
+#					\"submission_client\" => $submission_client,
+#					\"track_mbid\" => .MUSICBRAINZ_RELEASETRACKID,
+#					\"tracknumber\" => .Track
+#				},
+#				\"artist_name\" => .Artist,
+#				\"track_name\" => .Title,
+#				\"release_name\" => .Album
+#			}
+#			"
+#		)
+#	else
+#		json=$(jq ". | 
+#			\"listened_at\" => $listened_at,
+#			\"track_metadata\" => {
+#				'additional_info' => {
+#					\"duration_ms\" => $duration,
+#					\"media_player\" => $media_player,
+#					\"submission_client\" => $submission_client,
+#					\"tracknumber\" => .Track
+#				},
+#				\"artist_name\" => .Artist,
+#				\"track_name\" => .Title,
+#				\"release_name\" => .Album
+#			}
+#			"
+#		)
+#	fi
+#	printf '%s\n' "$json"
+#}
