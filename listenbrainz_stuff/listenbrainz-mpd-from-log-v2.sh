@@ -3,6 +3,7 @@
 . "$HOME/.config/listenbrainz-mpd-from-logrc"
 
 mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2"
+mpd_log_file_length=$(wc -l "$mpd_log_file")
 
 jsons_to_submit=()
 skipped_duration=()
@@ -10,35 +11,68 @@ skipped_error=()
 skipped_noartist=()
 skipped_notitle=()
 skipped_not_found=()
-declare -A json_cache
+json_cache_file="json_cache.txt"
+if [ -f "$json_cache_file" ];then
+	. "$json_cache_file"
+else
+	declare -A json_cache
+fi
+#for x in "${!json_cache[@]}"; do
+#	echo $x
+#	echo ${json_cache[$x]} | jq
+#	if [ "$?" -ne 0 ];then
+#		exit $?
+#	fi
+#done
+#exit
 
 to_add=$(<"$mpd_log_file")
 #to_add="Nov 28 2019 21:51 : player: played \"Megalovania - An Instrumental Version of Retro Gaming's REVENGE (Megalovania Remix).mp3\""
 
+#UPLINE=$(tput cuu1)
+#ERASELINE=$(tput el)
+
 IFS=$'\n'
 i=0
+skipped_noplayer=0
 for song in $to_add;do
-	#echo -ne "line $i\r"
-	echo -e "line $i"
-
-	if [ "$i" -eq 10000 ];then
-		exit
+	jtsl="${#jsons_to_submit[@]}"
+	skdl="${#skipped_duration[@]}"
+	skpl=$skipped_noplayer
+	skal="${#skipped_noartist[@]}"
+	skel="${#skipped_error[@]}"
+	sknl="${#skipped_not_found[@]}"
+	vald=$(( jtsl + skdl + skpl + skal + skel + sknl == i ))
+	if [ $vald -eq 1 ];then
+		vald="yee"
+	else
+		vald="noo"
 	fi
+	#echo "line $i ($vald); added: $jtsl; skipped playduration: $skdl; skipped no player: $skpl;"
+	#echo "skipped no artist: $skal; skipped error: $skel; skipped not found: $sknl;"
+	echo -ne "line $i ($vald); added: $jtsl; skipped playduration: $skdl; skipped no player: $skpl; skipped no artist: $skal; skipped error: $skel; skipped not found: $sknl;\r"
 
-#	if [ "$i" -eq 910 ];then
+
+#	if [ "$i" -eq 10000 ];then
 #		exit
 #	fi
-#
-#	if [ "$i" -lt 908 ];then
+
+#	if [ "$i" -eq 2175 ];then
+#		exit
+#	fi
+
+#	if [ "$i" -lt 2170 ];then
 #		((i++))
 #		continue
 #	fi
 
-#	if [ "$i" -eq 908 ];then
-#		set -x
-#	fi
-#	if [ "$i" -eq 9010 ];then
+#	if [ "$i" -eq 19 ];then
 #		set +x
+#	fi
+#	if [ "$i" -eq 18 ];then
+#		echo
+#		set -x
+#		echo $song
 #	fi
 
 	IFS=' ' read month day year time colon logger action filename <<< $song
@@ -49,6 +83,7 @@ for song in $to_add;do
 	# (unfortunately "player: played" is also used when restarting mpd)
 	if [ "$logger" != "player:" ] && [ "$action" != "played" ];then
 		#echo -ne "skipping: $song\r"
+		((skipped_noplayer++))
 		((i++))
 		continue
 	fi
@@ -117,8 +152,10 @@ for song in $to_add;do
 	}
 	";
 
-	echo $listenbrainz_json | jq
-	echo $filename
+	#echo -n "$UPLINE$ERASELINE$UPLINE$ERASELINE"
+
+	#echo $listenbrainz_json | jq
+	#echo $filename
 	jsons_to_submit+=("$listenbrainz_json")
 	((i++))
 done
@@ -130,6 +167,8 @@ LISTENBRAINZ_TOKEN="aa"
 #LISTENBRAINZ_TOKEN_FILE=""
 LISTENBRAINZ_IMPORT_DRY=1
 #listenbrainz_submit_import "${jsons_to_submit[@]}"
+payload="$(local IFS=, ; echo "${jsons[*]}")"
+echo "[$payload]" > to_sub.json
 
 IFS=$'\n'
 if [ ${#skipped_duration[@]} -ne 0 ];then
@@ -147,7 +186,14 @@ fi
 if [ ${#skipped_not_found[@]} -ne 0 ];then
 	echo -n "${skipped_not_found[*]}" > skipped_not_found.txt
 fi
-touch json_cache.txt
-for x in "${!json_cache[@]}"; do
-	printf "%s=%s\n" "$x" "${json_cache[$x]}" >> json_cache.txt
-done
+if ! [ -f "json_cache.txt" ];then
+	echo "writing to $json_cache_file"
+	printf '#!/bin/bash\ndeclare -A json_cache\n' > "$json_cache_file"
+	for x in "${!json_cache[@]}"; do
+		printf 'json_cache[%s]="%s"\n' "$x" "${json_cache[$x]}" >> "$json_cache_file"
+		echo -e "saving $x                                                               \r"
+	done
+	echo "finished writing to $json_cache_file"
+else
+	echo "$json_cache_file already present"
+fi
