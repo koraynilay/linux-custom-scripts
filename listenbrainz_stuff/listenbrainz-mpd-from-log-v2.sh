@@ -2,7 +2,8 @@
 . ./tag2filename.sh
 . "$HOME/.config/listenbrainz-mpd-from-logrc"
 
-mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2"
+#mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2"
+mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2-epoch"
 mpd_log_file_length=$(wc -l "$mpd_log_file")
 
 jsons_to_submit=()
@@ -16,6 +17,18 @@ if [ -f "$json_cache_file" ];then
 	. "$json_cache_file"
 else
 	declare -A json_cache
+fi
+json_duration_cache_file="json_duration_cache.txt"
+if [ -f "$json_duration_cache_file" ];then
+	. "$json_duration_cache_file"
+else
+	declare -A json_duration_cache
+fi
+json_halfduration_cache_file="json_halfduration_cache.txt"
+if [ -f "$json_halfduration_cache_file" ];then
+	. "$json_halfduration_cache_file"
+else
+	declare -A json_halfduration_cache
 fi
 #for x in "${!json_cache[@]}"; do
 #	echo $x
@@ -35,6 +48,7 @@ to_add=$(<"$mpd_log_file")
 IFS=$'\n'
 i=0
 skipped_noplayer=0
+use_epoch_log=1
 for song in $to_add;do
 	jtsl="${#jsons_to_submit[@]}"
 	skdl="${#skipped_duration[@]}"
@@ -53,9 +67,10 @@ for song in $to_add;do
 	echo -ne "line $i ($vald); added: $jtsl; skipped playduration: $skdl; skipped no player: $skpl; skipped no artist: $skal; skipped error: $skel; skipped not found: $sknl;\r"
 
 
-#	if [ "$i" -eq 10000 ];then
-#		exit
-#	fi
+	if [ "$i" -eq 2000 ];then
+		echo
+		exit
+	fi
 
 #	if [ "$i" -eq 2175 ];then
 #		exit
@@ -75,7 +90,12 @@ for song in $to_add;do
 #		echo $song
 #	fi
 
-	IFS=' ' read month day year time colon logger action filename <<< $song
+	if [ "$use_epoch_log" -eq 1 ];then
+		IFS=' ' read -r datetime colon logger action filename <<< $song
+	else
+		IFS=' ' read -r month day year time colon logger action filename <<< $song
+		datetime="$month $day $year $time"
+	fi
 	#echo $logger
 	#echo $action
 
@@ -91,10 +111,7 @@ for song in $to_add;do
 	filename=${filename#\"} # remove double quotes (") from around the filename
 	filename=${filename%\"} # remove double quotes (") from around the filename
 
-	datetime="$month $day $year $time"
-
 	if [ -z "${json_cache[$filename]}" ];then
-
 		media_player="MPD"
 		client="listenbrainz-mpd-from-log-v2.sh"
 		#listenbrainz_json="$(get_listenbrainz_json "$MPD_MUSIC_DIR/$filename" "$datetime" "true" "false" "$media_player" "$client")"
@@ -121,12 +138,21 @@ for song in $to_add;do
 		echo $track_metadata | jq -c
 		json_cache[$filename]="$track_metadata"
 	else
-		track_metadata="${json_cache["$filename"]}"
+		track_metadata="${json_cache[$filename]}"
 	fi
 
-	cur_ts="$(date -d "$datetime" +%s)"
-	halfduration="$(get_json_value "additional_info\"][\"duration_ms" "$track_metadata")"
-	halfduration="$((halfduration / 2 / 1000))"
+	if [ -z "${json_halfduration_cache[$filename]}" ];then
+		halfduration="${json_halfduration_cache[$filename]}"
+	else
+		halfduration="$(get_json_value "additional_info\"][\"duration_ms" "$track_metadata")"
+		halfduration="$((halfduration / 2 / 1000))"
+	fi
+
+	if [ "$use_epoch_log" -eq 1 ];then
+		cur_ts=$datetime
+	else
+		cur_ts="$(date -d "$datetime" +%s)"
+	fi
 
 	# save last timestamp
 	# if current timestamp - last timestamp < halfduration
@@ -167,7 +193,7 @@ LISTENBRAINZ_TOKEN="aa"
 #LISTENBRAINZ_TOKEN_FILE=""
 LISTENBRAINZ_IMPORT_DRY=1
 #listenbrainz_submit_import "${jsons_to_submit[@]}"
-payload="$(local IFS=, ; echo "${jsons[*]}")"
+payload="$(IFS=, ; echo "${jsons[*]}")"
 echo "[$payload]" > to_sub.json
 
 IFS=$'\n'
