@@ -54,9 +54,10 @@ for song in $to_add;do
 	skdl="${#skipped_duration[@]}"
 	skpl=$skipped_noplayer
 	skal="${#skipped_noartist[@]}"
+	sktl="${#skipped_notitle[@]}"
 	skel="${#skipped_error[@]}"
 	sknl="${#skipped_not_found[@]}"
-	vald=$(( jtsl + skdl + skpl + skal + skel + sknl == i ))
+	vald=$(( jtsl + skdl + skpl + skal + stkl + skel + sknl == i ))
 	if [ $vald -eq 1 ];then
 		vald="yee"
 	else
@@ -64,13 +65,13 @@ for song in $to_add;do
 	fi
 	#echo "line $i ($vald); added: $jtsl; skipped playduration: $skdl; skipped no player: $skpl;"
 	#echo "skipped no artist: $skal; skipped error: $skel; skipped not found: $sknl;"
-	echo -ne "line $i ($vald); added: $jtsl; skipped playduration: $skdl; skipped no player: $skpl; skipped no artist: $skal; skipped error: $skel; skipped not found: $sknl;\r"
+	echo -ne "line $i ($vald); added: $jtsl; skipped: playduration: $skdl; no player: $skpl; no artist: $skal; no title: $sktl; error: $skel; not found: $sknl;\r"
 
 
-	if [ "$i" -eq 2000 ];then
-		echo
-		exit
-	fi
+#	if [ "$i" -eq 2000 ];then
+#		echo
+#		exit
+#	fi
 
 #	if [ "$i" -eq 2175 ];then
 #		exit
@@ -193,7 +194,7 @@ LISTENBRAINZ_TOKEN="aa"
 #LISTENBRAINZ_TOKEN_FILE=""
 LISTENBRAINZ_IMPORT_DRY=1
 #listenbrainz_submit_import "${jsons_to_submit[@]}"
-payload="$(IFS=, ; echo "${jsons[*]}")"
+payload="$(IFS=, ; echo "${jsons_to_submit[*]}")"
 echo "[$payload]" > to_sub.json
 
 IFS=$'\n'
