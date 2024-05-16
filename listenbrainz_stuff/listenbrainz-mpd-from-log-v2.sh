@@ -18,17 +18,11 @@ if [ -f "$json_cache_file" ];then
 else
 	declare -A json_cache
 fi
-json_duration_cache_file="json_duration_cache.txt"
-if [ -f "$json_duration_cache_file" ];then
-	. "$json_duration_cache_file"
+halfduration_cache_file="halfduration_cache.txt"
+if [ -f "$halfduration_cache_file" ];then
+	. "$halfduration_cache_file"
 else
-	declare -A json_duration_cache
-fi
-json_halfduration_cache_file="json_halfduration_cache.txt"
-if [ -f "$json_halfduration_cache_file" ];then
-	. "$json_halfduration_cache_file"
-else
-	declare -A json_halfduration_cache
+	declare -A halfduration_cache
 fi
 #for x in "${!json_cache[@]}"; do
 #	echo $x
@@ -144,13 +138,13 @@ for song in $to_add;do
 		track_metadata="${json_cache[$filename]}"
 	fi
 
-	if [ -n "${json_halfduration_cache[$filename]}" ];then
-		halfduration="${json_halfduration_cache[$filename]}"
+	if [ -n "${halfduration_cache[$filename]}" ];then
+		halfduration="${halfduration_cache[$filename]}"
 	else
 		halfduration="$(get_json_value "additional_info\"][\"duration_ms" "$track_metadata")"
 		halfduration="$((halfduration / 2 / 1000))"
 		to_write_halfduration_cache+=("$filename")
-		json_halfduration_cache[$filename]="$halfduration"
+		halfduration_cache[$filename]="$halfduration"
 	fi
 
 	if [ "$use_epoch_log" -eq 1 ];then
@@ -240,21 +234,21 @@ else
 	echo
 fi
 
-if ! [ -f "$json_halfduration_cache_file" ];then
-	echo "writing to $json_halfduration_cache_file"
-	printf '#!/bin/bash\ndeclare -A json_halfduration_cache\n' > "$json_halfduration_cache_file"
-	for x in "${!json_halfduration_cache[@]}"; do
-		printf "json_halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${json_halfduration_cache[$x]}" >> "$json_halfduration_cache_file"
+if ! [ -f "$halfduration_cache_file" ];then
+	echo "writing to $halfduration_cache_file"
+	printf '#!/bin/bash\ndeclare -A halfduration_cache\n' > "$halfduration_cache_file"
+	for x in "${!halfduration_cache[@]}"; do
+		printf "halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${halfduration_cache[$x]}" >> "$halfduration_cache_file"
 		echo -e "saving half duration $x                                                               \r"
 	done
-	echo "finished writing to $json_halfduration_cache_file"
+	echo "finished writing to $halfduration_cache_file"
 else
-	echo -n "$json_halfduration_cache_file already present"
+	echo -n "$halfduration_cache_file already present"
 	if [ "${#to_write_halfduration_cache[@]}" -gt 0 ];then
 		echo ", adding new ones"
 		#echo "(${to_write_cache[@]})"
 		for x in "${to_write_halfduration_cache[@]}"; do
-			printf "json_halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${json_halfduration_cache[$x]}" >> "$json_halfduration_cache_file"
+			printf "halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${halfduration_cache[$x]}" >> "$halfduration_cache_file"
 			echo -e "saving half duration $x                                                               \r"
 		done
 		echo -n finished saving new half duration
