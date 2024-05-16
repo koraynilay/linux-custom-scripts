@@ -1,7 +1,8 @@
 #!/bin/perl
 use strict;
 use POSIX;
-use JSON;
+use Cpanel::JSON::XS;
+use JSON qw//;
 use Data::Dumper;
 
 sub listenbrainz_json {
@@ -11,7 +12,7 @@ sub listenbrainz_json {
 	# media_player;
 	# submission_client;
 
-	my $song_tags = decode_json(@_[0]);
+	my $song_tags = JSON::decode_json(@_[0]);
 	#print Dumper($song_tags);
 
 	my $recording_mbid = $song_tags->{MUSICBRAINZ_TRACKID};
@@ -61,7 +62,10 @@ sub listenbrainz_json {
 	exit 1 if !$lb_json_tm->{artist_name};
 	exit 2 if !$lb_json_tm->{track_name};
 
-	my $final_json = encode_json \%lb_json;
+	#my $final_json = JSON->new;
+	#$final_json->canonical(1);
+	#$final_json = encode_json \%lb_json;
+	my $final_json = Cpanel::JSON::XS->new->utf8->canonical->encode(\%lb_json);
 	print $final_json;
 }
 
@@ -71,7 +75,7 @@ sub almost_listenbrainz_json {
 	# media_player;
 	# submission_client;
 
-	my $song_tags = decode_json(@_[0]);
+	my $song_tags = JSON::decode_json(@_[0]);
 	#print Dumper($song_tags);
 
 	my $recording_mbid = $song_tags->{MUSICBRAINZ_TRACKID};
@@ -117,7 +121,10 @@ sub almost_listenbrainz_json {
 	exit 1 if !$lb_json{artist_name};
 	exit 2 if !$lb_json{track_name};
 
-	my $final_json = encode_json \%lb_json;
+	#my $final_json = JSON->new;
+	#$final_json->canonical(1);
+	#$final_json = encode_json \%lb_json;
+	my $final_json = Cpanel::JSON::XS->new->utf8->canonical->encode(\%lb_json);
 	print $final_json;
 }
 
