@@ -38,6 +38,7 @@ fi
 #	fi
 #done
 #exit
+to_write_cache=()
 
 to_add=$(<"$mpd_log_file")
 #to_add="Nov 28 2019 21:51 : player: played \"Megalovania - An Instrumental Version of Retro Gaming's REVENGE (Megalovania Remix).mp3\""
@@ -70,7 +71,7 @@ for song in $to_add;do
 
 #	if [ "$i" -eq 2000 ];then
 #		echo
-#		exit
+#		break
 #	fi
 
 #	if [ "$i" -eq 2175 ];then
@@ -137,16 +138,19 @@ for song in $to_add;do
 		fi
 
 		echo $track_metadata | jq -c
+		to_write_cache+=("$filename")
 		json_cache[$filename]="$track_metadata"
 	else
 		track_metadata="${json_cache[$filename]}"
 	fi
 
-	if [ -z "${json_halfduration_cache[$filename]}" ];then
+	if [ -n "${json_halfduration_cache[$filename]}" ];then
 		halfduration="${json_halfduration_cache[$filename]}"
 	else
 		halfduration="$(get_json_value "additional_info\"][\"duration_ms" "$track_metadata")"
 		halfduration="$((halfduration / 2 / 1000))"
+		to_write_halfduration_cache+=("$filename")
+		json_halfduration_cache[$filename]="$halfduration"
 	fi
 
 	if [ "$use_epoch_log" -eq 1 ];then
@@ -213,14 +217,47 @@ fi
 if [ ${#skipped_not_found[@]} -ne 0 ];then
 	echo -n "${skipped_not_found[*]}" > skipped_not_found.txt
 fi
-if ! [ -f "json_cache.txt" ];then
+
+if ! [ -f "$json_cache_file" ];then
 	echo "writing to $json_cache_file"
 	printf '#!/bin/bash\ndeclare -A json_cache\n' > "$json_cache_file"
 	for x in "${!json_cache[@]}"; do
-		printf 'json_cache[%s]="%s"\n' "$x" "${json_cache[$x]}" >> "$json_cache_file"
-		echo -e "saving $x                                                               \r"
+		printf "json_cache['%s']='%s'\n" "${x//\'/\'\"\'\"\'}" "${json_cache[$x]//\'/\'\"\'\"\'}" >> "$json_cache_file"
+		echo -e "saving cache $x                                                               \r"
 	done
 	echo "finished writing to $json_cache_file"
 else
-	echo "$json_cache_file already present"
+	echo -n "$json_cache_file already present"
+	if [ "${#to_write_cache[@]}" -gt 0 ];then
+		echo ", adding new ones"
+		#echo "(${to_write_cache[@]})"
+		for x in "${to_write_cache[@]}"; do
+			printf "json_cache['%s']='%s'\n" "${x//\'/\'\"\'\"\'}" "${json_cache[$x]//\'/\'\"\'\"\'}" >> "$json_cache_file"
+			echo -e "saving cache $x                                                               \r"
+		done
+		echo -n finished saving new cache
+	fi
+	echo
+fi
+
+if ! [ -f "$json_halfduration_cache_file" ];then
+	echo "writing to $json_halfduration_cache_file"
+	printf '#!/bin/bash\ndeclare -A json_halfduration_cache\n' > "$json_halfduration_cache_file"
+	for x in "${!json_halfduration_cache[@]}"; do
+		printf "json_halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${json_halfduration_cache[$x]}" >> "$json_halfduration_cache_file"
+		echo -e "saving half duration $x                                                               \r"
+	done
+	echo "finished writing to $json_halfduration_cache_file"
+else
+	echo -n "$json_halfduration_cache_file already present"
+	if [ "${#to_write_halfduration_cache[@]}" -gt 0 ];then
+		echo ", adding new ones"
+		#echo "(${to_write_cache[@]})"
+		for x in "${to_write_halfduration_cache[@]}"; do
+			printf "json_halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${json_halfduration_cache[$x]}" >> "$json_halfduration_cache_file"
+			echo -e "saving half duration $x                                                               \r"
+		done
+		echo -n finished saving new half duration
+	fi
+	echo
 fi
