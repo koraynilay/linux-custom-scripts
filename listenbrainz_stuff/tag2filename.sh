@@ -31,6 +31,7 @@ info_func_mpd() {
 
 	local ret=$(printf '%s\n%s\n' "find filename \"$filename\"" "close" | nc $MPD_HOST $MPD_PORT | \
 		sed -E \
+		-e 's/\\/\\\\/g' \
 		-e 's/"/\\"/g' \
 		-e 's/^OK MPD [0-9]\.[0-9]{2}\.[0-9]$/{"json_start":"",/g' \
 		-e 's/([^:]*): (.*)/"\1": "\2",/g' \
