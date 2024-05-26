@@ -16,14 +16,13 @@ int main(int argc, char *argv[]) {
 
 	string[fsize] = '\0';
 	//
-	printf("%s", string);
 
 	PCRE2_UCHAR *outputbuffer = malloc(sizeof(char) * 20000);
 	int errornumber;
 	PCRE2_SIZE erroroffset;
 
 	PCRE2_SPTR pattern = (PCRE2_SPTR)argv[2];
-	pcre2_code *re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0, &errornumber, &erroroffset, NULL);
+	pcre2_code *re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED | PCRE2_MULTILINE, 0, &errornumber, &erroroffset, NULL);
 	if (re == NULL) {
 		PCRE2_UCHAR buffer[256];
 		pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
@@ -34,11 +33,15 @@ int main(int argc, char *argv[]) {
 	PCRE2_SPTR subject = (PCRE2_SPTR)string;
 	PCRE2_SIZE length = fsize;
 	PCRE2_SIZE startoffset = 0;
-	uint32_t options = PCRE2_SUBSTITUTE_EXTENDED;
+	uint32_t options = PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL;
 	PCRE2_SPTR rep = (PCRE2_SPTR)argv[3];
 	PCRE2_SIZE rlength = strlen(argv[3]);
 	PCRE2_SIZE outlengthptr;
-	pcre2_substitute(re, subject, length, startoffset, options, NULL, NULL, rep, rlength, outputbuffer, &outlengthptr);
+	int r = pcre2_substitute(re, subject, length, startoffset, options, NULL, NULL, rep, rlength, outputbuffer, &outlengthptr);
+	if(r == 0) {
+		printf("no matches :(\n");
+		return 1;
+	}
 
 	if(argv[4][0] != '-') {
 		f = fopen(argv[4], "wb");
