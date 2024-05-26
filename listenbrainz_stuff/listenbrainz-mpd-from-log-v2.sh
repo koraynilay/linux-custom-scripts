@@ -4,6 +4,7 @@
 
 #mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2"
 mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2-epoch"
+#mpd_log_file="$HOME/mpdmpdmpdlololog"
 mpd_log_file_length=$(wc -l "$mpd_log_file")
 
 jsons_to_submit=()
@@ -104,6 +105,27 @@ for song in $to_add;do
 		continue
 	fi
 
+	if [ "$use_epoch_log" -eq 1 ];then
+		cur_ts=$datetime
+	else
+		cur_ts="$(date -d "$datetime" +%s)"
+	fi
+
+	# save last timestamp
+	# if current timestamp - last timestamp < halfduration
+	# 	don't submit
+	#
+	# not much but better than assuming all "played" action are fully listened songs
+	#set -x
+	if [ "$cur_ts" = "$last_ts" ];then
+		last_ts=$cur_ts
+		#set +x
+		#echo "not enough duration '$song' ($filename), skipping"
+		skipped_duration+=("$i '$song' ($filename)")
+		((i++))
+		continue
+	fi
+
 	filename=${filename#\"} # remove double quotes (") from around the filename
 	filename=${filename%\"} # remove double quotes (") from around the filename
 
@@ -114,19 +136,22 @@ for song in $to_add;do
 		#listenbrainz_json="$(get_listenbrainz_json_mpd "$filename" "$datetime" "true" "false" "$media_player" "$client")"
 		track_metadata="$(get_almost_listenbrainz_json_mpd "$filename" "$media_player" "$client")"
 		exitcode=$?
-		if [ $exitcode -eq 1 ];then
+		if [ $exitcode -eq 247 ];then
 			#echo "no artist for '$song' ($filename), skipping"
-			skipped_noartist+=("$i '$song' ($filename)")
+			#skipped_noartist+=("$i '$song' ($filename)")
+			skipped_noartist+=("$filename")
 			((i++))
 			continue
-		elif [ $exitcode -eq 2 ];then
+		elif [ $exitcode -eq 248 ];then
 			#echo "no title for '$song' ($filename), skipping"
-			skipped_notitle+=("$i '$song' ($filename)")
+			#skipped_notitle+=("$i '$song' ($filename)")
+			skipped_notitle+=("$filename")
 			((i++))
 			continue
 		elif [ $exitcode -eq 249 ];then
 			#echo "not found '$song' ($filename), skipping"
-			skipped_not_found+=("$i '$song' ($filename)")
+			#skipped_not_found+=("$i '$song' ($filename)")
+			skipped_not_found+=("$filename")
 			((i++))
 			continue
 		fi
@@ -147,20 +172,7 @@ for song in $to_add;do
 		halfduration_cache[$filename]="$halfduration"
 	fi
 
-	if [ "$use_epoch_log" -eq 1 ];then
-		cur_ts=$datetime
-	else
-		cur_ts="$(date -d "$datetime" +%s)"
-	fi
-
-	# save last timestamp
-	# if current timestamp - last timestamp < halfduration
-	# 	don't submit
-	#
-	# not much but better than assuming all "played" action are fully listened songs
-	#set -x
 	sub=$((cur_ts - last_ts))
-	last_ts=$cur_ts
 	if [ $sub -lt $halfduration ];then
 		#set +x
 		#echo "not enough duration '$song' ($filename), skipping"
@@ -168,6 +180,7 @@ for song in $to_add;do
 		((i++))
 		continue
 	fi
+	last_ts=$cur_ts
 	#set +x
 
 	listenbrainz_json="

@@ -59,8 +59,8 @@ sub listenbrainz_json {
 
 	#print Dumper(\%lb_json);
 
-	exit 1 if !$lb_json_tm->{artist_name};
-	exit 2 if !$lb_json_tm->{track_name};
+	exit 247 if !$lb_json_tm->{artist_name};
+	exit 248 if !$lb_json_tm->{track_name};
 
 	#my $final_json = JSON->new;
 	#$final_json->canonical(1);
@@ -118,8 +118,8 @@ sub almost_listenbrainz_json {
 
 	#print Dumper(\%lb_json);
 
-	exit 1 if !$lb_json{artist_name};
-	exit 2 if !$lb_json{track_name};
+	exit 247 if !$lb_json{artist_name};
+	exit 248 if !$lb_json{track_name};
 
 	#my $final_json = JSON->new;
 	#$final_json->canonical(1);
