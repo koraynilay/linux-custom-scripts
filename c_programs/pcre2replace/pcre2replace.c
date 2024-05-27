@@ -20,13 +20,13 @@ int main(int argc, char *argv[]) {
 	int errornumber;
 	PCRE2_SIZE erroroffset;
 
-	char *ps = argv[2];
-	unsigned int patlen = strlen(ps);
-	unsigned char pattern[8192+10];
-	sprintf((char *)pattern, "%s%.*s%s", "", patlen, ps, "");
-	//PCRE2_SPTR pattern = (PCRE2_SPTR)argv[2];
+	//char *ps = argv[2];
+	//unsigned int patlen = strlen(ps);
+	//unsigned char pattern[8192+10];
+	//sprintf((char *)pattern, "%s%.*s%s", "", patlen, ps, "");
+	PCRE2_SPTR pattern = (PCRE2_SPTR)argv[2];
 	long unsigned int coptions = PCRE2_MULTILINE;
-	printf("-buffer:%s;options: %04lx\n", pattern, coptions);
+	printf("-pattern:%s;options: %04lx\n", pattern, coptions);
 	pcre2_code *re = pcre2_compile(pattern, -1, coptions, &errornumber, &erroroffset, NULL);
 	if (re == NULL) {
 		PCRE2_UCHAR buffer[256];
@@ -36,18 +36,17 @@ int main(int argc, char *argv[]) {
 	}
 
 	PCRE2_SPTR subject = (PCRE2_SPTR)string;
-	size_t length = 20000;
+	size_t length = fsize;
 	int startoffset = 0;
-	unsigned int moptions = PCRE2_SUBSTITUTE_GLOBAL | PCRE2_SUBSTITUTE_EXTENDED;
+	unsigned int roptions = PCRE2_SUBSTITUTE_GLOBAL | PCRE2_SUBSTITUTE_EXTENDED;
 	//unsigned int moptions = 0;
 	PCRE2_SPTR rep = (PCRE2_SPTR)argv[3];
 	PCRE2_SIZE rlength = strlen(argv[3]);
 
-	PCRE2_UCHAR *outputbuffer = malloc(sizeof(char) * 100000);
-	PCRE2_SIZE outlengthptr = 100000;
+	PCRE2_UCHAR *outputbuffer = malloc(sizeof(char) * fsize*2);
+	PCRE2_SIZE outlengthptr = fsize*2;
 
-	PCRE2_SIZE* ovector;
-	uint32_t ovecsize = 128;
+	uint32_t ovecsize = 512;
 	pcre2_match_data *match_data = pcre2_match_data_create(ovecsize, NULL);
 	//int r = pcre2_match(re, (PCRE2_SPTR)string, (int)length, startoffset, moptions, match_data, NULL);
 
@@ -57,7 +56,7 @@ int main(int argc, char *argv[]) {
 			(int)length,
 			startoffset,
 			//PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL,
-			moptions,
+			roptions,
 			match_data,
 			NULL,
 			rep,
