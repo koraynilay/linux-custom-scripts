@@ -5,3 +5,11 @@ scrn
 scrap
 chroot_stuff/users/koray/
 chroot_stuff/users/root/
+
+listenbrainz_stuff/skipped_*
+listenbrainz_stuff/*_cache.txt*
+listenbrainz_stuff/jj*
+listenbrainz_stuff/ss*
+listenbrainz_stuff/tt*
+listenbrainz_stuff/*cureq*
+listenbrainz_stuff/to_sub.json
