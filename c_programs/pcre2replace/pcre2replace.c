@@ -21,8 +21,14 @@ int main(int argc, char *argv[]) {
 	int errornumber;
 	PCRE2_SIZE erroroffset;
 
-	PCRE2_SPTR pattern = (PCRE2_SPTR)argv[2];
-	pcre2_code *re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED | PCRE2_MULTILINE, 0, &errornumber, &erroroffset, NULL);
+	char *ps = argv[2];
+	unsigned int patlen = strlen(ps);
+	unsigned char pattern[8192+10];
+	sprintf((char *)pattern, "%s%.*s%s", "", patlen, ps, "");
+	//PCRE2_SPTR pattern = (PCRE2_SPTR)argv[2];
+	long unsigned int coptions = PCRE2_MULTILINE | PCRE2_FIRSTLINE;
+	printf("-buffer:%s;options: %04lx\n", pattern, coptions);
+	pcre2_code *re = pcre2_compile(pattern, -1, coptions, &errornumber, &erroroffset, NULL);
 	if (re == NULL) {
 		PCRE2_UCHAR buffer[256];
 		pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
@@ -30,15 +36,37 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	PCRE2_SPTR subject = (PCRE2_SPTR)string;
-	PCRE2_SIZE length = fsize;
-	PCRE2_SIZE startoffset = 0;
-	uint32_t options = PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL;
-	PCRE2_SPTR rep = (PCRE2_SPTR)argv[3];
-	PCRE2_SIZE rlength = strlen(argv[3]);
-	PCRE2_SIZE outlengthptr;
-	int r = pcre2_substitute(re, subject, length, startoffset, options, NULL, NULL, rep, rlength, outputbuffer, &outlengthptr);
-	if(r == 0) {
+	//PCRE2_SPTR subject = (PCRE2_SPTR)string;
+	size_t length = 20000;
+	int startoffset = 0;
+	//uint32_t moptions = PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL;
+	unsigned int moptions = 0;
+	//PCRE2_SPTR rep = (PCRE2_SPTR)argv[3];
+	//PCRE2_SIZE rlength = strlen(argv[3]);
+	//PCRE2_SIZE outlengthptr;
+	PCRE2_SIZE* ovector;
+	uint32_t ovecsize = 128;
+	pcre2_match_data *match_data = pcre2_match_data_create(ovecsize, NULL);
+	int r = pcre2_match(re, (PCRE2_SPTR)string, (int)length, startoffset, moptions, match_data, NULL);
+
+	/*
+	int r = pcre2_substitute(
+			re,
+			subject,
+			length,
+			0,
+			PCRE2_SUBSTITUTE_EXTENDED | PCRE2_SUBSTITUTE_GLOBAL,
+			NULL,
+			NULL,
+			rep,
+			rlength,
+			outputbuffer,
+			&outlengthptr
+		);
+		*/
+
+	printf("-subject:%s;r:%d\n", string, r);
+	if(r < 0) {
 		printf("no matches :(\n");
 		return 1;
 	}

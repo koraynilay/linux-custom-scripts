@@ -1,0 +1,18 @@
+ sususu
+void askdbwalkjdb(a sus);
+
+ restituisce una rubrica vuota, NULL se errore
+ContactBookADTptr mkCBook() {
+
+ controlla se la rubrica e' vuota, -1 se NULL
+int isEmptyCBook(const ContactBookADT* book) {
+
+ aggiunge un contatto alla rubrica (restituisce false se l'elemento era gia' presente, true altrimenti)
+_Bool cbook_add(ContactBookADTptr book, ContactPtr cnt) {
+
+
+ toglie un elemento all'insieme (restituisce false se l'elemento non era presente, true altrimenti
+_Bool cbook_remove(ContactBookADTptr book, char* name, char* surname) {
+
+ Crea un nuovo contatto
+ContactPtr mkContact(char* name, char* surname, char* mobile, char* url);
