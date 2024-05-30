@@ -137,12 +137,14 @@ for song in $to_add;do
 		track_metadata="$(get_almost_listenbrainz_json_mpd "$filename" "$media_player" "$client")"
 		exitcode=$?
 		if [ $exitcode -eq 247 ];then
+			#echo
 			#echo "no artist for '$song' ($filename), skipping"
 			#skipped_noartist+=("$i '$song' ($filename)")
 			skipped_noartist+=("$filename")
 			((i++))
 			continue
 		elif [ $exitcode -eq 248 ];then
+			#echo
 			#echo "no title for '$song' ($filename), skipping"
 			#skipped_notitle+=("$i '$song' ($filename)")
 			skipped_notitle+=("$filename")
@@ -230,7 +232,7 @@ if ! [ -f "$json_cache_file" ];then
 	printf '#!/bin/bash\ndeclare -A json_cache\n' > "$json_cache_file"
 	for x in "${!json_cache[@]}"; do
 		printf "json_cache['%s']='%s'\n" "${x//\'/\'\"\'\"\'}" "${json_cache[$x]//\'/\'\"\'\"\'}" >> "$json_cache_file"
-		echo -e "saving cache $x                                                               \r"
+		echo -e "saving cache $x;"
 	done
 	echo "finished writing to $json_cache_file"
 else
@@ -240,7 +242,7 @@ else
 		#echo "(${to_write_cache[@]})"
 		for x in "${to_write_cache[@]}"; do
 			printf "json_cache['%s']='%s'\n" "${x//\'/\'\"\'\"\'}" "${json_cache[$x]//\'/\'\"\'\"\'}" >> "$json_cache_file"
-			echo -e "saving cache $x                                                               \r"
+			echo -e "saving cache $x;                                                               \r"
 		done
 		echo -n finished saving new cache
 	fi
@@ -252,7 +254,7 @@ if ! [ -f "$halfduration_cache_file" ];then
 	printf '#!/bin/bash\ndeclare -A halfduration_cache\n' > "$halfduration_cache_file"
 	for x in "${!halfduration_cache[@]}"; do
 		printf "halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${halfduration_cache[$x]}" >> "$halfduration_cache_file"
-		echo -e "saving half duration $x                                                               \r"
+		echo -e "saving half duration $x;"
 	done
 	echo "finished writing to $halfduration_cache_file"
 else
@@ -262,7 +264,7 @@ else
 		#echo "(${to_write_cache[@]})"
 		for x in "${to_write_halfduration_cache[@]}"; do
 			printf "halfduration_cache['%s']=%s\n" "${x//\'/\'\"\'\"\'}" "${halfduration_cache[$x]}" >> "$halfduration_cache_file"
-			echo -e "saving half duration $x                                                               \r"
+			echo -e "saving half duration $x;"
 		done
 		echo -n finished saving new half duration
 	fi
