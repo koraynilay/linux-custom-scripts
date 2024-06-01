@@ -2,6 +2,11 @@
 . ./tag2filename.sh
 . "$HOME/.config/listenbrainz-mpd-from-logrc"
 
+LISTENBRAINZ_IMPORT_DEBUG=0
+LISTENBRAINZ_TOKEN="aa"
+#LISTENBRAINZ_TOKEN_FILE=""
+LISTENBRAINZ_IMPORT_DRY=1
+
 #mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2"
 mpd_log_file="$HOME/mpd_log_for_listenbrainz-v2-epoch"
 #mpd_log_file="$HOME/mpdmpdmpdlololog"
@@ -41,12 +46,19 @@ to_add=$(<"$mpd_log_file")
 #UPLINE=$(tput cuu1)
 #ERASELINE=$(tput el)
 
+outdir="to_sub"
+if ! [ -d "$outdir" ];then
+	mkdir -v "$outdir"
+fi
+
 IFS=$'\n'
 i=0
+j=1
 skipped_noplayer=0
 use_epoch_log=1
 for song in $to_add;do
 	jtsl="${#jsons_to_submit[@]}"
+	jtsl=$((jtsl + ((j-1) * 1000)))
 	skdl="${#skipped_duration[@]}"
 	skpl=$skipped_noplayer
 	skal="${#skipped_noartist[@]}"
@@ -61,7 +73,7 @@ for song in $to_add;do
 	fi
 	#echo "line $i ($vald); added: $jtsl; skipped playduration: $skdl; skipped no player: $skpl;"
 	#echo "skipped no artist: $skal; skipped error: $skel; skipped not found: $sknl;"
-	echo -ne "line $i ($vald); added: $jtsl; skipped: playduration: $skdl; no player: $skpl; no artist: $skal; no title: $sktl; error: $skel; not found: $sknl;\r"
+	echo -ne "line $i ($vald); added tot: $jtsl; skipped: playduration: $skdl; no player: $skpl; no artist: $skal; no title: $sktl; error: $skel; not found: $sknl;\r"
 
 
 #	if [ "$i" -eq 2000 ];then
@@ -197,18 +209,24 @@ for song in $to_add;do
 	#echo $listenbrainz_json | jq
 	#echo $filename
 	jsons_to_submit+=("$listenbrainz_json")
+
+	if [ ${#jsons_to_submit[@]} -eq 1000 ];then
+		#listenbrainz_submit_import "${jsons_to_submit[@]}"
+		echo
+		echo $j
+		payload="$(IFS=, ; echo "${jsons_to_submit[*]}")"
+		echo "[$payload]" > $outdir/to_sub_$j.json
+		jsons_to_submit=()
+		((j++))
+	fi
 	((i++))
 done
 
-echo
-
-LISTENBRAINZ_IMPORT_DEBUG=1
-LISTENBRAINZ_TOKEN="aa"
-#LISTENBRAINZ_TOKEN_FILE=""
-LISTENBRAINZ_IMPORT_DRY=1
 #listenbrainz_submit_import "${jsons_to_submit[@]}"
+echo
+echo $j
 payload="$(IFS=, ; echo "${jsons_to_submit[*]}")"
-echo "[$payload]" > to_sub.json
+echo "[$payload]" > $outdir/to_sub_$j.json
 
 IFS=$'\n'
 if [ ${#skipped_duration[@]} -ne 0 ];then
