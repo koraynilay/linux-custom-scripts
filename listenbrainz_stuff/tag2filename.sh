@@ -107,6 +107,10 @@ get_filename_from_tags_mpd() {
 listenbrainz_submit_import() {
 	local func_name="$FUNCNAME"
 	local log_start="$func_name(): "
+	local from_file="false"
+	if [ "$1" = "true" ];then
+		from_file="true"
+	fi
 
 	local token=""
 	if [ -n "$LISTENBRAINZ_TOKEN" ];then
@@ -132,23 +136,38 @@ listenbrainz_submit_import() {
 	if [ "${LISTENBRAINZ_IMPORT_DRY:=0}" -eq 1 ];then
 		echo="echo"
 	fi
+	
+	IFS=""
+	local payload=""
+	if [ "$from_file" = "true" ];then
+		local datafile=$2
+		payload="$(<$datafile)"
+	else
+		local jsons=("$@")
+		#echo ${jsons[0]}
+		#echo ${jsons[1]}
+		payload="$(local IFS=, ; echo "${jsons[*]}")"
 
+	fi
 
-	local jsons=("$@")
-	#echo ${jsons[0]}
-	#echo ${jsons[1]}
-
-	local payload="$(local IFS=, ; echo "${jsons[*]}")"
-
-	$echo curl "$url" -X POST \
-		-H "Authorization: token $token" \
-		-H "Content-Type: application/json" \
-		-d "{
+	local data="{
 			\"listen_type\": \"import\",
 			\"payload\": [
 				$payload
 			]
 		}"
+
+	if [ "${LISTENBRAINZ_IMPORT_DEBUG}" -eq 1 ];then
+		echo $data
+	fi
+
+	# no need to compact the json, curl will do it
+	$echo curl "$url" -X POST \
+		-H "Authorization: token $token" \
+		-H "Content-Type: application/json" \
+		-d '@-' <<-EOF
+				$data
+			EOF
 }
 
 check_if_correct() {
