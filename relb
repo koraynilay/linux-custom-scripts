@@ -5,7 +5,33 @@
 source $HOME/.config/relb_envars
 
 linux_server_build() {
-	PATH="$ue4_path/../clang35_prebuilt/bin:$PATH" $ue4_path/Engine/Build/BatchFiles/RunUAT.sh BuildCookRun -project=$game_server_path/ShooterGame.uproject -noP4 -clientconfig=Development -serverconfig=Development -nocompileeditor -ue4exe=UE4Editor -utf8output -server -serverplatform=Linux -noclient -build -cook -map=B_redfalls+Highrise_Collisions_Temp+Highrise_Vista+Highrise_Lights+Highrise_Audio+ShooterEntry+Highrise_Gameplay+Highrise_Meshing+Sanctuary+Highrise+clash+clash_gameplay+clash_gameplay_tdm+clash_gameplay_killconf+detour+dev_gym+gateway+grandview_gameplay+grandview+grandview_gameplay_elimination+grandview_gameplay_rush+mammoth+namsan+promenade+promenade_night+reactor+reactor_night+redfalls+redfalls_gameplay+redfalls_gameplay_blitz+redfalls_gameplay_turfwar+C_redfalls+L_redfalls+redfalls_bloodmoon+station_gameplay+station_gameplay_blitz+station+station_gameplay_turfwar+trench+tutorial+B_vertigo+C_vertigo+vertigo+L_vertigo -unversionedcookedcontent -compressed -stage -package -stagingdirectory=$server_output_folder -cmdline=" -Messaging" -addcmdline="-SessionId=4745CDB71B080E0A003702C3899401A6 -SessionOwner='koraynilay' -SessionName='ciao'" -compile
+	PATH="$ue4_path/../clang35_prebuilt/bin:$PATH" \
+		$ue4_path/Engine/Build/BatchFiles/RunUAT.sh \
+		BuildCookRun \
+		-project=$game_server_path/ShooterGame.uproject \
+		-noP4 \
+		-clientconfig=Development \
+		-serverconfig=Development \
+		-nocompileeditor \
+		-ue4exe=UE4Editor \
+		-utf8output \
+		-server \
+		-serverplatform=Linux \
+		-noclient \
+		-build \
+		-cook \
+		-map=B_redfalls+Highrise_Collisions_Temp+Highrise_Vista+Highrise_Lights+Highrise_Audio+ShooterEntry+Highrise_Gameplay+Highrise_Meshing+Sanctuary+Highrise+clash+clash_gameplay+clash_gameplay_tdm+clash_gameplay_killconf+detour+dev_gym+gateway+grandview_gameplay+grandview+grandview_gameplay_elimination+grandview_gameplay_rush+mammoth+namsan+promenade+promenade_night+reactor+reactor_night+redfalls+redfalls_gameplay+redfalls_gameplay_blitz+redfalls_gameplay_turfwar+C_redfalls+L_redfalls+redfalls_bloodmoon+station_gameplay+station_gameplay_blitz+station+station_gameplay_turfwar+trench+tutorial+B_vertigo+C_vertigo+vertigo+L_vertigo \
+		-unversionedcookedcontent \
+		-compressed \
+		-stage \
+		-package \
+		-stagingdirectory=$server_output_folder \
+		-cmdline=" \
+		-Messaging" \
+		-addcmdline="-SessionId=4745CDB71B080E0A003702C3899401A6 \
+		-SessionOwner='koraynilay' \
+		-SessionName='ciao'" \
+		-compile
 	notify-send -a relb "finished compiling relb"
 }
 menu_server_start() {
@@ -25,7 +51,7 @@ relb_cd() {
 		m|menu-server) cd $relb_menu_server;;
 		g|game-server) cd $game_server_path/Source;;
 		l|linux-build) cd $relb_game_server;;
-		ue4|SourceUE4_koraynilay) cd $relb_base_path/SourceUE4_koraynilay;;
+		ue4|SourceUE4) cd $ue4_path;;
 		w|wine|prefix|wineprefix) cd $relb_base_path/.wine;;
 		wa|wine_appdata) cd $relb_base_path/.wine/drive_c/users/koraynilay/AppData/Roaming/AerialNinjaLauncher;;
 		d|deployer) cd $relb_deployer;;
@@ -48,6 +74,11 @@ pull_g() {
 	echo "RUN: git stash pop"
 }
 
+change_lb_launcher_setting() {
+	relb_cd wa
+	ln -vs settings_${1}.ini settings.ini -f
+}
+
 menu_server_change_env() {
 	cd $relb_menu_server
 	ln -svf .env_$1 .env
@@ -63,6 +94,7 @@ main() {
 		d|deployer-node) deployer_start;;
 		u|update|git-pull|pull) pull_relb;;
 		gu) pull_g;;
+		cs|change_launcher_settings) change_lb_launcher_setting $2;;
 		v|vs|lb-launcher-settings|settings) vim $relb_base_path/.wine/drive_c/users/koraynilay/AppData/Roaming/AerialNinjaLauncher/settings.ini;;
 		r) PATH="$relb_base_path/clang35_prebuilt/bin:$PATH" /usr/bin/mono "$relb_base_path/SourceUE4/Engine/Binaries/DotNET/UnrealBuildTool.exe" ShooterGame Development Linux -project="$relb_base_path/relb-game-server/ShooterGame.uproject" -editorrecompile -progress -noubtmakefiles -NoHotReloadFromIDE;;
 		cd) relb_cd $2;;

@@ -113,6 +113,7 @@ dovcsh() {
 }
 
 # main
+set -x
 m="git --git-dir=$HOME/.config/dotfiles-minimal/dotfiles-minimal.git --work-tree=$HOME -c status.showUntrackedFiles=no"
 ycmd="yadm"
 if [ -z $1 ];then
