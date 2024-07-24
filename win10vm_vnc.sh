@@ -25,12 +25,17 @@ qemu-system-x86_64 \
 	-drive file=win10.qcow2,if=virtio,cache=none,aio=native,cache.direct=on \
 	\
 	-vga vmware \
-	-display sdl,gl=on \
+	-display none \
 	\
 	-device ich9-intel-hda \
 	-audiodev pa,id=snd0 \
 	-device hda-output,audiodev=snd0 \
-	-cdrom virtio-win-0.1.171.iso
+	-cdrom virtio-win-0.1.171.iso \
+	\
+	-vnc :0 \
+	\
+	-usbdevice tablet
+	#-display sdl,gl=on \
 
 	#-device virtio-keyboard-pci \
 	#-device virtio-tablet-pci \
