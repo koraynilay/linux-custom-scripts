@@ -32,7 +32,9 @@ linux_server_build() {
 		-SessionOwner='koraynilay' \
 		-SessionName='ciao'" \
 		-compile
-	notify-send -a relb "finished compiling relb"
+	if [ -n "$DISPLAY" ];then
+		notify-send -a relb "finished compiling relb"
+	fi
 }
 menu_server_start() {
 	cd $relb_menu_server
