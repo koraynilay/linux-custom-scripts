@@ -33,7 +33,7 @@ fi
 cava_id=$(xdotool search --name "^$deskcat\$")
 peaclock_id=$(xdotool search --name "^$deskpct\$")
 _2peaclock_id=$(xdotool search --name "^$_2deskpct\$")
-sleep 1
+sleep 1.5
 # overrideredirect 1
 xdotool windowunmap --sync $cava_id
 xdotool set_window --overrideredirect 1 $cava_id

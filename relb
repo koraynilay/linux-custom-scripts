@@ -42,7 +42,7 @@ menu_server_start() {
 }
 game_server_start() {
 	cd $relb_game_server
-	./ShooterGameServer.sh -log -token=__secret__ -menuhost=http://localhost:4000 $@
+	./ShooterGameServer.sh -log -token=__secret__ -menuhost=http://$relb_ip:4000 $@
 }
 deployer_start() {
 	cd $relb_deployer
@@ -86,6 +86,26 @@ menu_server_change_env() {
 	ln -svf .env_$1 .env
 }
 
+umap_reader() {
+	#oflag="$relb_maps_dst/${1:t:r}"
+	# for ${1:t:r} and ${(C)1} see:
+	# - https://stackoverflow.com/a/36689910 :t:r
+	# - https://stackoverflow.com/a/12422397 (C)
+	# - https://zsh.sourceforge.io/Doc/Release/Expansion.html#Modifiers
+	
+	mapfolder="${(C)1%%_*}"
+	if [ "$mapfolder" = "Grandview" ];then
+		mapfolder="GrandView"
+	elif [ "$mapfolder" = "Redfalls" ];then
+		mapfolder="RedFalls"
+	fi
+
+	mflag="$relb_maps_src/$mapfolder/$1.umap"
+	oflag="$relb_maps_dst/$1"
+	mkdir -vp "$oflag"
+	umap-reader -m "$mflag" -o "$oflag"
+}
+
 main() {
 	case $1 in
 		l|linux-server-build) linux_server_build;;
@@ -94,6 +114,7 @@ main() {
 		yp|menu-server-envprod) menu_server_change_env "prod";;
 		s|game-server-start) game_server_start $@;;
 		d|deployer-node) deployer_start;;
+		ur|umap-reader) umap_reader ${@:2};;
 		u|update|git-pull|pull) pull_relb;;
 		gu) pull_g;;
 		cs|change_launcher_settings) change_lb_launcher_setting $2;;
