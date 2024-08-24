@@ -136,7 +136,8 @@ if [ $update -eq 1 ];then
 				data=$(date -d @$(getfattr --only-values -n system.ntfs_crtime_be "$a" 2>/dev/null | perl -MPOSIX -0777 -ne '$t = unpack("Q>"); print $t/10000000-11644473600') +%Y-%m-%d_%H-%M-%S)
 			else
 				#data=$(date -d "$(stat "$a" | nl | awk '$1 == 8 {print $3,$4}')" +%Y-%m-%d_%H-%M-%S)
-				data=$(date -d "$(stat -c '%w' "$a")" +%Y-%m-%d_%H-%M-%S)
+				data=$(date -d "$(stat -c '%y' "$a")" +%Y-%m-%d_%H-%M-%S)
+				# was %w for creation date, but seems to be wrong sometimes
 			fi
 			if [ $dry -eq 0 ];then
 				echo "$data \"$a\"" >> $mf
