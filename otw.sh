@@ -11,7 +11,9 @@ printhelp() {
 
 listwargames() {
 	for game in "${!wargames[@]}"; do
-		echo "$game (port ${wargames[$game]})"
+		echo "$game"
+		#echo "$game (port ${wargames[$game]})"
+		#echo "(port ${wargames[$game]}) $game"
 	done
 	exit 0
 }
@@ -36,7 +38,8 @@ OPTS="hlp:"
 
 getopt --test
 if [ "$?" -eq 4 ];then
-	set -- $(getopt --options="$OPTS" --name "$0" -- "$@")
+	eval set -- $(getopt --options="$OPTS" --name "$0" -- "$@")
+	# sets $1 to --
 fi
 
 while getopts "$OPTS" opt;do #r #per -r (resume)
@@ -48,26 +51,65 @@ while getopts "$OPTS" opt;do #r #per -r (resume)
 	esac
 done
 
-if [ -z "$1" ];then
-	echo "$0: missing wargame argument"
-	echo "Try '$0 -h' for more information"
+#if [ "$1" = "--" ] && [ -z "$2" ] || [ -z "$1" ];then
+
+# $1 is --
+if [ -z "$2" ];then
+	echo "$(basename $0): missing wargame argument"
+	echo "Try '$(basename $0) -h' for more information"
+	exit 1
 fi
 
-wargame="$1"
-wargameport="${wargames[$wargame]}"
+wargame="$2"
 
-n=0 #TODO: start at last available password
+echo $wargame
+if [ -z "${wargames[$wargame]}" ];then
+	echo "unsupported wargame, use -l to have a list of supported wargames"
+	exit 5
+fi
+
+wargameport="${wargames[$wargame]}"
+filepassname="password"
+
+if ! [ -d "$wargame" ];then
+	#echo "creating $wargame folder in current working directory ($PWD)"
+	echo "creating $wargame folder and cd'ing to it"
+	mkdir -v "$wargame"
+fi
+
+if ! [ "$(basename $PWD)" = "$wargame" ];then
+	cd "$wargame" || exit 99
+fi
+
+n=0 #TODO: start at index of last available password
 while true; do
 	wargameuser="$wargame$n"
 	wargamedomain="$wargame.labs.overthewire.org"
+	fp="$wargameuser/$filepassname"
 
-	read -rp "type password for $wargameuser: " pass
-	echo "$pass" > "$wargameuser/$filepassname"
+	if ! [ -f "$fp" ];then
+		read -rp "type password for $wargameuser: " pass
+		if [ -z "$pass" ];then
+			echo "no password provided for $wargameuser, exiting"
+			exit 4
+		fi
+
+		mkdir "$wargameuser"
+		echo "$pass" > "$fp"
+	fi
 
 	echo "connecting to $wargame with user $wargameuser"
-	sshpass -f"$wargameuser/$filepassname" ssh "$wargameuser@$wargamedomain" -p "$wargameport"
+	sshpass -f"$fp" ssh "$wargameuser@$wargamedomain" -p "$wargameport" || exit 6
 
-	n=$((n+1))
+	read -n1 -rp "continue to next level/reconnect to current level/quit? [c/r/q]: " cont
+	echo
+	if [ "$cont" = "q" ] || [ "$cont" = "" ];then
+		exit 0
+	fi
+
+	if ! [ "$cont" = "r" ];then
+		n=$((n+1))
+	fi
 done
 
 
