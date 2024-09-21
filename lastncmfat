@@ -152,7 +152,7 @@ if [ $update -eq 1 ];then
 	echo -E "$plf"
 	echo -ne "playlist tmp:\t"
 	echo -E "$plf_tmp"
-	for csong in `cat $mft | sort -nr | awk '!/^#/' | tr -d '"' | awk '/\.mp3$|\.wav$|\.flac$|\.m4a$/ {print substr($0, 21)}'`;do
+	for csong in `cat $mft | sort -nr | awk '!/^#/' | tr -d '"' | awk '{print substr($0, 21)}'`;do
 		if [ -z "$(grep -F "$csong" "$plf")" ];then
 			echo -ne "plf added\t"
 			echo -E " ${csong}"

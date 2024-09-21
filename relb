@@ -6,6 +6,9 @@ source $HOME/.config/relb_envars
 
 linux_server_build() {
 	nce="-nocompileeditor"
+	if [ "$1" = "r" ];then
+		nce=""
+	fi
 	PATH="$ue4_path/../clang35_prebuilt/bin:$PATH" \
 		$ue4_path/Engine/Build/BatchFiles/RunUAT.sh \
 		BuildCookRun \
@@ -108,7 +111,7 @@ umap_reader() {
 
 main() {
 	case $1 in
-		l|linux-server-build) linux_server_build;;
+		l|linux-server-build) linux_server_build $@;;
 		y|menu-server-start) menu_server_start;;
 		yd|menu-server-envdev) menu_server_change_env "dev";;
 		yp|menu-server-envprod) menu_server_change_env "prod";;
