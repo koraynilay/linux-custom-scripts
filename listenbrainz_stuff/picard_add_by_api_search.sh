@@ -20,5 +20,5 @@ for folder in "$@"; do
 	#echo "$mbid"
 	curl http://127.0.0.1:8000/openalbum\?id\="$mbid"
 	echo
-	sleep 0.3
+	sleep 1
 done
