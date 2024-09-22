@@ -34,11 +34,11 @@ wargames=(
 	['formulaone']='2232'
 )
 
-OPTS="hlp:"
+OPTS="hlp:n:"
 
 getopt --test
 if [ "$?" -eq 4 ];then
-	eval set -- $(getopt --options="$OPTS" --name "$0" -- "$@")
+	eval set -- "$(getopt --options="$OPTS" --name "$0" -- "$@")"
 	# sets $1 to --
 fi
 
@@ -47,6 +47,7 @@ while getopts "$OPTS" opt;do #r #per -r (resume)
 		p)wargameport="$OPTARG";;
 		h)printhelp;;
 		l)listwargames;;
+		n)n="$OPTARG";;
 		?)exit 2;;
 	esac
 done
@@ -55,33 +56,39 @@ done
 
 # $1 is --
 if [ -z "$2" ];then
-	echo "$(basename $0): missing wargame argument"
-	echo "Try '$(basename $0) -h' for more information"
+	echo "$(basename "$0"): missing wargame argument"
+	echo "Try '$(basename "$0") -h' for more information"
 	exit 1
 fi
 
 wargame="$2"
 
-echo $wargame
 if [ -z "${wargames[$wargame]}" ];then
-	echo "unsupported wargame, use -l to have a list of supported wargames"
+	echo "unsupported wargame "$wargame", use -l to have a list of supported wargames"
 	exit 5
 fi
 
 wargameport="${wargames[$wargame]}"
 filepassname="password"
 
-if ! [ -d "$wargame" ];then
+if [[ "$(basename "$PWD")" =~ $wargame[0-9]+ ]];then
+	cd ..
+elif ! [ -d "$wargame" ];then
 	#echo "creating $wargame folder in current working directory ($PWD)"
 	echo "creating $wargame folder and cd'ing to it"
 	mkdir -v "$wargame"
-fi
-
-if ! [ "$(basename $PWD)" = "$wargame" ];then
+elif ! [ "$(basename "$PWD")" = "$wargame" ];then
 	cd "$wargame" || exit 99
 fi
 
-n=0 #TODO: start at index of last available password
+if [ -z "$n" ];then
+	num="$(fd -t f | sort | tail -1 | sed -E 's/leviathan([0-9])+.*/\1/g')"
+	if [ -z "$num" ];then
+		n=0
+	else
+		n="$num"
+	fi
+fi
 while true; do
 	wargameuser="$wargame$n"
 	wargamedomain="$wargame.labs.overthewire.org"
