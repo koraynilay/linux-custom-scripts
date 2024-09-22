@@ -89,6 +89,7 @@ if [ -z "$n" ];then
 		n="$num"
 	fi
 fi
+n=0
 while true; do
 	wargameuser="$wargame$n"
 	wargamedomain="$wargame.labs.overthewire.org"
