@@ -2,12 +2,12 @@
 deskcat='cava_desktop'
 deskpct='peaclock_desktop'
 _2deskpct='_2peaclock_desktop'
-geomcava='370 260' #width height
+geomcava='370 210' #width height
 geompeaclock='470 260' #width height
 _2geompeaclock='470 260' #width height
-poscava='1550 800' #absolute x y (from top_left of monitor)
-pospeaclock='10 340' #absolute x y (from top_left of monitor)
-_2pospeaclock='1930 290' #absolute x y (from top_left of monitor)
+poscava='1550 850' #absolute x y (from top_left of monitor)
+pospeaclock='10 325' #absolute x y (from top_left of monitor)
+_2pospeaclock='1930 275' #absolute x y (from top_left of monitor)
 cava_id=$(xdotool search --name "^$deskcat\$")
 peaclock_id=$(xdotool search --name "^$deskpct\$")
 _2peaclock_id=$(xdotool search --name "^$_2deskpct\$")
