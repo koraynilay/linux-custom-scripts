@@ -77,6 +77,7 @@ elif ! [ -d "$wargame" ];then
 	#echo "creating $wargame folder in current working directory ($PWD)"
 	echo "creating $wargame folder and cd'ing to it"
 	mkdir -v "$wargame"
+	cd "$wargame" || exit 99
 elif ! [ "$(basename "$PWD")" = "$wargame" ];then
 	cd "$wargame" || exit 99
 fi
@@ -90,9 +91,10 @@ if [ -z "$n" ];then
 	fi
 fi
 n=0
+wargamedomain="$wargame.labs.overthewire.org"
+ssh-keyscan "$wargamedomain" >> ~/.ssh/known_hosts
 while true; do
 	wargameuser="$wargame$n"
-	wargamedomain="$wargame.labs.overthewire.org"
 	fp="$wargameuser/$filepassname"
 
 	if ! [ -f "$fp" ];then

@@ -19,7 +19,7 @@ case $1 in
 	exit)
 		efif="/efi/loader/entries"
 		main(){
-			entries="terminal\nhtop\nvirtual keyboard\nhibernate\nlogout\nrestart to other kernel\nrestart to windows\nrestart\nshutdown"
+			entries="terminal\nhtop\nvirtual keyboard\nhibernate\nlogout\nrestart to other kernel\nrestart to firmware\nrestart to windows\nrestart\nshutdown"
 			msg="Up: $(uptime -p | awk '{print $2"h "$4"m"}')"
 			res=$(echo -e "$entries" | rofi -theme "$rofi_theme" -p "$msg"  -width 10 -xoffset 0 -lines 5 -no-fixed-num-lines -dmenu)
 
@@ -48,6 +48,12 @@ case $1 in
 					;;
 				restart\ to\ other\ kernel)
 					kerns
+					;;
+				restart\ to\ firmware)
+					ask "restart"
+					mpc pause
+					killall -9 conky
+					systemctl reboot --firmware-setup
 					;;
 				restart\ to\ windows)
 					ask "restart to windows"
