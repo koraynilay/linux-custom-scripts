@@ -1,6 +1,6 @@
 #!/bin/sh
 file="$HOME/.config/copyq/copyq_tab_JmNsaXBib2FyZA==.dat $HOME/.local/share/copyq"
-folder="/I/Raccolte/linux/koraynilay/copyq_dat_file"
+folder="/Q/copyq_dat_file"
 cd "$folder"
 rsync --progress -xvaHAX --delete -c --cc xxh3 $file .
 git status

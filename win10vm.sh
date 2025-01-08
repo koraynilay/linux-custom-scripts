@@ -1,11 +1,13 @@
 #!/bin/sh
 #vmsfolder='/C/linux/vms'
-vmsfolder='/I/vms/qemu'
+vmsfolder='/C/vms/qemu'
 vmname="win10"
 #share="$HOME/share_win"
-share="/Q/relb/MultiplayerComponentDll"
+#share="/Q/relb/MultiplayerComponentDll"
+share="/C/relb/ancify-launcher"
 cd "$vmsfolder"
 cd "$vmname"
+echo sudo ip tuntap add dev tap0 mode tap group $USER
 qemu-system-x86_64 \
 	-name win10 \
 	\

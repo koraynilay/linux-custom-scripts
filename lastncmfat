@@ -209,6 +209,8 @@ if [ $update -eq 1 ];then
 			mpc play >/dev/null
 		fi
 	fi
+
+	cp -v "$plf" "$md/full-mpd.m3u"
 fi
 
 #printf "csong\n"
