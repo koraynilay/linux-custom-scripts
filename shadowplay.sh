@@ -6,7 +6,7 @@ time_sec=300
 folder="/home/koraynilay/Videos/screencasts"
 fps=60
 quality="ultra"
-mode="screen"
+mode="screen-direct" # screen only records 1 monitor, direct all of them
 case $1 in
 	start)
 		gpu-screen-recorder -w "$mode" -c "$ext" -f "$fps" -a "$sound" -a "$mic" -q "$quality" -r "$time_sec" -k h265 -o "$folder" &!
