@@ -8,6 +8,7 @@ linux_server_build() {
 	nce="-nocompileeditor"
 	if [ "$1" = "r" ];then
 		nce=""
+		echo "rebuilding binaries too"
 	fi
 	PATH="$ue4_path/../clang35_prebuilt/bin:$PATH" \
 		$ue4_path/Engine/Build/BatchFiles/RunUAT.sh \
@@ -111,7 +112,7 @@ umap_reader() {
 
 main() {
 	case $1 in
-		l|linux-server-build) linux_server_build $@;;
+		l|linux-server-build) linux_server_build ${@:2};;
 		y|menu-server-start) menu_server_start;;
 		yd|menu-server-envdev) menu_server_change_env "dev";;
 		yp|menu-server-envprod) menu_server_change_env "prod";;
