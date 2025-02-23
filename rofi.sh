@@ -111,6 +111,9 @@ case $1 in
 	run)
 		rofi -theme "$rofi_theme" -sidebar-mode -show run
 	;;
+	drun)
+		rofi -theme "$rofi_theme" -sidebar-mode -show drun
+	;;
 	show)
 		rofi -theme "$rofi_theme" -sidebar-mode -show window
 	;;
