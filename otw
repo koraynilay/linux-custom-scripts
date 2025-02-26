@@ -113,11 +113,11 @@ while true; do
 
 	read -n1 -rp "continue to next level/reconnect to current level/quit? [c/r/q]: " cont
 	echo
-	if [ "$cont" = "q" ] || [ "$cont" = "" ];then
+	if [ "$cont" = "q" ];then
 		exit 0
 	fi
 
-	if ! [ "$cont" = "r" ];then
+	if ! [ "$cont" = "r" ] || [ "$cont" = "" ];then
 		n=$((n+1))
 	fi
 done
