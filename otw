@@ -3,8 +3,9 @@
 
 printhelp() {
 	echo -ne "Usage: $0 [wargame name] [opt]\n";
-	echo -ne "  -p\tSpecify the port, it can be used instead of the name or to specify a different port\n";
-	echo -ne "  -l\tList supported wargames"
+	echo -ne "  -l\t\tList supported wargames\n"
+	echo -ne "  -p PORT\tSpecify the port, it can be used instead of the name or to specify a different port\n";
+	echo -ne "  -n NUMBER\tStart from level n"
 	echo
 	exit 0
 }
@@ -51,6 +52,7 @@ while getopts "$OPTS" opt;do #r #per -r (resume)
 		?)exit 2;;
 	esac
 done
+shift $((OPTIND-2))
 
 #if [ "$1" = "--" ] && [ -z "$2" ] || [ -z "$1" ];then
 
@@ -70,6 +72,7 @@ fi
 
 wargameport="${wargames[$wargame]}"
 filepassname="password"
+sshkeyname="sshkey"
 
 if [[ "$(basename "$PWD")" =~ $wargame[0-9]+ ]];then
 	cd ..
@@ -83,21 +86,22 @@ elif ! [ "$(basename "$PWD")" = "$wargame" ];then
 fi
 
 if [ -z "$n" ];then
-	num="$(fd -t f | sort | tail -1 | sed -E 's/leviathan([0-9])+.*/\1/g')"
+	num="$(fd -t f | sort | tail -1 | sed -E "s/$wargame([0-9])+.*/\1/g")"
 	if [ -z "$num" ];then
 		n=0
 	else
 		n="$num"
 	fi
 fi
-n=0
+
 wargamedomain="$wargame.labs.overthewire.org"
 ssh-keyscan "$wargamedomain" >> ~/.ssh/known_hosts
 while true; do
 	wargameuser="$wargame$n"
 	fp="$wargameuser/$filepassname"
+	fk="$wargameuser/$sshkeyname"
 
-	if ! [ -f "$fp" ];then
+	if ! [ -f "$fp" ] && ! [ -f "$fk" ];then
 		read -rp "type password for $wargameuser: " pass
 		if [ -z "$pass" ];then
 			echo "no password provided for $wargameuser, exiting"
@@ -108,10 +112,21 @@ while true; do
 		echo "$pass" > "$fp"
 	fi
 
-	echo "connecting to $wargame with user $wargameuser"
-	sshpass -f"$fp" ssh "$wargameuser@$wargamedomain" -p "$wargameport" || exit 6
+	echo -n "connecting to $wargame with user $wargameuser: "
+	if [ -f "$fk" ];then
+		echo "using sshkey $fk"
+		ssh -i "$fk" "$wargameuser@$wargamedomain" -p "$wargameport"
+	else
+		echo "using password in $fp"
+		sshpass -f"$fp" ssh "$wargameuser@$wargamedomain" -p "$wargameport"
+	fi
 
-	read -n1 -rp "continue to next level/reconnect to current level/quit? [c/r/q]: " cont
+	if [ "$?" -eq 5 ];then
+		echo "connection failed, maybe password or sshkey weren't correct"
+		exit 5
+	fi
+
+	read -n1 -rp "continue to next level/reconnect to current level/quit? [C/r/q]: " cont
 	echo
 	if [ "$cont" = "q" ];then
 		exit 0
