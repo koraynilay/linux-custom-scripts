@@ -1,6 +1,7 @@
 #!/bin/bash
 #browser_folder="chromium"
-browser_folder="google-chrome"
+#browser_folder="google-chrome"
+browser_folder="thorium"
 #browser_folder="BraveSoftware/Brave-Browser"
 folders=("$HOME/.config/$browser_folder/Default/Sessions" "$HOME/.config/$browser_folder/Profile 1/Sessions")
 bck_folder="$HOME/.chtb"
