@@ -39,7 +39,7 @@ for i in $(xrandr -q | grep -Eo '[^ ]+\+[0-9]+\+[0-9]+' | sed 's/x\|+/ /g');do
 done
 IFS=$tmp_ifs
 #echo $size_to_replace $offset_to_replace
-ffmpeg_opts_video="-hwaccel vulkan "
+ffmpeg_opts_video="-hwaccel cuda -hwaccel_output_format cuda "
 ffmpeg_opts_video+="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmpeg_opts_video+="-f pulse -i $(pactl get-default-sink).monitor -ac 2 " #auto interno analogico # audio
 #ffmpeg_opts_video+="-f pulse -i PulseEffects_apps.monitor -ac 2 " #pulseffects_apps # audio

@@ -51,6 +51,7 @@ pkg_list_ver() {
 	pacman -Qem >> $HOME/${pkglistver}_aur.txt
 }
 list_films_animes() {
+	sshfs nas:/F/free_ck /F/free_ck
 	cd /F/free_ck/films
 	paste <(/bin/ls -tr | xargs -d'\n' du -s | cut -f1) <(/bin/ls -tr | xargs -d'\n' du -s | cut -f2- | xargs -d'\n' ls -d --color=always -U) > ~/filmsanimes_list.txt
 	cd "$orig_dir"
