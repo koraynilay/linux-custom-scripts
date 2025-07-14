@@ -29,6 +29,9 @@ qemu-system-x86_64 \
 	-vga vmware \
 	-display sdl,gl=on \
 	\
+	-usb \
+	-device usb-host,hostbus=1,hostport=5 \
+	\
 	-device ich9-intel-hda \
 	-audiodev pa,id=snd0 \
 	-device hda-output,audiodev=snd0 \
