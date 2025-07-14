@@ -1,0 +1,4 @@
+#!/bin/bash
+# before using this you have to set the qbt settings
+# with `qbt settings`
+qbt global limit alternative -s "$1"
