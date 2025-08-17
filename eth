@@ -1,6 +1,6 @@
 #!/bin/sh
 case $1 in
-	up)sudo ip link set dev enp4s0 up;;
-	down)sudo ip link set dev enp4s0 down;;
+	up)sudo ip link set dev enp13s0 up;;
+	down)sudo ip link set dev enp13s0 down;;
 	*)printf "usage:\nup\tset eth up\ndown\tset eth down\n";;
 esac

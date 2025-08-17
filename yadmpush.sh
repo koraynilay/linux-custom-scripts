@@ -71,7 +71,7 @@ dostuff_function() {
 	echo cmd:$cmd
 	$echo pkg_list
 	$echo pkg_list_ver
-	$echo list_films_animes
+	#$echo list_films_animes
 	$echo cp -v /I/Raccolte/music_files.txt ~/ 
 	$echo $cmd status
 	$echo sleep 1
