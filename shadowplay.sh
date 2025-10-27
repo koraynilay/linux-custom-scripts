@@ -21,7 +21,11 @@ case $1 in
 		;;
 	save-replay)
 		killall -SIGUSR1 gpu-screen-recorder
-		dunstify -a gpu-screen-recorder "Replay saved in $folder"
+		if [ $? -ne 0 ]; then
+			dunstify -a gpu-screen-recorder "not running" -u critical
+		else
+			dunstify -a gpu-screen-recorder "Replay saved in $folder"
+		fi
 		;;
 	pause)
 		killall -STOP gpu-screen-recorder

@@ -3,8 +3,8 @@
 vmsfolder='/C/vms/qemu'
 vmname="win10"
 #share="$HOME/share_win"
-#share="/Q/relb/MultiplayerComponentDll"
-share="/C/relb/ancify-launcher"
+share="/C/relb/MultiplayerComponentDll"
+#share="/C/relb/ancify-launcher"
 cd "$vmsfolder"
 cd "$vmname"
 echo sudo ip tuntap add dev tap0 mode tap group $USER
@@ -15,8 +15,8 @@ qemu-system-x86_64 \
 	-machine type=q35,accel=kvm \
 	-device intel-iommu \
 	-cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
-	-m 6000 \
-	-smp 3 \
+	-m 10000 \
+	-smp 8 \
 	\
 	-monitor unix:/tmp/monitor.sock,server,nowait \
 	\
