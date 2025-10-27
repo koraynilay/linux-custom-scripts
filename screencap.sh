@@ -54,7 +54,7 @@ ffmpeg_opts_video+="-preset fast "
 
 ffmpeg_opts_image="-f x11grab size_to_replace -i ${DISPLAY}offset_to_replace "
 ffmpeg_opts_image+="-vframes 1 -pix_fmt yuv444p "
-ffmpeg_opts_image+="-preset fast "
+ffmpeg_opts_image+="-preset ultrafast "
 
 started_notif_time=200
 finished_notif_time=10000
