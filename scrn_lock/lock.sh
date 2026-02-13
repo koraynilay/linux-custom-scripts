@@ -115,6 +115,7 @@ else
 
 		#-i "$pic" \
 fi
+wall_time.sh auto
 
 #	--timestr='%l %M %S %p' \
 
