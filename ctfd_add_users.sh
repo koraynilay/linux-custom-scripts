@@ -2,7 +2,7 @@
 source $PLAYERS_FILE
 
 if [ -z "$PLAYERS_FILE" ] || [ -z "$CTFD_IP" ] || [ -z "$CTFD_PORT" ] || [ -z "$CTFD_TOKEN" ]; then
-	echo "CTFD_IP, CTFD_PORT, and CTFD_TOKEN environment variables must be set."
+	echo "pls set CTFD_IP, CTFD_PORT, and CTFD_TOKEN"
 	exit 1
 fi
 
