@@ -86,7 +86,7 @@ elif ! [ "$(basename "$PWD")" = "$wargame" ];then
 fi
 
 if [ -z "$n" ];then
-	num="$(fd -t f | sort | tail -1 | sed -E "s/$wargame([0-9])+.*/\1/g")"
+	num="$(fd -t f | sort -V | tail -1 | sed -E "s/$wargame([0-9]+).*/\1/g")"
 	if [ -z "$num" ];then
 		n=0
 	else
