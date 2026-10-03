@@ -24,7 +24,7 @@ qemu-system-x86_64 \
 	-net user,smb="$share",smbserver=10.0.2.4 \
 	-net tap,ifname=tap0,script=no,downscript=no \
 	\
-	-drive file=win10.qcow2,if=virtio,cache=none,aio=native,cache.direct=on \
+	-drive file=win10.qcow2,if=virtio \
 	\
 	-vga vmware \
 	-display sdl,gl=on \

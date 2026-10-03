@@ -6,7 +6,9 @@ time_sec=300
 folder="/home/koraynilay/Videos/screencasts"
 fps=60
 quality="ultra"
-mode="screen-direct" # screen only records 1 monitor, screen-direct all of them
+#mode="DP-0|HDMI-0" # screen only records 1 monitor, screen-direct all of them
+#mode="$(xrandr -q | /bin/grep -Po '(?<=current )[0-9]{4} x [0-9]{4}' | tr -d ' ')+0+0"
+mode="DP-0;x=0;y=0|HDMI-0;x=1920;y=0"
 recpidfile="/tmp/gpu-screen-recorder-recordpidfile"
 case $1 in
 	start)

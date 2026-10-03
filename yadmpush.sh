@@ -86,7 +86,7 @@ dostuff_function() {
 		done
 	fi
 	$echo $cmd status
-	$echo $cmd commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+	$echo $cmd commit --no-gpg-sign -m "$(date +'%Y-%m-%d %H:%M:%S')"
 }
 dostuff_push() {
 	cmd="$1"
@@ -108,7 +108,7 @@ dovcsh() {
 		#vcsh $repo status --untracked=no --porcelain
 		vcsh $repo add -vu
 		#vcsh $repo status --untracked=no --porcelain
-		vcsh $repo commit -m "$(date +'%Y-%m-%d %H:%M:%S')"
+		vcsh $repo commit --no-gpg-sign -m "$(date +'%Y-%m-%d %H:%M:%S')"
 		vcsh $repo push
 	done
 }

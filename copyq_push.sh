@@ -6,5 +6,5 @@ rsync --progress -xvaHAX --delete -c --cc xxh3 $file .
 git status
 git add -A
 git status
-git commit -m "$(date +%Y-%m-%d_%H-%M-%S)"
+git commit --no-gpg-sign -m "$(date +%Y-%m-%d_%H-%M-%S)"
 git push
